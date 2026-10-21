@@ -61,13 +61,16 @@ main.fit{overflow:hidden}
 .sample span{flex:1}
 .sample button{border:0;background:var(--accent);color:#fff;border-radius:8px;padding:7px 10px;font-size:13px;white-space:nowrap}
 /* 班表 */
-.bar{flex:none;display:flex;align-items:center;gap:2px;height:52px}
-.ico{flex:none;background:none;border:0;padding:5px;color:var(--icon);border-radius:10px}
+/* 左右兩邊等寬，月份才會在正中間 */
+.bar{flex:none;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;height:52px}
+.bar .bl{display:flex;justify-content:flex-start}
+.bar .br{display:flex;justify-content:flex-end;gap:2px}
+.ico{flex:none;background:none;border:0;padding:4px;color:var(--icon);border-radius:10px}
 .ico svg{display:block;width:34px;height:34px}
 .ico.on{background:color-mix(in srgb,var(--icon) 22%,transparent)}
 .ico.hide{visibility:hidden}
-.nav{flex:1;min-width:0;display:flex;align-items:center;justify-content:center}
-.nav button{flex:none;background:none;border:0;padding:6px 8px;color:var(--fg)}
+.nav{min-width:0;display:flex;align-items:center;justify-content:center}
+.nav button{flex:none;background:none;border:0;padding:6px 4px;color:var(--fg)}
 .nav svg{width:26px;height:22px;display:block;fill:currentColor}
 .nav .title{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:center;min-width:0}
 .week,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
@@ -87,6 +90,7 @@ main.fit{overflow:hidden}
 .cell.out .td{opacity:.45}
 .cell.hol .d{font-weight:700}
 .cell .hn{font-size:10px;line-height:14px;color:#c81e1e;background:rgba(255,255,255,.92);border-radius:7px;white-space:nowrap;max-width:calc(100% - 4px);overflow:hidden;text-overflow:ellipsis;padding:0 4px;margin:-4px 0;font-weight:600}
+.cell .hn.mk{color:#7c2d12;background:#fcd34d}
 .cell.out .hn{opacity:.6}
 .tgl{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:12px;margin-top:8px;font-size:16px}
 .tgl span{flex:1}
@@ -212,10 +216,10 @@ body.editing #tabs{display:none}
 
   <section class="view" id="v-cal">
     <div class="bar">
-      <button class="ico" id="todayBtn" aria-label="回到今天"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="3.5"/><rect x="4" y="9" width="40" height="9" rx="4" fill="currentColor"/><rect x="13" y="4" width="4" height="10" rx="2" fill="currentColor"/><rect x="31" y="4" width="4" height="10" rx="2" fill="currentColor"/><text x="24" y="35" font-size="12.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="Arial,sans-serif">Today</text></svg></button>
+      <div class="bl"><button class="ico" id="todayBtn" aria-label="回到今天"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="3.5"/><rect x="4" y="9" width="40" height="9" rx="4" fill="currentColor"/><rect x="13" y="4" width="4" height="10" rx="2" fill="currentColor"/><rect x="31" y="4" width="4" height="10" rx="2" fill="currentColor"/><text x="24" y="35" font-size="12.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="Arial,sans-serif">Today</text></svg></button></div>
       <div class="nav"><button id="prevBtn" aria-label="上個月"><svg viewBox="0 0 40 32"><path d="M2 16L38 1 28 16 38 31z"/></svg></button><div class="title" id="title"></div><button id="nextBtn" aria-label="下個月"><svg viewBox="0 0 40 32"><path d="M38 16L2 1 12 16 2 31z"/></svg></button></div>
-      <button class="ico" id="editBtn" aria-label="快速排班"><svg viewBox="0 0 48 48"><path d="M34.5 5.5a4 4 0 0 1 5.7 0l2.3 2.3a4 4 0 0 1 0 5.7L17 39l-11 4 4-11z" fill="currentColor"/></svg></button>
-      <button class="ico" id="shareBtn" aria-label="分享班表圖片"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M17 18h-6v26h26V18h-6"/><path d="M24 30V4M16 11l8-8 8 8"/></svg></button>
+      <div class="br"><button class="ico" id="editBtn" aria-label="快速排班"><svg viewBox="0 0 48 48"><path d="M34.5 5.5a4 4 0 0 1 5.7 0l2.3 2.3a4 4 0 0 1 0 5.7L17 39l-11 4 4-11z" fill="currentColor"/></svg></button>
+      <button class="ico" id="shareBtn" aria-label="分享班表圖片"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M17 18h-6v26h26V18h-6"/><path d="M24 30V4M16 11l8-8 8 8"/></svg></button></div>
     </div>
     <div class="week"><div>週日</div><div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div>週六</div></div>
     <div class="grid" id="grid"></div>
@@ -255,7 +259,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v10（2026-10-22）';
+const APP_VER='v11（2026-10-22）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -268,7 +272,7 @@ const HELP=[
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
   '【每月固定】勾「🔁 每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
   '【清除排班】選單 →「清除本月班別」把正在看的這個月全部變成空白（連循環的班也清掉，備註保留）；「清除所有排班」會清掉全部手動班別和排班循環，備註、備忘錄、待辦會保留。',
-  '【國定假日】內建 2026、2027 年國定假日（含補假），日期會變紅色並標出節日。選單 →「國定假日」可以關掉顯示，或讓國定假日自動排成休假（手動設定的日子優先）。',
+  '【國定假日】內建 2026、2027 年國定假日（含補假），日期下方會標出節日（紅字），補假用黃底咖啡字標示「補假」，點那天可看是哪個節日的補假。選單 →「國定假日」可以關掉顯示，或讓國定假日自動排成休假（手動設定的日子優先）。',
   '【過期待辦】月曆上的紅色數字是還沒做的待辦；如果那天的待辦都已經過期沒處理，數字會變成灰色。',
   '【班別設定】選單 →「班別設定」：可以新增、改名、改顏色或刪除班別。',
   '【分享】按右上分享鍵，把本月班表做成圖片，長按圖片即可儲存或傳 LINE。',
@@ -401,7 +405,7 @@ function renderCal(){
     if(!out&&t)cnt[t.id]=(cnt[t.id]||0)+1;
     const name=t?t.name:'';
     const cls=['cell',out?'out':'',k===tk?'today':'',name.length>=4?'s4':name.length===3?'s3':''].join(' ');
-    return `<div class="${cls}${hn?' hol':''}" data-k="${k}" style="${out?'':paint(t)}"><span class="d">${d.getDate()}</span>${hn?`<span class="hn">${hn}</span>`:''}<span class="s">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}${n?`<span class="td${allLate(ot)?' old':''}">${n}</span>`:''}</div>`;
+    return `<div class="${cls}${hn?' hol':''}" data-k="${k}" style="${out?'':paint(t)}"><span class="d">${d.getDate()}</span>${hn?(hn.includes('補假')?`<span class="hn mk" title="${hn}">補假</span>`:`<span class="hn">${hn}</span>`):''}<span class="s">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}${n?`<span class="td${allLate(ot)?' old':''}">${n}</span>`:''}</div>`;
   }).join('');
   $('stats').innerHTML=S.types.filter(t=>cnt[t.id]).map(t=>`<span><i class="dot" style="background:${t.color}"></i>${esc(t.name)} ${cnt[t.id]} 天</span>`).join('');
   $('editBtn').classList.toggle('on',editing);
@@ -773,8 +777,8 @@ function drawMonth(){
     const hn=S.hol.show?HOLIDAYS[k]:'';
     g.font='34px '+F;g.fillText(d.getDate(),x+60,y+42);
     if(hn){g.font='bold 20px '+F;const w=Math.min(112,g.measureText(hn).width+16);
-      g.fillStyle='rgba(255,255,255,.92)';g.beginPath();g.roundRect?g.roundRect(x+60-w/2,y+63,w,26,13):g.rect(x+60-w/2,y+63,w,26);g.fill();
-      g.fillStyle='#c81e1e';g.fillText(hn,x+60,y+77,108);
+      g.fillStyle=hn.includes('補假')?'#fcd34d':'rgba(255,255,255,.92)';g.beginPath();g.roundRect?g.roundRect(x+60-w/2,y+63,w,26,13):g.rect(x+60-w/2,y+63,w,26);g.fill();
+      g.fillStyle=hn.includes('補假')?'#7c2d12':'#c81e1e';g.fillText(hn,x+60,y+77,108);
       g.fillStyle=out?'#888':(k===tk||!t)?'#111':textColor(t.color)}
     if(t){const n=t.name;g.font=(n.length>=4?24:n.length===3?28:32)+'px '+F;g.fillText(n,x+60,y+108)}
     const e=S.days[k];if(e&&e.note&&!out){g.font='bold 30px '+F;g.fillText('*',x+104,y+20)}
