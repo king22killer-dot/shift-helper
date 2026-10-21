@@ -197,8 +197,35 @@ body.editing #tabs{display:none}
 .row2{display:flex;gap:8px}
 .row2 .field{flex:1;min-width:0}
 .row2 button{flex:none;border:0;background:var(--accent);color:#fff;border-radius:10px;padding:0 16px;font-size:15px}
-.memo-title{font-size:20px!important;font-weight:600;border:0!important;background:none!important;padding:6px 0!important}
-.memo-body{height:44vh!important;font-size:16px;line-height:1.6}
+.memo-title{font-size:20px!important;font-weight:600;border:0!important;border-bottom:1px solid var(--hair)!important;border-radius:0!important;background:none!important;padding:8px 10px!important;margin-bottom:10px}
+.memo-title:focus-visible,.memo-title:focus{outline:none;border-bottom-color:var(--accent)!important}
+.memo-body{height:30vh!important;font-size:16px;line-height:1.6}
+.mtools{display:flex;gap:8px;margin-top:10px}
+.mtools button{flex:1;border:1px solid var(--hair);background:var(--surface);border-radius:10px;padding:10px 6px;font-size:15px;color:var(--fg)}
+.mtools button.rec{background:var(--danger);border-color:var(--danger);color:#fff}
+.atts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.atts:empty{display:none}
+.att{position:relative;border:1px solid var(--hair);border-radius:10px;overflow:hidden;background:#fff;aspect-ratio:3/4;max-width:100%;padding:0}
+.att img{width:100%;height:100%;object-fit:contain;display:block}
+.att .x,.aud .x{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:12px;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;line-height:24px;padding:0}
+.aud{grid-column:1/-1;position:relative;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:6px 36px 6px 10px}
+.aud span{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.aud audio{flex:1;min-width:0;height:36px}
+.aud .x{top:50%;transform:translateY(-50%);right:6px}
+.memo .ic{font-size:12px;color:var(--muted)}
+/* 手寫畫面 */
+#draw{position:fixed;inset:0;z-index:30;background:var(--sheet);display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+#draw .dtop{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 12px}
+#draw .dtop b{font-size:17px}
+#draw .dtop button{background:none;border:0;font-size:17px;color:var(--accent);padding:8px 4px}
+#draw .pad{flex:1;min-height:0;margin:0 10px;border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--hair)}
+#draw canvas{display:block;width:100%;height:100%;touch-action:none}
+#draw .dbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:10px}
+#draw .sw{width:30px;height:30px;border-radius:15px;border:3px solid var(--chipline);padding:0}
+#draw .sw.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--sheet) inset}
+#draw .tb{border:1px solid var(--hair);background:var(--surface);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--fg)}
+#draw .tb.on{border-color:var(--accent);color:var(--accent);font-weight:600}
 .sheet-foot{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}
 .sheet-foot .sp{flex:1}
 .sheet-foot button{border:1px solid var(--hair);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14px;color:var(--fg)}
@@ -256,6 +283,13 @@ body.editing #tabs{display:none}
 <div id="palette" hidden><div class="hint"><span>選一個班別，再點日期套用</span><button id="palDone">完成</button></div><div class="row" id="palRow"></div></div>
 <div class="mask" id="mask" hidden><div class="sheet" id="sheet"></div></div>
 <div id="cfm" hidden><div class="box"><p id="cfmMsg"></p><div class="acts"><button id="cfmNo">取消</button><button class="ok" id="cfmOk">確定</button></div></div></div>
+<div id="draw" hidden><div class="dtop"><button id="dwCancel">取消</button><b>手寫</b><button id="dwSave">儲存</button></div>
+  <div class="pad"><canvas id="dwCv"></canvas></div>
+  <div class="dbar" id="dwBar">
+    <button class="sw on" data-c="#111111" style="background:#111" aria-label="黑色"></button><button class="sw" data-c="#d11a1a" style="background:#d11a1a" aria-label="紅色"></button><button class="sw" data-c="#1d5fc9" style="background:#1d5fc9" aria-label="藍色"></button><button class="sw" data-c="#15803d" style="background:#15803d" aria-label="綠色"></button>
+    <button class="tb" data-w="2">細</button><button class="tb on" data-w="4">中</button><button class="tb" data-w="8">粗</button>
+    <button class="tb" id="dwEr">橡皮擦</button><button class="tb" id="dwUndo">↶ 復原</button><button class="tb" id="dwClr">清除</button>
+  </div></div>
 <div id="toast"></div>
 
 <script>
@@ -267,7 +301,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v12（2026-10-22）';
+const APP_VER='v13（2026-10-22）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -276,6 +310,8 @@ const HELP=[
   '【快速排班】按鉛筆進入編輯模式，下方選一個班別後連續點日期就能套用；選「空白」把那天清空；有排班循環時另有「依循環」可以恢復成循環的班。按「完成」離開。',
   '【排班循環】選單 →「排班循環」→「新增排班循環」：設定起始日、輪班順序（例如 日日休休夜夜休休）和要排幾個月。可以設好幾組（例如 10 月一組、11 月一組），日期重疊時以開始日比較晚的那組為準。最後一個月月底如果這一輪還沒輪完，會延到下個月把這輪排完才停。沒有手動設定的日子會自動依循環顯示。',
   '【備忘錄】按「＋ 新增」寫一則，打字會自動儲存。可以搜尋，也可以「置頂」常用的那則。',
+  '【手寫】備忘錄裡按「✍️ 手寫」用手指寫字或畫圖，可換顏色、粗細、橡皮擦、復原，按「儲存」加進備忘錄。點縮圖可以再修改。',
+  '【錄音】備忘錄裡按「🎙 錄音」開始（第一次要允許麥克風），再按一次停止，就會存進備忘錄，可以直接播放。手寫和錄音只存在這支手機，不包含在「匯出備份」的文字裡。',
   '【待辦事項】輸入內容，日期可填可不填，按「新增」。有日期的待辦會出現在月曆上，並顯示那天是什麼班。點圓圈打勾完成，點文字可以修改或刪除。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
   '【每月固定】勾「🔁 每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
@@ -599,32 +635,160 @@ function updateBadge(){
 
 /* ===== 備忘錄 ===== */
 const fmtAt=ms=>{const d=new Date(ms);return ymd(d)===ymd(new Date())?pad(d.getHours())+':'+pad(d.getMinutes()):(d.getMonth()+1)+'/'+d.getDate()};
+function memoIcons(m){
+  const f=m.files||[],d=f.filter(x=>x.type==='draw').length,a=f.filter(x=>x.type==='audio').length;
+  return d||a?`<span class="ic">${d?'✍️ '+d+'　':''}${a?'🎙 '+a:''}</span>`:'';
+}
 function renderMemos(){
   const q=$('memoQ').value.trim().toLowerCase();
   const arr=S.memos.filter(m=>!q||(m.title+'\n'+m.body).toLowerCase().includes(q)).sort((a,b)=>(b.pin-a.pin)||(b.at-a.at));
-  $('memoList').innerHTML=arr.length?arr.map(m=>`<button class="memo${m.pin?' pin':''}" data-id="${m.id}"><b>${m.pin?'📌 ':''}${esc(m.title||'（無標題）')}</b><p>${esc(m.body)}</p><small>${fmtAt(m.at)}</small></button>`).join('')
+  $('memoList').innerHTML=arr.length?arr.map(m=>`<button class="memo${m.pin?' pin':''}" data-id="${m.id}"><b>${m.pin?'📌 ':''}${esc(m.title||'（無標題）')}</b><p>${esc(m.body)}</p>${memoIcons(m)}<small>${fmtAt(m.at)}</small></button>`).join('')
     :`<div class="empty" style="grid-column:1/-1">${q?'找不到符合的備忘錄。':'還沒有備忘錄。<br>按右上「＋ 新增」寫第一則。'}</div>`;
 }
 $('memoQ').oninput=renderMemos;
 $('memoList').onclick=e=>{const b=e.target.closest('.memo');if(b)editMemo(b.dataset.id)};
 $('memoNew').onclick=()=>editMemo(null);
+// 手寫圖片和錄音存在 IndexedDB（localStorage 容量太小）
+const FDB='shift-helper-files';
+function idbReq(mode,fn){
+  return new Promise((res,rej)=>{
+    const o=indexedDB.open(FDB,1);
+    o.onupgradeneeded=()=>o.result.createObjectStore('files');
+    o.onerror=()=>rej(o.error);
+    o.onsuccess=()=>{const db=o.result,tx=db.transaction('files',mode),r=fn(tx.objectStore('files'));
+      tx.oncomplete=()=>{db.close();res(r&&r.result)};tx.onerror=()=>{db.close();rej(tx.error)}};
+  });
+}
+const fileGet=id=>idbReq('readonly',st=>st.get(id));
+const filePut=(id,blob)=>idbReq('readwrite',st=>st.put(blob,id));
+const fileDel=id=>idbReq('readwrite',st=>st.delete(id)).catch(()=>{});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+
+// 手寫畫面：回傳 PNG Blob；取消回傳 null
+function openDraw(baseBlob){
+  return new Promise(resolve=>{
+    const box=$('draw'),cv=$('dwCv');box.hidden=false;
+    const ctx=cv.getContext('2d'),dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+    let strokes=[],cur=null,color='#111111',width=4,erase=false,base=null;
+    const fit=()=>{const r=cv.getBoundingClientRect();cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);redraw()};
+    const line=st=>{
+      ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=st.erase?'#ffffff':st.color;ctx.lineWidth=st.w*dpr*(st.erase?4:1);
+      ctx.beginPath();st.pts.forEach((pt,i)=>i?ctx.lineTo(pt[0]*cv.width,pt[1]*cv.height):ctx.moveTo(pt[0]*cv.width,pt[1]*cv.height));
+      if(st.pts.length===1)ctx.lineTo(st.pts[0][0]*cv.width+.1,st.pts[0][1]*cv.height);
+      ctx.stroke();ctx.restore();
+    };
+    function redraw(){
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+      if(base){const k=Math.min(cv.width/base.width,cv.height/base.height);ctx.drawImage(base,(cv.width-base.width*k)/2,(cv.height-base.height*k)/2,base.width*k,base.height*k)}
+      strokes.forEach(line);
+    }
+    const pos=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]};
+    cv.onpointerdown=e=>{e.preventDefault();cv.setPointerCapture(e.pointerId);cur={color,w:width,erase,pts:[pos(e)]};strokes.push(cur);line(cur)};
+    cv.onpointermove=e=>{if(!cur)return;const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];evs.forEach(ev=>cur.pts.push(pos(ev)));
+      const n=cur.pts.length;line({...cur,pts:cur.pts.slice(Math.max(0,n-evs.length-1))})};
+    cv.onpointerup=cv.onpointercancel=()=>{cur=null};
+    $('dwBar').onclick=e=>{
+      const sw=e.target.closest('.sw'),tw=e.target.closest('[data-w]');
+      if(sw){color=sw.dataset.c;erase=false;$('dwBar').querySelectorAll('.sw').forEach(x=>x.classList.toggle('on',x===sw));$('dwEr').classList.remove('on')}
+      if(tw){width=+tw.dataset.w;$('dwBar').querySelectorAll('[data-w]').forEach(x=>x.classList.toggle('on',x===tw))}
+    };
+    $('dwEr').onclick=()=>{erase=!erase;$('dwEr').classList.toggle('on',erase)};
+    $('dwUndo').onclick=()=>{strokes.pop();redraw()};
+    $('dwClr').onclick=async()=>{if(!strokes.length&&!base)return;if(!await ask('清除整張手寫？','清除',true))return;strokes=[];base=null;redraw()};
+    const done=v=>{box.hidden=true;window.removeEventListener('resize',fit);cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;resolve(v)};
+    $('dwCancel').onclick=async()=>{if(strokes.length&&!await ask('不儲存這次的手寫？','不儲存',true))return;done(null)};
+    $('dwSave').onclick=()=>{if(!strokes.length&&!base)return done(null);cv.toBlob(bl=>done(bl),'image/png')};
+    window.addEventListener('resize',fit);
+    requestAnimationFrame(()=>{
+      fit();
+      if(baseBlob){const im=new Image();im.onload=()=>{base=im;redraw()};im.src=URL.createObjectURL(baseBlob)}
+    });
+  });
+}
+
+// 錄音
+let rec=null;
+function recMime(){
+  if(!window.MediaRecorder)return null;
+  for(const t of ['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg'])if(!MediaRecorder.isTypeSupported||MediaRecorder.isTypeSupported(t))return t;
+  return '';
+}
+async function startRec(onDone,onTick){
+  const mt=recMime();
+  if(mt===null||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('這支手機不支援錄音');return false}
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}
+  catch(e){toast(e&&e.name==='NotAllowedError'?'請允許使用麥克風（設定 → Safari → 麥克風）':'無法開啟麥克風');return false}
+  const mr=new MediaRecorder(stream,mt?{mimeType:mt}:undefined),chunks=[],t0=Date.now();
+  mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  mr.onstop=()=>{stream.getTracks().forEach(t=>t.stop());clearInterval(rec&&rec.tm);
+    const dur=Math.round((Date.now()-t0)/1000);rec=null;
+    if(chunks.length)onDone(new Blob(chunks,{type:mr.mimeType||mt||'audio/mp4'}),dur)};
+  mr.start(1000);
+  rec={mr,tm:setInterval(()=>onTick(Math.round((Date.now()-t0)/1000)),500)};
+  return true;
+}
+const stopRec=()=>{if(rec&&rec.mr.state!=='inactive')rec.mr.stop()};
+const fmtDur=n=>Math.floor(n/60)+':'+pad(n%60);
+
 function editMemo(id){
-  let m=id?S.memos.find(x=>x.id===id):{id:uid(),title:'',body:'',pin:false,at:Date.now()};
-  const isNew=!id;let added=!isNew;
+  let m=id?S.memos.find(x=>x.id===id):{id:uid(),title:'',body:'',pin:false,at:Date.now(),files:[]};
+  m.files=m.files||[];
+  const isNew=!id;let added=!isNew;const urls=[];
+  const hasContent=()=>m.title.trim()||m.body.trim()||m.files.length;
   const sync=()=>{
-    m.title=$('mmT').value;m.body=$('mmB').value;
-    if(!added&&(m.title.trim()||m.body.trim())){S.memos.push(m);added=true}
+    if($('mmT')){m.title=$('mmT').value;m.body=$('mmB').value}
+    if(!added&&hasContent()){S.memos.push(m);added=true}
     if(added){m.at=Date.now();save()}
-    $('mmAt').textContent=added?'已儲存 '+fmtAt(m.at):'';
+    if($('mmAt'))$('mmAt').textContent=added?'已儲存 '+fmtAt(m.at):'';
   };
   openSheet(`<h2><span>${isNew?'新備忘錄':'備忘錄'}</span><button data-x>完成</button></h2>
     <input class="field memo-title" id="mmT" placeholder="標題" value="${esc(m.title)}">
     <textarea class="memo-body" id="mmB" placeholder="寫點什麼…">${esc(m.body)}</textarea>
-    <div class="sheet-foot"><span id="mmAt">${added?'最後修改 '+fmtAt(m.at):''}</span><span class="sp"></span><button id="mmPin">${m.pin?'取消置頂':'📌 置頂'}</button>${added?'<button class="del" id="mmDel">刪除</button>':''}</div>`,
-    ()=>{if(added&&!m.title.trim()&&!m.body.trim()){S.memos=S.memos.filter(x=>x.id!==m.id);save()}});
+    <div class="mtools"><button id="mmDraw">✍️ 手寫</button><button id="mmRec">🎙 錄音</button></div>
+    <div class="atts" id="mmAtts"></div>
+    <div class="sheet-foot"><span id="mmAt">${added?'最後修改 '+fmtAt(m.at):''}</span><span class="sp"></span><button id="mmPin">${m.pin?'取消置頂':'📌 置頂'}</button><button class="del" id="mmDel"${added?'':' hidden'}>刪除</button></div>`,
+    ()=>{stopRec();urls.forEach(u=>URL.revokeObjectURL(u));
+      if(added&&!hasContent()){S.memos=S.memos.filter(x=>x.id!==m.id);save()}});
+  async function renderAtts(){
+    const box=$('mmAtts');if(!box)return;
+    const parts=await Promise.all(m.files.map(async f=>{
+      let b=null;try{b=await fileGet(f.id)}catch(e){}
+      if(!b)return f.type==='audio'?`<div class="aud" data-f="${f.id}"><span>找不到錄音檔</span><button class="x" data-rm aria-label="刪除">✕</button></div>`:'';
+      const u=URL.createObjectURL(b);urls.push(u);
+      return f.type==='draw'?`<button class="att" data-f="${f.id}" aria-label="修改手寫"><img src="${u}" alt="手寫"><span class="x" data-rm role="button" aria-label="刪除">✕</span></button>`
+        :`<div class="aud" data-f="${f.id}"><span>🎙 ${fmtDur(f.dur||0)}</span><audio controls preload="metadata" src="${u}"></audio><button class="x" data-rm aria-label="刪除">✕</button></div>`;
+    }));
+    if($('mmAtts'))$('mmAtts').innerHTML=parts.join('');
+  }
+  const addFile=async(type,blob,extra)=>{
+    const f={id:'f'+uid(),type,at:Date.now(),...extra};
+    try{await filePut(f.id,blob)}catch(e){return toast('儲存失敗：手機空間不足或不支援')}
+    m.files.push(f);sync();if($('mmDel'))$('mmDel').hidden=false;renderAtts();
+  };
+  renderAtts();
   $('mmT').oninput=$('mmB').oninput=sync;
+  $('mmDraw').onclick=async()=>{const bl=await openDraw(null);if(bl)addFile('draw',bl)};
+  $('mmRec').onclick=async()=>{
+    if(rec){stopRec();return}
+    const btn=$('mmRec');
+    const ok=await startRec((bl,dur)=>{addFile('audio',bl,{dur});if($('mmRec')){$('mmRec').classList.remove('rec');$('mmRec').textContent='🎙 錄音'}},
+      sec=>{if($('mmRec'))$('mmRec').textContent='■ 停止錄音 '+fmtDur(sec)});
+    if(ok){btn.classList.add('rec');btn.textContent='■ 停止錄音 0:00'}
+  };
+  $('mmAtts').onclick=async e=>{
+    const el=e.target.closest('[data-f]');if(!el)return;
+    const f=m.files.find(x=>x.id===el.dataset.f);if(!f)return;
+    if(e.target.closest('[data-rm]')){
+      e.preventDefault();
+      if(!await ask(f.type==='draw'?'刪除這張手寫？':'刪除這段錄音？','刪除',true))return;
+      m.files=m.files.filter(x=>x!==f);fileDel(f.id);sync();renderAtts();return;
+    }
+    if(f.type==='draw'){const old=await fileGet(f.id).catch(()=>null);const bl=await openDraw(old);if(bl){await filePut(f.id,bl);f.at=Date.now();sync();renderAtts()}}
+  };
   $('mmPin').onclick=()=>{m.pin=!m.pin;$('mmPin').textContent=m.pin?'取消置頂':'📌 置頂';sync();if(!added)toast('先寫點內容再置頂')};
-  const del=$('mmDel');if(del)del.onclick=async()=>{if(!await ask('刪除這則備忘錄？','刪除',true))return;S.memos=S.memos.filter(x=>x.id!==m.id);save();onClose=null;closeSheet()};
+  $('mmDel').onclick=async()=>{if(!await ask('刪除這則備忘錄？（手寫和錄音也會一起刪掉）','刪除',true))return;
+    stopRec();m.files.forEach(f=>fileDel(f.id));S.memos=S.memos.filter(x=>x.id!==m.id);save();onClose=null;urls.forEach(u=>URL.revokeObjectURL(u));closeSheet()};
   if(isNew)setTimeout(()=>$('mmT').focus(),50);
 }
 
@@ -769,8 +933,9 @@ function openHol(){
   $('hOff').onchange=()=>{S.hol.off=$('hOff').checked;save();renderCal();toast(S.hol.off?'國定假日已排成休假':'已取消')};
 }
 async function resetApp(){
-  if(!await ask('清除全部資料並重新開始？班表、排班循環、備忘錄、待辦、設定都會刪除，無法復原。','全部清除',true))return;
+  if(!await ask('清除全部資料並重新開始？班表、排班循環、備忘錄（含手寫和錄音）、待辦、設定都會刪除，無法復原。','全部清除',true))return;
   try{localStorage.removeItem(KEY)}catch(e){}
+  try{indexedDB.deleteDatabase(FDB)}catch(e){}
   try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch(e){}
   try{if(navigator.serviceWorker)for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch(e){}
   S={types:JSON.parse(JSON.stringify(TYPES)),days:{},cycles:[],memos:[],todos:[],hol:{show:true,off:false}};save();
