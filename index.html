@@ -11,142 +11,267 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <title>班表小幫手</title>
 <style>
-:root{--line:#8f8f8f;--blue:#4a78b0;--bg1:#dbe7f5;--bg2:#c9daef}
+/* 版面：iOS 風格頂欄＋藍色紙紋底的月曆，下方分頁列切換 班表／備忘錄／待辦 */
+:root{
+  --bg1:#dbe7f5;--bg2:#c9daef;--dot1:rgba(255,255,255,.55);--dot2:rgba(120,150,200,.18);
+  --surface:#ffffff;--sheet:#f4f6f9;--fg:#141922;--muted:#5f6b7a;--line:#8f969f;--hair:#d9dee6;
+  --cell:#ffffff;--out:#d3dfef;--outfg:#8a94a3;--accent:#2f7de1;--icon:#4a78b0;
+  --today:#7ef25a;--todayline:#2c9b12;--danger:#e5484d;--warn:#c2410c;--chipline:#b4bcc8;--input:#ffffff;
+  --badge:#e5484d;--soft:rgba(255,255,255,.72);
+  --font:-apple-system,BlinkMacSystemFont,"PingFang TC","Heiti TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg1:#142030;--bg2:#0e1622;--dot1:rgba(255,255,255,.05);--dot2:rgba(120,160,220,.08);
+  --surface:#1a2332;--sheet:#131b27;--fg:#e8edf5;--muted:#9aa6b8;--line:#3d4a5d;--hair:#2a3546;
+  --cell:#1f2a3a;--out:#16202d;--outfg:#5f6d82;--accent:#5aa0ff;--icon:#8fb4e6;
+  --today:#6fe04c;--todayline:#9bf77c;--danger:#ff6b6f;--warn:#fb923c;--chipline:#4a5568;--input:#0f1622;
+  --badge:#ff6b6f;--soft:rgba(26,35,50,.8);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg1:#142030;--bg2:#0e1622;--dot1:rgba(255,255,255,.05);--dot2:rgba(120,160,220,.08);
+  --surface:#1a2332;--sheet:#131b27;--fg:#e8edf5;--muted:#9aa6b8;--line:#3d4a5d;--hair:#2a3546;
+  --cell:#1f2a3a;--out:#16202d;--outfg:#5f6d82;--accent:#5aa0ff;--icon:#8fb4e6;
+  --today:#6fe04c;--todayline:#9bf77c;--danger:#ff6b6f;--warn:#fb923c;--chipline:#4a5568;--input:#0f1622;
+  --badge:#ff6b6f;--soft:rgba(26,35,50,.8);color-scheme:dark}
+html{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);height:100%}
+body{margin:0;min-height:100%}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Heiti TC","Microsoft JhengHei",sans-serif;color:#111;
-  background:var(--bg1);
-  background-image:radial-gradient(circle at 20% 30%,rgba(255,255,255,.55) 0 2px,transparent 3px),
-    radial-gradient(circle at 70% 60%,rgba(255,255,255,.45) 0 1.5px,transparent 3px),
-    radial-gradient(circle at 40% 80%,rgba(120,150,200,.18) 0 2px,transparent 4px),
+[hidden]{display:none!important}
+body{font-family:var(--font);color:var(--fg);background:var(--bg1);
+  background-image:radial-gradient(circle at 20% 30%,var(--dot1) 0 2px,transparent 3px),
+    radial-gradient(circle at 70% 60%,var(--dot1) 0 1.5px,transparent 3px),
+    radial-gradient(circle at 40% 80%,var(--dot2) 0 2px,transparent 4px),
     linear-gradient(135deg,var(--bg1),var(--bg2));
-  background-size:23px 23px,31px 31px,41px 41px,100% 100%;
-  -webkit-user-select:none;user-select:none;overscroll-behavior:none}
-header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #ddd;
-  padding:env(safe-area-inset-top) 12px 0;display:flex;align-items:center;height:calc(48px + env(safe-area-inset-top))}
+  background-size:23px 23px,31px 31px,41px 41px,100% 100%;background-attachment:fixed;
+  -webkit-user-select:none;user-select:none;overscroll-behavior:none;font-size:15px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:0 16px;display:flex;align-items:center;height:50px}
 header h1{flex:1;text-align:center;font-size:18px;margin:0;font-weight:600;letter-spacing:1px}
-header .side{width:60px}
-header button{background:none;border:0;color:#2f7de1;font-size:17px;text-decoration:underline;padding:8px 0;width:60px;text-align:right}
-main{max-width:620px;margin:0 auto;padding:12px 6px calc(20px + env(safe-area-inset-bottom))}
-.tools{display:flex;align-items:center;height:64px;padding:0 6px}
+header .side{width:64px}
+header .menu-btn{background:none;border:0;color:var(--accent);font-size:17px;text-decoration:underline;padding:8px 0;width:64px;text-align:right}
+main{max-width:620px;margin:0 auto;padding:10px 16px calc(84px + env(safe-area-inset-bottom,0px))}
+.view[hidden]{display:none}
+/* 範例提示 */
+.sample{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px dashed var(--chipline);border-radius:12px;padding:8px 12px;margin-bottom:8px;font-size:13px;color:var(--muted)}
+.sample span{flex:1}
+.sample button{border:0;background:var(--accent);color:#fff;border-radius:8px;padding:7px 10px;font-size:13px;white-space:nowrap}
+/* 班表 */
+.tools{display:flex;align-items:center;height:60px}
 .tools .sp{flex:1}
-.ico{background:none;border:0;padding:6px;margin:0 4px;color:var(--blue);border-radius:10px}
-.ico svg{display:block;width:44px;height:44px}
-.ico.on{background:rgba(74,120,176,.22)}
+.ico{background:none;border:0;padding:6px;margin:0 2px;color:var(--icon);border-radius:10px}
+.ico svg{display:block;width:42px;height:42px}
+.ico.on{background:color-mix(in srgb,var(--icon) 22%,transparent)}
 .ico.hide{visibility:hidden}
-.nav{display:flex;align-items:center;justify-content:space-between;margin:8px 0 4px}
-.nav button{background:none;border:0;padding:6px 14px}
-.nav svg{width:40px;height:32px;display:block}
-.nav .title{font-size:26px;font-weight:500}
-.week,.grid{display:grid;grid-template-columns:repeat(7,1fr)}
-.week div{text-align:center;font-size:17px;padding:4px 0}
+.nav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 4px}
+.nav button{background:none;border:0;padding:6px 10px;color:var(--fg)}
+.nav svg{width:38px;height:30px;display:block;fill:currentColor}
+.nav .title{font-size:25px;font-weight:500;font-variant-numeric:tabular-nums}
+.week,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.week div{text-align:center;font-size:15px;padding:4px 0}
 .grid{border:1px solid var(--line);background:var(--line);gap:1px}
-.cell{position:relative;aspect-ratio:3/5;background:#fff;display:flex;flex-direction:column;align-items:center;
-  justify-content:space-around;padding:4px 0;overflow:hidden}
-.cell .d{font-size:19px}
-.cell .s{font-size:17px;white-space:nowrap;letter-spacing:-.5px}
-.cell.s3 .s{font-size:14px}
-.cell.s4 .s{font-size:12px}
-.cell .star{position:absolute;top:1px;right:5px;font-size:15px;font-weight:700}
-.cell.out{background:rgba(214,226,242,.92)!important;color:#888!important}
-.cell.today{background:#7ef25a!important;color:#000!important}
-.cell.today::after{content:"";position:absolute;inset:0;border:2px solid #2c9b12;pointer-events:none}
+.cell{position:relative;aspect-ratio:3/5;max-width:100%;background:var(--cell);color:var(--fg);display:flex;flex-direction:column;align-items:center;
+  justify-content:space-around;padding:4px 0;overflow:hidden;font-variant-numeric:tabular-nums}
+.cell .d{font-size:18px}
+.cell .s{font-size:16px;white-space:nowrap;letter-spacing:-.5px}
+.cell.s3 .s{font-size:13px}
+.cell.s4 .s{font-size:11px}
+.cell .star{position:absolute;top:1px;right:4px;font-size:14px;font-weight:700}
+.cell .td{position:absolute;bottom:3px;right:3px;min-width:16px;height:16px;border-radius:8px;background:var(--badge);color:#fff;font-size:10px;line-height:16px;text-align:center;padding:0 3px;font-weight:600}
+.cell.out{background:var(--out)!important;color:var(--outfg)!important}
+.cell .td.old{background:#9aa3ae}
+.cell.out .td{opacity:.45}
+.cell.hol .d{font-weight:700}
+.cell .hn{font-size:10px;line-height:14px;color:#c81e1e;background:rgba(255,255,255,.92);border-radius:7px;white-space:nowrap;max-width:calc(100% - 4px);overflow:hidden;text-overflow:ellipsis;padding:0 4px;margin:-4px 0;font-weight:600}
+.cell.out .hn{opacity:.6}
+.tgl{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:12px;margin-top:8px;font-size:16px}
+.tgl span{flex:1}
+.tgl small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.tgl input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.hlist{font-size:14px;line-height:1.9;background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:8px 12px;margin-top:8px;font-variant-numeric:tabular-nums}
+.cell.today{background:var(--today)!important;color:#000!important}
+.cell.today::after{content:"";position:absolute;inset:0;border:2px solid var(--todayline);pointer-events:none}
 .cell.flash{animation:fl .3s}
 @keyframes fl{from{filter:brightness(.8)}to{filter:none}}
-.stats{margin:10px 4px 0;font-size:14px;color:#334;display:flex;flex-wrap:wrap;gap:6px}
-.stats span{background:rgba(255,255,255,.7);border-radius:12px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px}
-.dot{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid #999}
+.stats{margin:10px 0 0;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px}
+.stats span{background:var(--soft);border-radius:12px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--chipline)}
+/* 清單共用 */
+.panel-head{display:flex;gap:8px;align-items:center;margin:4px 0 12px}
+.panel-head h2{font-size:22px;margin:0;flex:1}
+.field{width:100%;font-size:16px;padding:10px 12px;border:1px solid var(--chipline);border-radius:10px;background:var(--input);color:var(--fg);font-family:inherit}
+.addbar{display:flex;gap:6px;align-items:stretch;background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:6px;margin-bottom:14px}
+.addbar .field{border:0;padding:8px;min-width:0;flex:1}
+.addbar .date{flex:none;width:118px;font-size:14px;border:1px solid var(--hair);border-radius:8px;background:var(--input);color:var(--fg);padding:0 6px;font-family:inherit}
+.addbar button{flex:none;border:0;background:var(--accent);color:#fff;border-radius:10px;padding:0 14px;font-size:15px}
+.addwrap{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:6px;margin-bottom:14px}
+.addwrap .addbar{border:0;padding:0;margin:0;background:none}
+.opts{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:8px 4px 2px;font-size:14px;color:var(--muted)}
+.opts label{display:inline-flex;align-items:center;gap:5px}
+.opts input[type=date]{font-size:14px;border:1px solid var(--hair);border-radius:8px;background:var(--input);color:var(--fg);padding:5px 6px;font-family:inherit}
+.opts input[type=number]{width:54px;font-size:15px;border:1px solid var(--hair);border-radius:8px;background:var(--input);color:var(--fg);padding:5px 6px;text-align:center;font-family:inherit}
+.opts input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
+.group{margin-bottom:16px}
+.group h3{font-size:13px;color:var(--muted);margin:0 4px 6px;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
+.group h3.late{color:var(--danger)}
+.group h3 button{background:none;border:0;color:var(--accent);font-size:13px;padding:2px}
+.list{background:var(--surface);border:1px solid var(--hair);border-radius:14px;overflow:hidden}
+.todo{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-top:1px solid var(--hair)}
+.todo:first-child{border-top:0}
+.chk{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--chipline);background:none;padding:0;display:grid;place-items:center;margin-top:1px}
+.chk svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
+.todo.done .chk{background:var(--accent);border-color:var(--accent)}
+.todo.done .chk svg{opacity:1}
+.todo .body{flex:1;min-width:0;background:none;border:0;text-align:left;padding:0}
+.todo .txt{font-size:16px;line-height:1.4;word-break:break-word}
+.todo.done .txt{text-decoration:line-through;color:var(--muted)}
+.todo .meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.todo .meta.late{color:var(--danger)}
+.tag{display:inline-block;border-radius:6px;padding:1px 6px;font-size:11px;border:1px solid var(--chipline)}
+.empty{text-align:center;color:var(--muted);padding:28px 12px;font-size:14px;line-height:1.7}
+/* 備忘錄 */
+.memos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.memo{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:12px;text-align:left;min-width:0;display:flex;flex-direction:column;gap:6px;min-height:120px}
+.memo b{font-size:15px;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.memo p{margin:0;font-size:13px;color:var(--muted);line-height:1.5;word-break:break-word;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;flex:1;white-space:pre-line}
+.memo small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.memo.pin{border-color:var(--accent)}
+.newbtn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:8px 14px;font-size:15px}
+/* 分頁列 */
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--surface);border-top:1px solid var(--hair);
+  display:flex;padding:4px max(8px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-right,0px))}
+#tabs button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);padding:6px 0;position:relative}
+#tabs button svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2}
+#tabs button.on{color:var(--accent)}
+#tabs .n{position:absolute;top:2px;left:calc(50% + 8px);background:var(--badge);color:#fff;border-radius:8px;font-size:10px;min-width:16px;height:16px;line-height:16px;padding:0 4px}
+body.editing #tabs{display:none}
 /* 編輯列 */
-#palette{position:fixed;left:0;right:0;bottom:0;z-index:8;background:#fff;border-top:1px solid #ccc;
-  padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:none;box-shadow:0 -4px 14px rgba(0,0,0,.12)}
-#palette.show{display:block}
-#palette .hint{font-size:12px;color:#666;margin:0 4px 6px;display:flex;justify-content:space-between}
+#palette{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--surface);border-top:1px solid var(--hair);
+  padding:8px max(8px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));box-shadow:0 -4px 14px rgba(0,0,0,.12)}
+#palette .hint{font-size:12px;color:var(--muted);margin:0 4px 6px;display:flex;justify-content:space-between}
+#palette .hint button{background:none;border:0;color:var(--accent);font-size:15px;padding:0}
 #palette .row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
-.chip{flex:none;border:2px solid #aaa;border-radius:10px;padding:9px 12px;font-size:16px;min-width:64px;text-align:center;background:#fff;color:#111}
-.chip.sel{border-color:#1d5fc9;box-shadow:0 0 0 2px #1d5fc9 inset}
-body.editing main{padding-bottom:120px}
+.chip{flex:none;border:2px solid var(--chipline);border-radius:10px;padding:9px 12px;font-size:16px;min-width:60px;text-align:center;background:var(--cell);color:var(--fg)}
+.chip.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+body.editing main{padding-bottom:130px}
 /* 底部視窗 */
-.mask{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20;display:none;align-items:flex-end;justify-content:center}
-.mask.show{display:flex}
-.sheet{background:#f6f7f9;width:100%;max-width:620px;max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;
-  padding:14px 14px calc(16px + env(safe-area-inset-bottom));-webkit-user-select:text;user-select:text}
-.sheet h2{font-size:18px;margin:2px 0 12px;display:flex;justify-content:space-between;align-items:center}
-.sheet h2 button{font-size:16px;background:none;border:0;color:#2f7de1;padding:4px}
-.sheet h3{font-size:15px;margin:16px 0 6px;color:#444}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--sheet);width:100%;max-width:620px;max-height:90vh;overflow:auto;border-radius:16px 16px 0 0;
+  padding:14px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));-webkit-user-select:text;user-select:text}
+.sheet h2{font-size:18px;margin:2px 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sheet h2 button{font-size:16px;background:none;border:0;color:var(--accent);padding:4px}
+.sheet h3{font-size:14px;margin:16px 0 6px;color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.sheet textarea,.sheet input[type=text],.sheet input[type=date]{width:100%;font-size:16px;padding:9px;border:1px solid #ccc;border-radius:8px;background:#fff;font-family:inherit}
-.sheet textarea{height:80px;resize:none}
-.btn{display:block;width:100%;font-size:17px;padding:12px;border-radius:10px;border:0;background:#2f7de1;color:#fff;margin-top:12px}
-.btn.gray{background:#e2e5ea;color:#222}
-.btn.red{background:#e5484d}
-.menu .btn{text-align:left;background:#fff;color:#111;border:1px solid #ddd;margin-top:8px}
+.sheet textarea{width:100%;font-size:16px;padding:10px;border:1px solid var(--chipline);border-radius:10px;background:var(--input);color:var(--fg);font-family:inherit;resize:none;height:80px}
+.btn{display:block;width:100%;font-size:17px;padding:12px;border-radius:10px;border:0;background:var(--accent);color:#fff;margin-top:12px}
+.btn.gray{background:var(--hair);color:var(--fg)}
+.btn.red{background:var(--danger);color:#fff}
+.menu .btn{text-align:left;background:var(--surface);color:var(--fg);border:1px solid var(--hair);margin-top:8px}
 .trow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.trow input[type=text]{flex:1}
-.trow input[type=color]{width:44px;height:40px;border:1px solid #ccc;border-radius:8px;padding:2px;background:#fff}
-.trow button{background:none;border:0;font-size:20px;color:#e5484d;padding:4px 8px}
-.seq{display:flex;flex-wrap:wrap;gap:4px;min-height:44px;background:#fff;border:1px solid #ccc;border-radius:8px;padding:6px}
-.seq span{padding:5px 8px;border-radius:6px;border:1px solid #aaa;font-size:14px}
-.seq .ph{color:#999;border:0;padding:6px 2px}
-.small{font-size:13px;color:#666;line-height:1.5}
-.help p{margin:6px 0;line-height:1.6;font-size:15px}
-#toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom));transform:translateX(-50%);background:rgba(0,0,0,.78);
+.trow .field{flex:1;min-width:0}
+.trow input[type=color]{width:44px;height:42px;border:1px solid var(--chipline);border-radius:8px;padding:2px;background:var(--input);flex:none}
+.trow button{background:none;border:0;font-size:20px;color:var(--danger);padding:4px 8px}
+.seq{display:flex;flex-wrap:wrap;gap:4px;min-height:44px;background:var(--input);border:1px solid var(--chipline);border-radius:10px;padding:6px}
+.seq span{padding:5px 8px;border-radius:6px;border:1px solid var(--chipline);font-size:14px}
+.seq .ph{color:var(--muted);border:0;padding:6px 2px}
+.small{font-size:13px;color:var(--muted);line-height:1.5}
+.help p{margin:6px 0;line-height:1.65;font-size:15px}
+.minilist{background:var(--surface);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:8px}
+.minilist:empty{display:none}
+.row2{display:flex;gap:8px}
+.row2 .field{flex:1;min-width:0}
+.row2 button{flex:none;border:0;background:var(--accent);color:#fff;border-radius:10px;padding:0 16px;font-size:15px}
+.memo-title{font-size:20px!important;font-weight:600;border:0!important;background:none!important;padding:6px 0!important}
+.memo-body{height:44vh!important;font-size:16px;line-height:1.6}
+.sheet-foot{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}
+.sheet-foot .sp{flex:1}
+.sheet-foot button{border:1px solid var(--hair);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14px;color:var(--fg)}
+.sheet-foot button.del{color:var(--danger)}
+/* 確認視窗 */
+#cfm{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:24px}
+#cfm .box{background:var(--surface);border-radius:14px;max-width:320px;width:100%;padding:18px 16px 12px;text-align:center}
+#cfm p{margin:0 0 14px;font-size:16px;line-height:1.5}
+#cfm .acts{display:flex;gap:8px}
+#cfm .acts button{flex:1;border:0;border-radius:10px;padding:11px;font-size:16px;background:var(--hair);color:var(--fg)}
+#cfm .acts .ok{background:var(--accent);color:#fff}
+#cfm .acts .ok.red{background:var(--danger)}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(0,0,0,.8);
   color:#fff;padding:9px 16px;border-radius:20px;font-size:15px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.cell.flash{animation:none}#toast{transition:none}}
 </style>
 </head>
 <body>
-<header><div class="side"></div><h1>班表小幫手</h1><button id="menuBtn">選單</button></header>
-<main id="main">
-  <div class="tools">
-    <button class="ico" id="todayBtn" aria-label="回到今天"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="3.5"/><rect x="4" y="9" width="40" height="9" rx="4" fill="currentColor"/><rect x="13" y="4" width="4" height="10" rx="2" fill="currentColor"/><rect x="31" y="4" width="4" height="10" rx="2" fill="currentColor"/><text x="24" y="35" font-size="12.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="Arial,sans-serif">Today</text></svg></button>
-    <div class="sp"></div>
-    <button class="ico" id="editBtn" aria-label="編輯"><svg viewBox="0 0 48 48"><path d="M34.5 5.5a4 4 0 0 1 5.7 0l2.3 2.3a4 4 0 0 1 0 5.7L17 39l-11 4 4-11z" fill="currentColor"/><path d="M29 11l8 8M32 8l8 8" stroke="#dbe7f5" stroke-width="1.6"/></svg></button>
-    <button class="ico" id="shareBtn" aria-label="分享"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M17 18h-6v26h26V18h-6"/><path d="M24 30V4M16 11l8-8 8 8"/></svg></button>
-  </div>
-  <div class="nav">
-    <button id="prevBtn" aria-label="上個月"><svg viewBox="0 0 40 32"><path d="M2 16L38 1 28 16 38 31z"/></svg></button>
-    <div class="title" id="title"></div>
-    <button id="nextBtn" aria-label="下個月"><svg viewBox="0 0 40 32"><path d="M38 16L2 1 12 16 2 31z"/></svg></button>
-  </div>
-  <div class="week"><div>週日</div><div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div>週六</div></div>
-  <div class="grid" id="grid"></div>
-  <div class="stats" id="stats"></div>
+<header><div class="side"></div><h1>班表小幫手</h1><button class="menu-btn" id="menuBtn">選單</button></header>
+<main>
+  <div class="sample" id="sampleBar" hidden><span>目前是範例資料，可以先點點看。</span><button id="sampleClr">清除範例，開始使用</button></div>
+
+  <section class="view" id="v-cal">
+    <div class="tools">
+      <button class="ico" id="todayBtn" aria-label="回到今天"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="3.5"/><rect x="4" y="9" width="40" height="9" rx="4" fill="currentColor"/><rect x="13" y="4" width="4" height="10" rx="2" fill="currentColor"/><rect x="31" y="4" width="4" height="10" rx="2" fill="currentColor"/><text x="24" y="35" font-size="12.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="Arial,sans-serif">Today</text></svg></button>
+      <div class="sp"></div>
+      <button class="ico" id="editBtn" aria-label="快速排班"><svg viewBox="0 0 48 48"><path d="M34.5 5.5a4 4 0 0 1 5.7 0l2.3 2.3a4 4 0 0 1 0 5.7L17 39l-11 4 4-11z" fill="currentColor"/></svg></button>
+      <button class="ico" id="shareBtn" aria-label="分享班表圖片"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M17 18h-6v26h26V18h-6"/><path d="M24 30V4M16 11l8-8 8 8"/></svg></button>
+    </div>
+    <div class="nav">
+      <button id="prevBtn" aria-label="上個月"><svg viewBox="0 0 40 32"><path d="M2 16L38 1 28 16 38 31z"/></svg></button>
+      <div class="title" id="title"></div>
+      <button id="nextBtn" aria-label="下個月"><svg viewBox="0 0 40 32"><path d="M38 16L2 1 12 16 2 31z"/></svg></button>
+    </div>
+    <div class="week"><div>週日</div><div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div>週六</div></div>
+    <div class="grid" id="grid"></div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="view" id="v-memo" hidden>
+    <div class="panel-head"><h2>備忘錄</h2><button class="newbtn" id="memoNew">＋ 新增</button></div>
+    <input class="field" id="memoQ" type="search" placeholder="搜尋備忘錄" style="margin-bottom:12px">
+    <div class="memos" id="memoList"></div>
+  </section>
+
+  <section class="view" id="v-todo" hidden>
+    <div class="panel-head"><h2>待辦事項</h2></div>
+    <form class="addwrap" id="todoForm"><div class="addbar"><input class="field" id="todoTxt" placeholder="新增待辦…" autocomplete="off"><button>新增</button></div>
+      <div class="opts"><label>日期 <input type="date" id="todoDate"></label><label>共 <input type="number" id="todoDays" min="1" max="365" inputmode="numeric" placeholder="1"> 天完成</label><label><input type="checkbox" id="todoRep"> 🔁 每月同一天</label></div></form>
+    <div id="todoList"></div>
+  </section>
 </main>
 
-<div id="palette"><div class="hint"><span>選一個班別，再點日期套用</span><span id="palDone" style="color:#2f7de1">完成</span></div><div class="row" id="palRow"></div></div>
-<div class="mask" id="mask"><div class="sheet" id="sheet"></div></div>
+<nav id="tabs">
+  <button data-tab="cal" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>班表</button>
+  <button data-tab="memo"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 12h8M8 16h6"/></svg>備忘錄</button>
+  <button data-tab="todo"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/></svg>待辦<span class="n" id="todoN" hidden></span></button>
+</nav>
+<div id="palette" hidden><div class="hint"><span>選一個班別，再點日期套用</span><button id="palDone">完成</button></div><div class="row" id="palRow"></div></div>
+<div class="mask" id="mask" hidden><div class="sheet" id="sheet"></div></div>
+<div id="cfm" hidden><div class="box"><p id="cfmMsg"></p><div class="acts"><button id="cfmNo">取消</button><button class="ok" id="cfmOk">確定</button></div></div></div>
 <div id="toast"></div>
 
 <script>
-const APP_VER='v1（2026-10-21）';
+const APP_VER='v8（2026-10-21）';
 const KEY='shift-helper-v1';
 const HELP=[
+  '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
   '【看班表】左右箭頭或左右滑動切換月份；按左上「Today」回到本月。今天會用綠色標示。',
-  '【單日設定】點任一天，可以選班別、寫備註。有備註的日子右上角會出現「*」。',
-  '【快速排班】按鉛筆進入編輯模式，下方選一個班別後連續點日期就能套用；選「清除」會恢復成循環預設值。再按一次鉛筆或「完成」離開。',
-  '【排班循環】選單 →「排班循環」：設定起始日和輪班順序（例如 日日休休夜夜休休），沒有手動設定的日子會自動依循環顯示，也會延伸到之後的月份。',
+  '【單日設定】點任一天，可以選班別、寫備註，也能直接新增這天的待辦。有備註的日子右上角有「*」，有未完成待辦的日子右下角有紅色數字。',
+  '【快速排班】按鉛筆進入編輯模式，下方選一個班別後連續點日期就能套用；選「空白」把那天清空；有排班循環時另有「依循環」可以恢復成循環的班。按「完成」離開。',
+  '【排班循環】選單 →「排班循環」：設定起始日、輪班順序（例如 日日休休夜夜休休）和要排幾個月。最後一個月月底如果這一輪還沒輪完，會延到下個月把這輪排完才停。沒有手動設定的日子會自動依循環顯示。',
+  '【備忘錄】按「＋ 新增」寫一則，打字會自動儲存。可以搜尋，也可以「置頂」常用的那則。',
+  '【待辦事項】輸入內容，日期可填可不填，按「新增」。有日期的待辦會出現在月曆上，並顯示那天是什麼班。點圓圈打勾完成，點文字可以修改或刪除。',
+  '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
+  '【每月固定】勾「🔁 每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
+  '【清除排班】選單 →「清除本月班別」把正在看的這個月全部變成空白（連循環的班也清掉，備註保留）；「清除所有排班」會清掉全部手動班別和排班循環，備註、備忘錄、待辦會保留。',
+  '【國定假日】內建 2026、2027 年國定假日（含補假），日期會變紅色並標出節日。選單 →「國定假日」可以關掉顯示，或讓國定假日自動排成休假（手動設定的日子優先）。',
+  '【過期待辦】月曆上的紅色數字是還沒做的待辦；如果那天的待辦都已經過期沒處理，數字會變成灰色。',
   '【班別設定】選單 →「班別設定」：可以新增、改名、改顏色或刪除班別。',
-  '【分享】按右上分享鍵，會把本月班表做成圖片，可傳 LINE 或存到相簿。',
-  '【備份】資料存在這支手機的瀏覽器裡。選單 →「匯出備份」可複製一段文字保存；換手機時用「匯入備份」貼上即可還原。',
-  '【加入主畫面】在 Safari 按分享 →「加入主畫面」，之後就能像 App 一樣開啟、離線也能用。'
+  '【分享】按右上分享鍵，把本月班表做成圖片，長按圖片即可儲存或傳 LINE。',
+  '【備份】資料存在這支手機的瀏覽器裡。選單 →「匯出備份」複製一段文字保存；換手機時用「匯入備份」貼上即可還原（班表、備忘錄、待辦全部包含）。'
 ];
-const DEF={
-  types:[
-    {id:'d',name:'日班',color:'#4da6f7'},
-    {id:'n',name:'夜班',color:'#f6cfa1'},
-    {id:'o',name:'休假',color:'#ffffff'},
-    {id:'r',name:'常日班',color:'#c9b8f0'},
-    {id:'a',name:'A班',color:'#ffe08a'},
-    {id:'b',name:'B班',color:'#a8e6c1'}
-  ],
-  days:{},          // 'YYYY-MM-DD': {t:'d', note:'...'}
-  cycle:{start:'',seq:[]}
-};
-let S;
-try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-if(!S||!Array.isArray(S.types))S=JSON.parse(JSON.stringify(DEF));
-S.days=S.days||{};S.cycle=S.cycle||{start:'',seq:[]};
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('儲存失敗')}}
+const TYPES=[
+  {id:'d',name:'日班',color:'#4da6f7'},{id:'n',name:'夜班',color:'#f6cfa1'},{id:'o',name:'休假',color:'#ffffff'},
+  {id:'r',name:'常日班',color:'#c9b8f0'},{id:'a',name:'A班',color:'#ffe08a'},{id:'b',name:'B班',color:'#a8e6c1'}
+];
 
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,'0');
@@ -154,235 +279,469 @@ const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
 const dayNum=d=>Math.round(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const typeById=id=>S.types.find(t=>t.id===id);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const WK=['日','一','二','三','四','五','六'];
-
 let today=new Date();today=new Date(today.getFullYear(),today.getMonth(),today.getDate());
-let view=new Date(today.getFullYear(),today.getMonth(),1);
-let editing=false,brush=null;
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
 
-// 某天的班別：手動設定優先，否則依循環
+function sampleData(){
+  const t=ymd(today);
+  return {sample:true,types:JSON.parse(JSON.stringify(TYPES)),
+    days:{[ymd(addDays(today,3))]:{t:'r',note:'（範例）支援白天訓練'}},
+    cycle:{start:ymd(new Date(today.getFullYear(),today.getMonth(),1)),seq:['d','d','o','o','n','n','o','o'],months:3},
+    memos:[
+      {id:uid(),title:'（範例）交班注意事項',body:'2 號機壓力偏高，記得每小時看一次。\n倉庫鑰匙放在值班台左邊抽屜。',pin:true,at:Date.now()-36e5},
+      {id:uid(),title:'（範例）年假規劃',body:'12 月底想排連休，記得 11/15 前跟組長說。',pin:false,at:Date.now()-864e5*2}
+    ],
+    todos:[
+      {id:uid(),text:'（範例）繳交加班單',date:t,done:false},
+      {id:uid(),text:'（範例）跟同事換 '+(addDays(today,5).getMonth()+1)+'/'+addDays(today,5).getDate()+' 的班',date:ymd(addDays(today,5)),done:false},
+      {id:uid(),text:'（範例）回診拿藥',date:ymd(addDays(today,-1)),done:false},
+      {id:uid(),text:'（範例）買新的工作鞋',date:'',done:false},
+      {id:uid(),text:'（範例）準備年度報告',date:ymd(addDays(today,-2)),days:7,done:false},
+      {id:uid(),text:'（範例）繳房租',date:ymd(new Date(today.getFullYear(),today.getMonth(),5)),monthly:true,doneM:{},done:false},
+      {id:uid(),text:'（範例）更新通訊錄',date:ymd(addDays(today,-3)),done:true}
+    ]};
+}
+let S=null;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!Array.isArray(S.types))S=sampleData();
+S.days=S.days||{};S.cycle=S.cycle||{start:'',seq:[]};S.memos=S.memos||[];S.todos=S.todos||[];S.hol=S.hol||{show:true,off:false};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const typeById=id=>S.types.find(t=>t.id===id);
+
+let view=new Date(today.getFullYear(),today.getMonth(),1);
+let tab='cal',editing=false,brush=null,showDone=false;
+
+const BLANK='x'; // 手動清成空白，蓋過循環
+// 國定假日（行政院人事行政總處 115、116 年辦公日曆表，含補假）
+const HOLIDAYS={
+  '2026-01-01':'元旦','2026-02-15':'小年夜','2026-02-16':'除夕','2026-02-17':'春節','2026-02-18':'春節','2026-02-19':'春節','2026-02-20':'春節補假',
+  '2026-02-27':'228補假','2026-02-28':'和平紀念日','2026-04-03':'兒童節補假','2026-04-04':'兒童節','2026-04-05':'清明節','2026-04-06':'清明補假',
+  '2026-05-01':'勞動節','2026-06-19':'端午節','2026-09-25':'中秋節','2026-09-28':'教師節','2026-10-09':'國慶補假','2026-10-10':'國慶日',
+  '2026-10-25':'光復節','2026-10-26':'光復節補假','2026-12-25':'行憲紀念日',
+  '2027-01-01':'元旦','2027-02-04':'小年夜','2027-02-05':'除夕','2027-02-06':'春節','2027-02-07':'春節','2027-02-08':'春節','2027-02-09':'春節補假','2027-02-10':'春節補假',
+  '2027-02-28':'和平紀念日','2027-03-01':'228補假','2027-04-04':'兒童節','2027-04-05':'清明節','2027-04-06':'兒童節補假','2027-04-30':'勞動節補假','2027-05-01':'勞動節',
+  '2027-06-09':'端午節','2027-09-15':'中秋節','2027-09-28':'教師節','2027-10-10':'國慶日','2027-10-11':'國慶補假','2027-10-25':'光復節',
+  '2027-12-24':'行憲補假','2027-12-25':'行憲紀念日','2027-12-31':'元旦補假'
+};
+const holName=k=>S.hol.show||S.hol.off?HOLIDAYS[k]||'':'';
+const offType=()=>typeById('o')||S.types.find(t=>t.name==='休假')||null;
 function shiftOf(key){
   const e=S.days[key];
+  if(e&&e.t===BLANK)return null;
   if(e&&e.t&&typeById(e.t))return typeById(e.t);
+  if(S.hol.off&&HOLIDAYS[key]&&offType())return offType();
   const c=S.cycle;
   if(c.start&&c.seq.length){
-    const diff=dayNum(parse(key))-dayNum(parse(c.start));
-    if(diff>=0)return typeById(c.seq[diff%c.seq.length])||null;
+    const diff=dayNum(parse(key))-dayNum(parse(c.start)),end=cycleEnd(c);
+    if(diff>=0&&(!end||key<=end))return typeById(c.seq[diff%c.seq.length])||null;
   }
   return null;
 }
-function textColor(hex){
-  const h=(hex||'#fff').replace('#','');
-  const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);
-  return (r*299+g*587+b*114)/1000<120?'#fff':'#111';
+// 第 N 個月的最後一天；months 為 0／未設定＝不限
+function cycleMonthEnd(c){
+  if(!c.start||!c.months)return '';
+  const d=parse(c.start);return ymd(new Date(d.getFullYear(),d.getMonth()+c.months,0));
 }
+// 循環實際結束日：月底那一輪沒輪完，就延到下個月把這輪排完
+function cycleEnd(c){
+  const me=cycleMonthEnd(c);if(!me||!c.seq.length)return me;
+  const rem=(dayNum(parse(me))-dayNum(parse(c.start))+1)%c.seq.length;
+  return rem?ymd(addDays(parse(me),c.seq.length-rem)):me;
+}
+function lum(hex){const h=(hex||'#fff').replace('#','');return (parseInt(h.substr(0,2),16)*299+parseInt(h.substr(2,2),16)*587+parseInt(h.substr(4,2),16)*114)/1000}
+const textColor=hex=>lum(hex)<120?'#fff':'#111';
+// 白色班別（休假）沿用主題的格子色，深色模式才不會刺眼
+const paint=t=>!t||lum(t.color)>245?'':`background:${t.color};color:${textColor(t.color)}`;
+const chipStyle=t=>lum(t.color)>245?'':`background:${t.color};color:${textColor(t.color)}`;
 function monthCells(){
-  const first=new Date(view.getFullYear(),view.getMonth(),1);
-  const start=new Date(first);start.setDate(1-first.getDay());
+  const first=new Date(view.getFullYear(),view.getMonth(),1),start=addDays(first,-first.getDay());
+  return Array.from({length:42},(_,i)=>addDays(start,i));
+}
+const ymOf=k=>k.slice(0,7);
+const ymAdd=(ym,n)=>{const[y,m]=ym.split('-').map(Number),d=new Date(y,m-1+n,1);return d.getFullYear()+'-'+pad(d.getMonth()+1)};
+// 每月重複的待辦在某個月的日期（31 號遇到小月就排月底）
+function occDate(t,ym){const[y,m]=ym.split('-').map(Number),day=parse(t.date).getDate(),last=new Date(y,m,0).getDate();return ym+'-'+pad(Math.min(day,last))}
+const dueOf=(date,days)=>days>1?ymd(addDays(parse(date),days-1)):date;
+// 把待辦展開成一筆一筆（每月重複的會在 from～to 每個月各一筆）
+function todoItems(fromYm,toYm){
   const out=[];
-  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);out.push(d)}
+  S.todos.forEach(t=>{
+    if(!t.monthly||!t.date){out.push({t,key:t.id,date:t.date||'',due:t.date?dueOf(t.date,t.days):'',done:!!t.done});return}
+    for(let ym=fromYm>ymOf(t.date)?fromYm:ymOf(t.date);ym<=toYm;ym=ymAdd(ym,1)){
+      const date=occDate(t,ym);
+      out.push({t,key:t.id+'@'+ym,ym,date,due:dueOf(date,t.days),done:!!(t.doneM&&t.doneM[ym])});
+    }
+  });
   return out;
 }
+const covers=(it,k)=>it.date&&it.date<=k&&k<=it.due;
+let calItems=[];
+const openTodos=k=>calItems.filter(it=>!it.done&&covers(it,k));
+// 這格的待辦全都過期沒做，數字改灰色
+const allLate=arr=>arr.length&&arr.every(it=>it.due<ymd(today));
+const fmtMD=k=>{const d=parse(k);return (d.getMonth()+1)+'/'+d.getDate()+'（'+WK[d.getDay()]+'）'};
 
-function render(){
+/* ===== 班表 ===== */
+function renderCal(){
   $('title').textContent=view.getFullYear()+'年'+(view.getMonth()+1)+'月';
-  const isNow=view.getFullYear()===today.getFullYear()&&view.getMonth()===today.getMonth();
-  $('todayBtn').classList.toggle('hide',isNow);
-  const tk=ymd(today);
-  const cnt={};
-  $('grid').innerHTML=monthCells().map(d=>{
-    const k=ymd(d),t=shiftOf(k),out=d.getMonth()!==view.getMonth(),e=S.days[k];
+  $('todayBtn').classList.toggle('hide',view.getFullYear()===today.getFullYear()&&view.getMonth()===today.getMonth());
+  const tk=ymd(today),cnt={},cells=monthCells();
+  calItems=todoItems(ymAdd(ymOf(ymd(cells[0])),-1),ymOf(ymd(cells[41])));
+  $('grid').innerHTML=cells.map(d=>{
+    const k=ymd(d),t=shiftOf(k),out=d.getMonth()!==view.getMonth(),e=S.days[k],ot=openTodos(k),n=ot.length,hn=S.hol.show?HOLIDAYS[k]:'';
     if(!out&&t)cnt[t.id]=(cnt[t.id]||0)+1;
     const name=t?t.name:'';
     const cls=['cell',out?'out':'',k===tk?'today':'',name.length>=4?'s4':name.length===3?'s3':''].join(' ');
-    const st=t&&!out?`background:${t.color};color:${textColor(t.color)}`:'';
-    return `<div class="${cls}" data-k="${k}" style="${st}"><span class="d">${d.getDate()}</span><span class="s">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}</div>`;
+    return `<div class="${cls}${hn?' hol':''}" data-k="${k}" style="${out?'':paint(t)}"><span class="d">${d.getDate()}</span>${hn?`<span class="hn">${hn}</span>`:''}<span class="s">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}${n?`<span class="td${allLate(ot)?' old':''}">${n}</span>`:''}</div>`;
   }).join('');
   $('stats').innerHTML=S.types.filter(t=>cnt[t.id]).map(t=>`<span><i class="dot" style="background:${t.color}"></i>${esc(t.name)} ${cnt[t.id]} 天</span>`).join('');
   $('editBtn').classList.toggle('on',editing);
 }
-function go(m){view=new Date(view.getFullYear(),view.getMonth()+m,1);render()}
-
+function go(m){view=new Date(view.getFullYear(),view.getMonth()+m,1);renderCal()}
 $('prevBtn').onclick=()=>go(-1);
 $('nextBtn').onclick=()=>go(1);
-$('todayBtn').onclick=()=>{view=new Date(today.getFullYear(),today.getMonth(),1);render()};
-
-// 左右滑動換月
-let tx=null,ty=0;
+$('todayBtn').onclick=()=>{view=new Date(today.getFullYear(),today.getMonth(),1);renderCal()};
+let tx=null,ty=0,swiped=false;
 $('grid').addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
 $('grid').addEventListener('touchend',e=>{
   if(tx===null)return;const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;tx=null;
   if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){swiped=true;go(dx<0?1:-1);setTimeout(()=>swiped=false,350)}
 },{passive:true});
-let swiped=false;
-
 $('grid').addEventListener('click',e=>{
   if(swiped)return;
   const c=e.target.closest('.cell');if(!c)return;
   const k=c.dataset.k,d=parse(k);
   if(editing){
     if(!brush)return toast('請先在下方選一個班別');
-    setShift(k,brush==='clear'?null:brush);
-    if(d.getMonth()!==view.getMonth())return;
+    setShift(k,brush==='auto'?null:brush);
     const n=$('grid').querySelector(`[data-k="${k}"]`);n&&n.classList.add('flash');
     return;
   }
-  if(d.getMonth()!==view.getMonth()){view=new Date(d.getFullYear(),d.getMonth(),1);render();return}
+  if(d.getMonth()!==view.getMonth()){view=new Date(d.getFullYear(),d.getMonth(),1);renderCal();return}
   openDay(k);
 });
-
 function setShift(k,t){
   const e=S.days[k]||{};
   if(t)e.t=t;else delete e.t;
   if(e.t||e.note)S.days[k]=e;else delete S.days[k];
-  save();render();
+  save();renderCal();
 }
-
-// 編輯模式
 function renderPalette(){
-  $('palRow').innerHTML=S.types.map(t=>`<button class="chip${brush===t.id?' sel':''}" data-t="${t.id}" style="background:${t.color};color:${textColor(t.color)}">${esc(t.name)}</button>`).join('')
-    +`<button class="chip${brush==='clear'?' sel':''}" data-t="clear">清除</button>`;
+  $('palRow').innerHTML=S.types.map(t=>`<button class="chip${brush===t.id?' sel':''}" data-t="${t.id}" style="${chipStyle(t)}">${esc(t.name)}</button>`).join('')
+    +`<button class="chip${brush===BLANK?' sel':''}" data-t="${BLANK}">空白</button>`
+    +(S.cycle.seq.length?`<button class="chip${brush==='auto'?' sel':''}" data-t="auto">依循環</button>`:'');
 }
 function setEditing(on){
-  editing=on;document.body.classList.toggle('editing',on);
-  $('palette').classList.toggle('show',on);
+  editing=on;document.body.classList.toggle('editing',on);$('palette').hidden=!on;
   if(on){if(!brush)brush=S.types[0]&&S.types[0].id;renderPalette()}
-  render();
+  renderCal();
 }
 $('editBtn').onclick=()=>setEditing(!editing);
 $('palDone').onclick=()=>setEditing(false);
 $('palRow').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;brush=b.dataset.t;renderPalette()};
 
-// 底部視窗
-function openSheet(html){$('sheet').innerHTML=html;$('mask').classList.add('show');$('sheet').scrollTop=0}
-function closeSheet(){$('mask').classList.remove('show');$('sheet').innerHTML=''}
+/* ===== 視窗工具 ===== */
+let onClose=null;
+function openSheet(html,close){$('sheet').innerHTML=html;$('mask').hidden=false;$('sheet').scrollTop=0;onClose=close||null;
+  const x=$('sheet').querySelector('[data-x]');if(x)x.onclick=closeSheet}
+function closeSheet(){if($('mask').hidden)return;const f=onClose;onClose=null;f&&f();$('mask').hidden=true;$('sheet').innerHTML='';renderAll()}
 $('mask').addEventListener('click',e=>{if(e.target===$('mask'))closeSheet()});
+function ask(msg,ok='確定',danger=false){
+  return new Promise(res=>{
+    $('cfmMsg').textContent=msg;$('cfmOk').textContent=ok;$('cfmOk').classList.toggle('red',danger);$('cfm').hidden=false;
+    const done=v=>{$('cfm').hidden=true;$('cfmOk').onclick=$('cfmNo').onclick=null;res(v)};
+    $('cfmOk').onclick=()=>done(true);$('cfmNo').onclick=()=>done(false);
+  });
+}
 
+/* ===== 單日 ===== */
+function todoRow(it,showDate){
+  const t=it.t,tk=ymd(today),late=!it.done&&it.due&&it.due<tk;
+  const sh=it.date?shiftOf(it.date):null,days=t.days>1?t.days:1;
+  let m='';
+  if(showDate&&it.date)m+=days>1?`${fmtMD(it.date)}～${fmtMD(it.due)}`:fmtMD(it.date);
+  if(!showDate&&days>1)m+=`${fmtMD(it.date)}～${fmtMD(it.due)}`;
+  if(days>1)m+=` · 共 ${days} 天`;
+  if(late)m+=' · 已過期';
+  else if(!it.done&&days>1&&it.date<=tk&&tk<=it.due)m+=` · 還剩 ${dayNum(parse(it.due))-dayNum(today)+1} 天`;
+  if(t.monthly)m+=` <span class="tag">🔁 每月 ${parse(t.date).getDate()} 號</span>`;
+  if(showDate&&sh)m+=` <span class="tag" style="${chipStyle(sh)}">${esc(sh.name)}</span>`;
+  const meta=m?`<div class="meta${late?' late':''}">${m}</div>`:'';
+  return `<div class="todo${it.done?' done':''}" data-key="${it.key}"><button class="chk" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><div class="txt">${esc(t.text)}</div>${meta}</button></div>`;
+}
+function toggleItem(key){
+  const[id,ym]=key.split('@'),t=S.todos.find(x=>x.id===id);if(!t)return;
+  if(ym){t.doneM=t.doneM||{};if(t.doneM[ym])delete t.doneM[ym];else t.doneM[ym]=true}else t.done=!t.done;
+  save();
+}
+function bindTodoClicks(root,after){
+  root.onclick=e=>{
+    const row=e.target.closest('.todo');if(!row)return;
+    if(e.target.closest('[data-chk]')){toggleItem(row.dataset.key);after();updateBadge();return}
+    if(e.target.closest('[data-open]'))editTodo(row.dataset.key.split('@')[0]);
+  };
+}
+// 新增待辦（共用：待辦分頁、單日視窗）
+function addTodo(text,date,days,monthly){
+  days=Math.max(1,Math.min(365,parseInt(days)||1));
+  if((days>1||monthly)&&!date)date=ymd(today);
+  const t={id:uid(),text,date:date||'',done:false};
+  if(days>1)t.days=days;
+  if(monthly){t.monthly=true;t.doneM={}}
+  S.todos.push(t);save();
+}
 function openDay(k){
   const d=parse(k),e=S.days[k]||{},cur=shiftOf(k);
   let sel=e.t||'';
-  const chips=()=>S.types.map(t=>`<button class="chip${sel===t.id?' sel':''}" data-t="${t.id}" style="background:${t.color};color:${textColor(t.color)}">${esc(t.name)}</button>`).join('')
-    +`<button class="chip${sel===''?' sel':''}" data-t="">${S.cycle.seq.length?'依循環':'未設定'}</button>`;
-  openSheet(`<h2>${d.getMonth()+1}月${d.getDate()}日（週${WK[d.getDay()]}）<button data-x>關閉</button></h2>
-    <div class="small">目前：${cur?esc(cur.name):'未設定'}${e.t?'（手動）':cur?'（循環）':''}</div>
+  const chips=()=>S.types.map(t=>`<button class="chip${sel===t.id?' sel':''}" data-t="${t.id}" style="${chipStyle(t)}">${esc(t.name)}</button>`).join('')
+    +(S.cycle.seq.length?`<button class="chip${sel===BLANK?' sel':''}" data-t="${BLANK}">空白</button><button class="chip${sel===''?' sel':''}" data-t="">依循環</button>`
+      :`<button class="chip${sel===''||sel===BLANK?' sel':''}" data-t="">空白</button>`);
+  const list=()=>todoItems(ymAdd(ymOf(k),-1),ymOf(k)).filter(it=>covers(it,k)).map(it=>todoRow(it,false)).join('');
+  const commit=()=>{const note=$('dayNote').value.trim(),n={};if(sel)n.t=sel;if(note)n.note=note;
+    if(n.t||n.note)S.days[k]=n;else delete S.days[k];save()};
+  openSheet(`<h2><span>${d.getMonth()+1}月${d.getDate()}日（週${WK[d.getDay()]}）${HOLIDAYS[k]?` <span style="color:var(--danger);font-size:15px">${HOLIDAYS[k]}</span>`:''}</span><button data-x>完成</button></h2>
+    <div class="small">目前：${cur?esc(cur.name):'空白'}${e.t?'（手動設定）':cur?'（依循環）':''}</div>
     <h3>班別</h3><div class="chips" id="dayChips">${chips()}</div>
-    <h3>備註</h3><textarea id="dayNote" placeholder="例如：支援、換班、加班 2 小時…">${esc(e.note||'')}</textarea>
-    <button class="btn" id="daySave">儲存</button>`);
+    <h3>備註</h3><textarea id="dayNote" placeholder="例如：支援、換班、加班 2 小時">${esc(e.note||'')}</textarea>
+    <h3>這天的待辦</h3><div class="minilist" id="dayTodos">${list()}</div>
+    <form id="dayAdd"><div class="row2"><input class="field" id="dayTodo" placeholder="新增這天開始的待辦…" autocomplete="off"><button>新增</button></div>
+      <div class="opts"><label>共 <input type="number" id="dayDays" min="1" max="365" inputmode="numeric" placeholder="1"> 天完成</label><label><input type="checkbox" id="dayRep"> 🔁 每月 ${d.getDate()} 號</label></div></form>`,commit);
   $('dayChips').onclick=ev=>{const b=ev.target.closest('.chip');if(!b)return;sel=b.dataset.t;$('dayChips').innerHTML=chips()};
-  $('sheet').querySelector('[data-x]').onclick=closeSheet;
-  $('daySave').onclick=()=>{
-    const note=$('dayNote').value.trim(),n={};
-    if(sel)n.t=sel;if(note)n.note=note;
-    if(n.t||n.note)S.days[k]=n;else delete S.days[k];
-    save();closeSheet();render();
-  };
+  bindTodoClicks($('dayTodos'),()=>$('dayTodos').innerHTML=list());
+  $('dayAdd').onsubmit=ev=>{ev.preventDefault();const v=$('dayTodo').value.trim();if(!v)return;
+    addTodo(v,k,$('dayDays').value,$('dayRep').checked);$('dayTodo').value='';$('dayDays').value='';$('dayRep').checked=false;$('dayTodos').innerHTML=list();updateBadge()};
 }
 
-// 選單
+/* ===== 待辦 ===== */
+// 待辦清單要看的範圍：每月重複的只列上個月起、未完成的，加上下一次
+function listItems(){
+  const tk=ymd(today),cur=ymOf(tk),all=todoItems(ymAdd(cur,-1),ymAdd(cur,2)),out=[],seen={};
+  all.forEach(it=>{
+    if(!it.ym){out.push(it);return}
+    if(it.date<=tk){if(!it.done||it.ym===cur)out.push(it);return}
+    if(!seen[it.t.id]){seen[it.t.id]=1;out.push(it)}
+  });
+  return out;
+}
+function renderTodos(){
+  const tk=ymd(today),items=listItems(),open=items.filter(i=>!i.done),done=items.filter(i=>i.done);
+  const byDate=(a,b)=>a.due<b.due?-1:a.due>b.due?1:0;
+  const late=open.filter(i=>i.due&&i.due<tk).sort(byDate),now=open.filter(i=>covers(i,tk)).sort(byDate);
+  const soon=open.filter(i=>i.date>tk).sort((a,b)=>a.date<b.date?-1:1),none=open.filter(i=>!i.date);
+  const grp=(title,arr,cls='',extra='')=>arr.length?`<div class="group"><h3 class="${cls}"><span>${title}（${arr.length}）</span>${extra}</h3><div class="list">${arr.map(i=>todoRow(i,true)).join('')}</div></div>`:'';
+  let h=grp('已過期',late,'late')+grp('今天要做 · '+fmtMD(tk),now)+grp('之後',soon)+grp('沒有日期',none);
+  if(!open.length)h=`<div class="empty">沒有未完成的待辦 🎉<br>在上面輸入一件事，按「新增」。</div>`;
+  if(done.length)h+=`<div class="group"><h3><button id="doneTog">${showDone?'▾':'▸'} 已完成（${done.length}）</button>${showDone?'<button id="doneClr">清除已完成</button>':''}</h3>${showDone?`<div class="list">${done.map(i=>todoRow(i,true)).join('')}</div>`:''}</div>`;
+  $('todoList').innerHTML=h;
+  const tg=$('doneTog');if(tg)tg.onclick=()=>{showDone=!showDone;renderTodos()};
+  const dc=$('doneClr');if(dc)dc.onclick=async()=>{if(!await ask('刪除全部已完成的待辦？（每月重複的不會刪）','刪除',true))return;S.todos=S.todos.filter(t=>t.monthly||!t.done);save();renderAll()};
+}
+bindTodoClicks($('todoList'),()=>renderAll());
+$('todoForm').onsubmit=e=>{e.preventDefault();const v=$('todoTxt').value.trim();if(!v)return $('todoTxt').focus();
+  addTodo(v,$('todoDate').value,$('todoDays').value,$('todoRep').checked);
+  $('todoTxt').value='';$('todoDate').value='';$('todoDays').value='';$('todoRep').checked=false;renderAll();toast('已新增')};
+function editTodo(id){
+  const t=S.todos.find(x=>x.id===id);if(!t)return;
+  openSheet(`<h2>修改待辦<button data-x>取消</button></h2>
+    <textarea id="etTxt">${esc(t.text)}</textarea>
+    <h3 id="etDateLbl">${t.monthly?'第一次的日期（之後每月同一天）':'開始日期（可不填）'}</h3><div class="row2"><input class="field" type="date" id="etDate" value="${t.date||''}"><button type="button" id="etNoDate" style="background:var(--hair);color:var(--fg)">不排日期</button></div>
+    <div class="opts" style="padding:12px 2px 0"><label>共 <input type="number" id="etDays" min="1" max="365" inputmode="numeric" value="${t.days||1}"> 天完成</label><label><input type="checkbox" id="etRep"${t.monthly?' checked':''}> 🔁 每月同一天</label></div>
+    <button class="btn" id="etSave">儲存</button><button class="btn red" id="etDel">${t.monthly?'刪除（所有月份）':'刪除'}</button>`);
+  $('etNoDate').onclick=()=>{$('etDate').value='';$('etRep').checked=false};
+  $('etRep').onchange=()=>$('etDateLbl').textContent=$('etRep').checked?'第一次的日期（之後每月同一天）':'開始日期（可不填）';
+  $('etSave').onclick=()=>{
+    const v=$('etTxt').value.trim();if(!v)return toast('內容不能空白');
+    const days=Math.max(1,Math.min(365,parseInt($('etDays').value)||1)),rep=$('etRep').checked;
+    let date=$('etDate').value||'';if((days>1||rep)&&!date)date=ymd(today);
+    t.text=v;t.date=date;if(days>1)t.days=days;else delete t.days;
+    if(rep){t.monthly=true;t.doneM=t.doneM||{}}else{delete t.monthly;delete t.doneM}
+    save();closeSheet();
+  };
+  $('etDel').onclick=async()=>{if(!await ask(t.monthly?'刪除這個每月待辦？所有月份都會一起刪掉。':'刪除這個待辦？','刪除',true))return;S.todos=S.todos.filter(x=>x.id!==id);save();closeSheet()};
+}
+function updateBadge(){
+  const tk=ymd(today),n=listItems().filter(i=>!i.done&&i.date&&i.date<=tk).length;
+  $('todoN').hidden=!n;$('todoN').textContent=n;
+}
+
+/* ===== 備忘錄 ===== */
+const fmtAt=ms=>{const d=new Date(ms);return ymd(d)===ymd(new Date())?pad(d.getHours())+':'+pad(d.getMinutes()):(d.getMonth()+1)+'/'+d.getDate()};
+function renderMemos(){
+  const q=$('memoQ').value.trim().toLowerCase();
+  const arr=S.memos.filter(m=>!q||(m.title+'\n'+m.body).toLowerCase().includes(q)).sort((a,b)=>(b.pin-a.pin)||(b.at-a.at));
+  $('memoList').innerHTML=arr.length?arr.map(m=>`<button class="memo${m.pin?' pin':''}" data-id="${m.id}"><b>${m.pin?'📌 ':''}${esc(m.title||'（無標題）')}</b><p>${esc(m.body)}</p><small>${fmtAt(m.at)}</small></button>`).join('')
+    :`<div class="empty" style="grid-column:1/-1">${q?'找不到符合的備忘錄。':'還沒有備忘錄。<br>按右上「＋ 新增」寫第一則。'}</div>`;
+}
+$('memoQ').oninput=renderMemos;
+$('memoList').onclick=e=>{const b=e.target.closest('.memo');if(b)editMemo(b.dataset.id)};
+$('memoNew').onclick=()=>editMemo(null);
+function editMemo(id){
+  let m=id?S.memos.find(x=>x.id===id):{id:uid(),title:'',body:'',pin:false,at:Date.now()};
+  const isNew=!id;let added=!isNew;
+  const sync=()=>{
+    m.title=$('mmT').value;m.body=$('mmB').value;
+    if(!added&&(m.title.trim()||m.body.trim())){S.memos.push(m);added=true}
+    if(added){m.at=Date.now();save()}
+    $('mmAt').textContent=added?'已儲存 '+fmtAt(m.at):'';
+  };
+  openSheet(`<h2><span>${isNew?'新備忘錄':'備忘錄'}</span><button data-x>完成</button></h2>
+    <input class="field memo-title" id="mmT" placeholder="標題" value="${esc(m.title)}">
+    <textarea class="memo-body" id="mmB" placeholder="寫點什麼…">${esc(m.body)}</textarea>
+    <div class="sheet-foot"><span id="mmAt">${added?'最後修改 '+fmtAt(m.at):''}</span><span class="sp"></span><button id="mmPin">${m.pin?'取消置頂':'📌 置頂'}</button>${added?'<button class="del" id="mmDel">刪除</button>':''}</div>`,
+    ()=>{if(added&&!m.title.trim()&&!m.body.trim()){S.memos=S.memos.filter(x=>x.id!==m.id);save()}});
+  $('mmT').oninput=$('mmB').oninput=sync;
+  $('mmPin').onclick=()=>{m.pin=!m.pin;$('mmPin').textContent=m.pin?'取消置頂':'📌 置頂';sync();if(!added)toast('先寫點內容再置頂')};
+  const del=$('mmDel');if(del)del.onclick=async()=>{if(!await ask('刪除這則備忘錄？','刪除',true))return;S.memos=S.memos.filter(x=>x.id!==m.id);save();onClose=null;closeSheet()};
+  if(isNew)setTimeout(()=>$('mmT').focus(),50);
+}
+
+/* ===== 分頁 ===== */
+function setTab(t){
+  tab=t;if(editing&&t!=='cal')setEditing(false);
+  ['cal','memo','todo'].forEach(x=>$('v-'+x).hidden=x!==t);
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  renderAll();window.scrollTo(0,0);
+}
+$('tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)setTab(b.dataset.tab)};
+function renderAll(){
+  $('sampleBar').hidden=!S.sample;
+  if(tab==='cal')renderCal();else if(tab==='memo')renderMemos();else renderTodos();
+  updateBadge();
+}
+$('sampleClr').onclick=async()=>{
+  if(!await ask('清除所有範例（班表、備忘錄、待辦）？班別種類會保留。','清除'))return;
+  S={types:S.types,days:{},cycle:{start:'',seq:[]},memos:[],todos:[]};save();renderAll();toast('已清除，可以開始使用');
+};
+
+/* ===== 選單 ===== */
 $('menuBtn').onclick=()=>{
   openSheet(`<h2>選單<button data-x>關閉</button></h2><div class="menu">
     <button class="btn" data-m="cycle">🔁 排班循環</button>
     <button class="btn" data-m="types">🎨 班別設定</button>
-    <button class="btn" data-m="clear">🧹 清除本月手動設定</button>
+    <button class="btn" data-m="clear">🧹 清除本月班別</button>
+    <button class="btn" data-m="hol">🎌 國定假日</button>
+    <button class="btn" data-m="wipe" style="color:var(--danger)">🗑 清除所有排班</button>
     <button class="btn" data-m="export">📤 匯出備份</button>
     <button class="btn" data-m="import">📥 匯入備份</button>
     <button class="btn" data-m="help">❓ 使用說明</button>
   </div><p class="small" style="text-align:center;margin-top:14px">班表小幫手 ${APP_VER}</p>`);
-  $('sheet').querySelector('[data-x]').onclick=closeSheet;
   $('sheet').querySelector('.menu').onclick=e=>{
     const m=e.target.closest('[data-m]');if(!m)return;
-    ({cycle:openCycle,types:openTypes,clear:clearMonth,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
+    ({cycle:openCycle,hol:openHol,types:openTypes,clear:clearMonth,wipe:wipeShifts,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
   };
 };
-
 function openCycle(){
-  let seq=S.cycle.seq.filter(id=>typeById(id));
-  const start=S.cycle.start||ymd(today);
-  const seqHtml=()=>seq.length?seq.map(id=>{const t=typeById(id);return `<span style="background:${t.color};color:${textColor(t.color)}">${esc(t.name)}</span>`}).join(''):'<span class="ph">點下面的班別依序加入…</span>';
+  let seq=S.cycle.seq.filter(id=>typeById(id)),months=S.cycle.start?(S.cycle.months||0):3;
+  const MS=[1,2,3,6,12,0];
+  const seqHtml=()=>seq.length?seq.map(id=>{const t=typeById(id);return `<span style="${chipStyle(t)}">${esc(t.name)}</span>`}).join(''):'<span class="ph">點下面的班別依序加入</span>';
+  const monHtml=()=>MS.map(m=>`<button class="chip${months===m?' sel':''}" data-m="${m}">${m?m+' 個月':'不限'}</button>`).join('');
+  // 預覽：顯示每個月 1 號接到循環的第幾天，確認跨月是接著排
+  const preview=()=>{
+    const st=$('cyStart').value;
+    if(!st||!seq.length)return '先選起始日、加入班別。';
+    const c={start:st,seq,months},me=cycleMonthEnd(c),end=cycleEnd(c),d0=parse(st),L=seq.length;
+    const ymdTxt=k=>{const d=parse(k);return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`};
+    if(!end)return '一直排下去，不設結束月份。每個月月底沒輪完的會直接接到下個月。';
+    const days=dayNum(parse(end))-dayNum(d0)+1;
+    let h=`排到 <b>${ymdTxt(end)}</b>，共 ${days} 天，剛好 ${days/L} 輪。`;
+    if(end!==me){
+      const ext=dayNum(parse(end))-dayNum(parse(me)),done=L-ext;
+      h+=`<br>${parse(me).getMonth()+1}月底這一輪才排到第 ${done} 天，還差 ${ext} 天，會<b>延到 ${parse(end).getMonth()+1}/${parse(end).getDate()}</b> 把這輪排完。`;
+    }else h+=`<br>${parse(me).getMonth()+1}月底剛好輪完，不用延。`;
+    return h;
+  };
   openSheet(`<h2>排班循環<button data-x>關閉</button></h2>
     <div class="small">設定一輪的班別順序，沒有手動設定的日子會依這個循環自動顯示。</div>
-    <h3>起始日（循環的第 1 天）</h3><input type="date" id="cyStart" value="${start}">
-    <h3>循環順序（共 <b id="cyN">${seq.length}</b> 天）</h3><div class="seq" id="cySeq">${seqHtml()}</div>
-    <div class="chips" id="cyAdd" style="margin-top:8px">${S.types.map(t=>`<button class="chip" data-t="${t.id}" style="background:${t.color};color:${textColor(t.color)}">＋${esc(t.name)}</button>`).join('')}</div>
+    <h3>起始日（循環的第 1 天）</h3><input class="field" type="date" id="cyStart" value="${S.cycle.start||ymd(today)}">
+    <h3>循環順序（一輪 <b id="cyN">${seq.length}</b> 天）</h3><div class="seq" id="cySeq">${seqHtml()}</div>
+    <div class="chips" id="cyAdd" style="margin-top:8px">${S.types.map(t=>`<button class="chip" data-t="${t.id}" style="${chipStyle(t)}">＋${esc(t.name)}</button>`).join('')}</div>
     <div class="chips" style="margin-top:8px"><button class="chip" id="cyBack">⌫ 刪最後一個</button><button class="chip" id="cyClr">全部清空</button></div>
-    <button class="btn" id="cySave">儲存循環</button>
-    <button class="btn red" id="cyOff">停用循環</button>`);
-  const upd=()=>{$('cySeq').innerHTML=seqHtml();$('cyN').textContent=seq.length};
-  $('sheet').querySelector('[data-x]').onclick=closeSheet;
+    <h3>要排幾個月（從起始日那個月算起）</h3><div class="chips" id="cyMon">${monHtml()}</div>
+    <div class="small" id="cyPrev" style="margin-top:10px;background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:10px 12px"></div>
+    <button class="btn" id="cySave">儲存循環</button><button class="btn red" id="cyOff">停用循環</button>`);
+  const upd=()=>{$('cySeq').innerHTML=seqHtml();$('cyN').textContent=seq.length;$('cyMon').innerHTML=monHtml();$('cyPrev').innerHTML=preview()};
+  upd();
+  $('cyStart').oninput=upd;
+  $('cyMon').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;months=+b.dataset.m;upd()};
   $('cyAdd').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;seq.push(b.dataset.t);upd()};
   $('cyBack').onclick=()=>{seq.pop();upd()};
   $('cyClr').onclick=()=>{seq=[];upd()};
-  $('cySave').onclick=()=>{
-    const s=$('cyStart').value;
-    if(!s)return toast('請選起始日');
-    if(!seq.length)return toast('請加入至少一個班別');
-    S.cycle={start:s,seq};save();closeSheet();render();toast('已套用循環');
-  };
-  $('cyOff').onclick=()=>{if(!confirm('停用循環？（手動設定的日子不受影響）'))return;S.cycle={start:'',seq:[]};save();closeSheet();render()};
+  $('cySave').onclick=()=>{const s=$('cyStart').value;if(!s)return toast('請選起始日');if(!seq.length)return toast('請加入至少一個班別');
+    S.cycle={start:s,seq,months};save();closeSheet();toast(months?`已套用 ${months} 個月`:'已套用循環')};
+  $('cyOff').onclick=async()=>{if(!await ask('停用循環？手動設定的日子不受影響。','停用',true))return;S.cycle={start:'',seq:[]};save();closeSheet()};
 }
-
 function openTypes(){
-  const rows=()=>S.types.map((t,i)=>`<div class="trow" data-i="${i}"><input type="color" value="${t.color}"><input type="text" value="${esc(t.name)}" maxlength="5"><button data-del aria-label="刪除">✕</button></div>`).join('');
+  const rows=()=>S.types.map((t,i)=>`<div class="trow" data-i="${i}"><input type="color" value="${t.color}" aria-label="顏色"><input class="field" type="text" value="${esc(t.name)}" maxlength="5" aria-label="名稱"><button data-del aria-label="刪除">✕</button></div>`).join('');
   openSheet(`<h2>班別設定<button data-x>關閉</button></h2>
     <div class="small">名稱最多 5 個字。刪除班別後，用到它的日子會變成空白。</div>
     <div id="tyList" style="margin-top:10px">${rows()}</div>
-    <button class="btn gray" id="tyAdd">＋ 新增班別</button>
-    <button class="btn" id="tySave">儲存</button>`);
-  const collect=()=>{$('tyList').querySelectorAll('.trow').forEach(r=>{const t=S.types[+r.dataset.i];t.color=r.querySelector('[type=color]').value;t.name=r.querySelector('[type=text]').value.trim()||t.name})};
-  $('sheet').querySelector('[data-x]').onclick=()=>{closeSheet();render()};
-  $('tyList').onclick=e=>{
+    <button class="btn gray" id="tyAdd">＋ 新增班別</button><button class="btn" id="tySave">儲存</button>`);
+  const collect=()=>$('tyList').querySelectorAll('.trow').forEach(r=>{const t=S.types[+r.dataset.i];t.color=r.querySelector('[type=color]').value;t.name=r.querySelector('[type=text]').value.trim()||t.name});
+  $('tyList').onclick=async e=>{
     if(!e.target.closest('[data-del]'))return;
-    const i=+e.target.closest('.trow').dataset.i;
-    if(!confirm('刪除「'+S.types[i].name+'」？'))return;
-    collect();S.types.splice(i,1);$('tyList').innerHTML=rows();
+    const i=+e.target.closest('.trow').dataset.i;collect();
+    if(!await ask('刪除「'+S.types[i].name+'」？','刪除',true))return;
+    S.types.splice(i,1);$('tyList').innerHTML=rows();
   };
-  $('tyAdd').onclick=()=>{collect();S.types.push({id:'t'+Date.now().toString(36),name:'新班別',color:'#ffd6e0'});$('tyList').innerHTML=rows()};
-  $('tySave').onclick=()=>{collect();save();closeSheet();if(brush&&brush!=='clear'&&!typeById(brush))brush=null;if(editing)renderPalette();render();toast('已儲存')};
+  $('tyAdd').onclick=()=>{collect();S.types.push({id:'t'+uid(),name:'新班別',color:'#ffd6e0'});$('tyList').innerHTML=rows()};
+  $('tySave').onclick=()=>{collect();save();if(brush&&brush!==BLANK&&brush!=='auto'&&!typeById(brush))brush=null;if(editing)renderPalette();closeSheet();toast('已儲存')};
 }
-
-function clearMonth(){
-  if(!confirm(`清除 ${view.getFullYear()}年${view.getMonth()+1}月 所有手動班別與備註？`))return;
-  const pre=view.getFullYear()+'-'+pad(view.getMonth()+1)+'-';
-  Object.keys(S.days).forEach(k=>{if(k.startsWith(pre))delete S.days[k]});
-  save();closeSheet();render();toast('已清除');
+function openHol(){
+  const ot=offType(),ys=[...new Set(Object.keys(HOLIDAYS).map(k=>k.slice(0,4)))];
+  openSheet(`<h2>國定假日<button data-x>關閉</button></h2>
+    <label class="tgl"><span>在班表上顯示國定假日<small>日期變紅色，並標出節日名稱</small></span><input type="checkbox" id="hShow"${S.hol.show?' checked':''}></label>
+    <label class="tgl"><span>國定假日自動排成「${ot?esc(ot.name):'休假'}」<small>會蓋過排班循環；你手動設定的日子不受影響</small></span><input type="checkbox" id="hOff"${S.hol.off?' checked':''}${ot?'':' disabled'}></label>
+    <div class="small" style="margin-top:12px">已內建 ${ys.join('、')} 年（依人事行政總處辦公日曆表，含補假）。</div>
+    <div class="hlist">${Object.entries(HOLIDAYS).filter(([k])=>k>=ymd(today)).slice(0,14).map(([k,n])=>`${fmtMD(k)}　${n}`).join('<br>')}</div>`);
+  $('hShow').onchange=()=>{S.hol.show=$('hShow').checked;save();renderCal()};
+  $('hOff').onchange=()=>{S.hol.off=$('hOff').checked;save();renderCal();toast(S.hol.off?'國定假日已排成休假':'已取消')};
 }
-
+async function wipeShifts(){
+  if(!await ask('清除所有排班？包含每一天手動設定的班別和排班循環。備註、備忘錄、待辦會保留。','全部清除',true))return;
+  Object.keys(S.days).forEach(k=>{delete S.days[k].t;if(!S.days[k].note)delete S.days[k]});
+  S.cycle={start:'',seq:[]};save();closeSheet();toast('已清除所有排班');
+}
+async function clearMonth(){
+  const y=view.getFullYear(),m=view.getMonth();
+  if(!await ask(`把 ${y}年${m+1}月 的班別全部清成空白？（連排班循環的班也會清掉，備註保留）`,'清除',true))return;
+  for(let d=new Date(y,m,1);d.getMonth()===m;d=addDays(d,1)){
+    const k=ymd(d),e=S.days[k]||{};
+    delete e.t;S.days[k]=e;
+    if(shiftOf(k))e.t=BLANK; // 循環還會排到這天，就標成空白蓋掉
+    if(!e.t&&!e.note)delete S.days[k];
+  }
+  save();closeSheet();toast(`已清除 ${m+1} 月班別`);
+}
 function openExport(){
   const txt=JSON.stringify(S);
   openSheet(`<h2>匯出備份<button data-x>關閉</button></h2>
-    <div class="small">把下面整段文字複製起來，貼到備忘錄或傳給自己保存。</div>
-    <textarea id="exTxt" style="height:160px;margin-top:8px" readonly>${esc(txt)}</textarea>
-    <button class="btn" id="exCopy">複製</button>`);
-  $('sheet').querySelector('[data-x]').onclick=closeSheet;
-  $('exCopy').onclick=async()=>{
-    try{await navigator.clipboard.writeText(txt);toast('已複製')}
-    catch(e){const t=$('exTxt');t.focus();t.select();try{document.execCommand('copy');toast('已複製')}catch(_){toast('請手動長按複製')}}
+    <div class="small">內含班表、備忘錄、待辦。把整段文字複製起來，貼到 LINE 給自己或存在別的地方。</div>
+    <textarea id="exTxt" style="height:160px;margin-top:8px" readonly>${esc(txt)}</textarea><button class="btn" id="exCopy">複製</button>`);
+  $('exCopy').onclick=()=>{
+    const fb=()=>{const t=$('exTxt');t.focus();t.select();toast('已選取，請按「拷貝」')};
+    try{navigator.clipboard.writeText(txt).then(()=>toast('已複製'),fb)}catch(e){fb()}
   };
 }
 function openImport(){
   openSheet(`<h2>匯入備份<button data-x>關閉</button></h2>
-    <div class="small">貼上之前匯出的文字。⚠️ 會取代目前所有資料。</div>
-    <textarea id="imTxt" style="height:160px;margin-top:8px" placeholder="貼在這裡"></textarea>
-    <button class="btn" id="imGo">匯入</button>`);
-  $('sheet').querySelector('[data-x]').onclick=closeSheet;
-  $('imGo').onclick=()=>{
-    let d;try{d=JSON.parse($('imTxt').value)}catch(e){return toast('格式不正確')}
-    if(!d||!Array.isArray(d.types)||typeof d.days!=='object')return toast('格式不正確');
-    if(!confirm('確定取代目前資料？'))return;
-    S={types:d.types,days:d.days||{},cycle:d.cycle||{start:'',seq:[]}};save();closeSheet();render();toast('匯入完成');
+    <div class="small">貼上之前匯出的文字。會取代目前所有資料。</div>
+    <textarea id="imTxt" style="height:160px;margin-top:8px" placeholder="貼在這裡"></textarea><button class="btn" id="imGo">匯入</button>`);
+  $('imGo').onclick=async()=>{
+    let d;try{d=JSON.parse($('imTxt').value)}catch(e){return toast('格式不正確，請貼上完整的備份文字')}
+    if(!d||!Array.isArray(d.types))return toast('格式不正確，請貼上完整的備份文字');
+    if(!await ask('確定用備份取代目前資料？','取代',true))return;
+    S={types:d.types,days:d.days||{},cycle:d.cycle||{start:'',seq:[]},memos:d.memos||[],todos:d.todos||[]};save();closeSheet();toast('匯入完成');
   };
 }
-function openHelp(){
-  openSheet(`<h2>使用說明<button data-x>關閉</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`);
-  $('sheet').querySelector('[data-x]').onclick=closeSheet;
-}
+function openHelp(){openSheet(`<h2>使用說明<button data-x>關閉</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`)}
 
-// 分享：把本月畫成圖片
+/* ===== 分享圖片 ===== */
 function drawMonth(){
-  const W=7*120,top=150,ch=150,cells=monthCells(),rows=6;
-  const cv=document.createElement('canvas');cv.width=W+20;cv.height=top+rows*ch+70;
-  const g=cv.getContext('2d'),F='-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif';
+  const W=7*120,top=150,ch=150,cells=monthCells();
+  const cv=document.createElement('canvas');cv.width=W+20;cv.height=top+6*ch+70;
+  const g=cv.getContext('2d'),F='-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif';
   g.fillStyle='#dbe7f5';g.fillRect(0,0,cv.width,cv.height);
   g.fillStyle='#111';g.textAlign='center';g.textBaseline='middle';
   g.font='500 46px '+F;g.fillText(view.getFullYear()+'年'+(view.getMonth()+1)+'月',cv.width/2,55);
@@ -394,42 +753,35 @@ function drawMonth(){
     g.fillStyle=out?'#d3e0f1':k===tk?'#7ef25a':t?t.color:'#fff';g.fillRect(x,y,120,ch);
     g.strokeStyle='#8f8f8f';g.lineWidth=2;g.strokeRect(x,y,120,ch);
     g.fillStyle=out?'#888':(k===tk||!t)?'#111':textColor(t.color);
+    const hn=S.hol.show?HOLIDAYS[k]:'';
     g.font='34px '+F;g.fillText(d.getDate(),x+60,y+42);
+    if(hn){g.font='bold 20px '+F;const w=Math.min(112,g.measureText(hn).width+16);
+      g.fillStyle='rgba(255,255,255,.92)';g.beginPath();g.roundRect?g.roundRect(x+60-w/2,y+63,w,26,13):g.rect(x+60-w/2,y+63,w,26);g.fill();
+      g.fillStyle='#c81e1e';g.fillText(hn,x+60,y+77,108);
+      g.fillStyle=out?'#888':(k===tk||!t)?'#111':textColor(t.color)}
     if(t){const n=t.name;g.font=(n.length>=4?24:n.length===3?28:32)+'px '+F;g.fillText(n,x+60,y+108)}
     const e=S.days[k];if(e&&e.note&&!out){g.font='bold 30px '+F;g.fillText('*',x+104,y+20)}
   });
   g.font='26px '+F;g.fillStyle='#334';
-  g.fillText(S.types.filter(t=>cnt[t.id]).map(t=>t.name+' '+cnt[t.id]+'天').join('　'),cv.width/2,top+rows*ch+36);
+  g.fillText(S.types.filter(t=>cnt[t.id]).map(t=>t.name+' '+cnt[t.id]+'天').join('　'),cv.width/2,top+6*ch+36);
   return cv;
 }
 $('shareBtn').onclick=()=>{
-  const cv=drawMonth(),name='班表_'+view.getFullYear()+'-'+pad(view.getMonth()+1)+'.png';
-  cv.toBlob(async b=>{
-    if(!b)return toast('產生圖片失敗');
-    const f=new File([b],name,{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){
-      try{await navigator.share({files:[f],title:'班表'})}catch(e){}
-      return;
-    }
-    const url=URL.createObjectURL(b);
-    openSheet(`<h2>班表圖片<button data-x>關閉</button></h2><div class="small">長按圖片可以儲存或分享。</div>
-      <img src="${url}" style="width:100%;margin-top:8px;border-radius:8px"><a class="btn" style="text-align:center;text-decoration:none" href="${url}" download="${name}">下載圖片</a>`);
-    $('sheet').querySelector('[data-x]').onclick=closeSheet;
-  },'image/png');
+  const url=drawMonth().toDataURL('image/png');
+  openSheet(`<h2>${view.getFullYear()}年${view.getMonth()+1}月班表<button data-x>關閉</button></h2>
+    <div class="small">長按圖片 →「儲存到照片」或「分享」傳到 LINE。</div>
+    <img src="${url}" alt="本月班表圖片" style="width:100%;margin-top:8px;border-radius:8px;-webkit-touch-callout:default">`);
 };
 
 let tt;
-function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1600)}
-
-// 跨日自動更新「今天」
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1700)}
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden)return;
   const n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());
-  if(+t!==+today){today=t;render()}
+  if(+t!==+today){today=t;renderAll()}
 });
-
-render();
-if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+renderAll();
+if('serviceWorker' in navigator&&location.protocol==='https:'&&window.top===window)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
