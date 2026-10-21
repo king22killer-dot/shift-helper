@@ -1,12 +1,14 @@
 # 班表小幫手（月曆班表 PWA）
 
-iPhone 用的月曆班表網頁 App。純靜態網站，沒有建置步驟，部署在 Netlify（推上 main 就自動部署）。
+iPhone 用的月曆班表網頁 App。純靜態網站，沒有建置步驟，部署在 GitHub Pages（推上 main 就自動部署）：https://king22killer-dot.github.io/shift-helper/
+網站在子路徑 `/shift-helper/` 底下，所有路徑都要用相對路徑（`manifest.json`、`sw.js`、`icon-180.png`），不要用 `/` 開頭。
 
 ## 檔案
 - `index.html`：整個 App（HTML＋CSS＋JS 都在這個檔）。
 - `sw.js`：Service Worker，`CACHE` 名稱要跟著版本號更新（例如 `shift-helper-v2`）。
 - `manifest.json`、`icon-*.png`：加入主畫面用。
-- `netlify.toml`：Netlify 設定（index.html／sw.js 不快取）。
+- `.nojekyll`：讓 GitHub Pages 直接提供檔案，不經過 Jekyll。
+- `netlify.toml`：舊的 Netlify 設定（已改用 GitHub Pages，可忽略）。
 
 ## 每次修改的規則
 1. 改 `index.html` 裡的 `const APP_VER='vNN（YYYY-MM-DD）';`，版本號加 1。
