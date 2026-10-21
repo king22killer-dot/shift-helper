@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="班表小幫手">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>班表小幫手</title>
+<style>
+:root{--line:#8f8f8f;--blue:#4a78b0;--bg1:#dbe7f5;--bg2:#c9daef}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Heiti TC","Microsoft JhengHei",sans-serif;color:#111;
+  background:var(--bg1);
+  background-image:radial-gradient(circle at 20% 30%,rgba(255,255,255,.55) 0 2px,transparent 3px),
+    radial-gradient(circle at 70% 60%,rgba(255,255,255,.45) 0 1.5px,transparent 3px),
+    radial-gradient(circle at 40% 80%,rgba(120,150,200,.18) 0 2px,transparent 4px),
+    linear-gradient(135deg,var(--bg1),var(--bg2));
+  background-size:23px 23px,31px 31px,41px 41px,100% 100%;
+  -webkit-user-select:none;user-select:none;overscroll-behavior:none}
+header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #ddd;
+  padding:env(safe-area-inset-top) 12px 0;display:flex;align-items:center;height:calc(48px + env(safe-area-inset-top))}
+header h1{flex:1;text-align:center;font-size:18px;margin:0;font-weight:600;letter-spacing:1px}
+header .side{width:60px}
+header button{background:none;border:0;color:#2f7de1;font-size:17px;text-decoration:underline;padding:8px 0;width:60px;text-align:right}
+main{max-width:620px;margin:0 auto;padding:12px 6px calc(20px + env(safe-area-inset-bottom))}
+.tools{display:flex;align-items:center;height:64px;padding:0 6px}
+.tools .sp{flex:1}
+.ico{background:none;border:0;padding:6px;margin:0 4px;color:var(--blue);border-radius:10px}
+.ico svg{display:block;width:44px;height:44px}
+.ico.on{background:rgba(74,120,176,.22)}
+.ico.hide{visibility:hidden}
+.nav{display:flex;align-items:center;justify-content:space-between;margin:8px 0 4px}
+.nav button{background:none;border:0;padding:6px 14px}
+.nav svg{width:40px;height:32px;display:block}
+.nav .title{font-size:26px;font-weight:500}
+.week,.grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.week div{text-align:center;font-size:17px;padding:4px 0}
+.grid{border:1px solid var(--line);background:var(--line);gap:1px}
+.cell{position:relative;aspect-ratio:3/5;background:#fff;display:flex;flex-direction:column;align-items:center;
+  justify-content:space-around;padding:4px 0;overflow:hidden}
+.cell .d{font-size:19px}
+.cell .s{font-size:17px;white-space:nowrap;letter-spacing:-.5px}
+.cell.s3 .s{font-size:14px}
+.cell.s4 .s{font-size:12px}
+.cell .star{position:absolute;top:1px;right:5px;font-size:15px;font-weight:700}
+.cell.out{background:rgba(214,226,242,.92)!important;color:#888!important}
+.cell.today{background:#7ef25a!important;color:#000!important}
+.cell.today::after{content:"";position:absolute;inset:0;border:2px solid #2c9b12;pointer-events:none}
+.cell.flash{animation:fl .3s}
+@keyframes fl{from{filter:brightness(.8)}to{filter:none}}
+.stats{margin:10px 4px 0;font-size:14px;color:#334;display:flex;flex-wrap:wrap;gap:6px}
+.stats span{background:rgba(255,255,255,.7);border-radius:12px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid #999}
+/* 編輯列 */
+#palette{position:fixed;left:0;right:0;bottom:0;z-index:8;background:#fff;border-top:1px solid #ccc;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:none;box-shadow:0 -4px 14px rgba(0,0,0,.12)}
+#palette.show{display:block}
+#palette .hint{font-size:12px;color:#666;margin:0 4px 6px;display:flex;justify-content:space-between}
+#palette .row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chip{flex:none;border:2px solid #aaa;border-radius:10px;padding:9px 12px;font-size:16px;min-width:64px;text-align:center;background:#fff;color:#111}
+.chip.sel{border-color:#1d5fc9;box-shadow:0 0 0 2px #1d5fc9 inset}
+body.editing main{padding-bottom:120px}
+/* 底部視窗 */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20;display:none;align-items:flex-end;justify-content:center}
+.mask.show{display:flex}
+.sheet{background:#f6f7f9;width:100%;max-width:620px;max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;
+  padding:14px 14px calc(16px + env(safe-area-inset-bottom));-webkit-user-select:text;user-select:text}
+.sheet h2{font-size:18px;margin:2px 0 12px;display:flex;justify-content:space-between;align-items:center}
+.sheet h2 button{font-size:16px;background:none;border:0;color:#2f7de1;padding:4px}
+.sheet h3{font-size:15px;margin:16px 0 6px;color:#444}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.sheet textarea,.sheet input[type=text],.sheet input[type=date]{width:100%;font-size:16px;padding:9px;border:1px solid #ccc;border-radius:8px;background:#fff;font-family:inherit}
+.sheet textarea{height:80px;resize:none}
+.btn{display:block;width:100%;font-size:17px;padding:12px;border-radius:10px;border:0;background:#2f7de1;color:#fff;margin-top:12px}
+.btn.gray{background:#e2e5ea;color:#222}
+.btn.red{background:#e5484d}
+.menu .btn{text-align:left;background:#fff;color:#111;border:1px solid #ddd;margin-top:8px}
+.trow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.trow input[type=text]{flex:1}
+.trow input[type=color]{width:44px;height:40px;border:1px solid #ccc;border-radius:8px;padding:2px;background:#fff}
+.trow button{background:none;border:0;font-size:20px;color:#e5484d;padding:4px 8px}
+.seq{display:flex;flex-wrap:wrap;gap:4px;min-height:44px;background:#fff;border:1px solid #ccc;border-radius:8px;padding:6px}
+.seq span{padding:5px 8px;border-radius:6px;border:1px solid #aaa;font-size:14px}
+.seq .ph{color:#999;border:0;padding:6px 2px}
+.small{font-size:13px;color:#666;line-height:1.5}
+.help p{margin:6px 0;line-height:1.6;font-size:15px}
+#toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom));transform:translateX(-50%);background:rgba(0,0,0,.78);
+  color:#fff;padding:9px 16px;border-radius:20px;font-size:15px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header><div class="side"></div><h1>班表小幫手</h1><button id="menuBtn">選單</button></header>
+<main id="main">
+  <div class="tools">
+    <button class="ico" id="todayBtn" aria-label="回到今天"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="3.5"/><rect x="4" y="9" width="40" height="9" rx="4" fill="currentColor"/><rect x="13" y="4" width="4" height="10" rx="2" fill="currentColor"/><rect x="31" y="4" width="4" height="10" rx="2" fill="currentColor"/><text x="24" y="35" font-size="12.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="Arial,sans-serif">Today</text></svg></button>
+    <div class="sp"></div>
+    <button class="ico" id="editBtn" aria-label="編輯"><svg viewBox="0 0 48 48"><path d="M34.5 5.5a4 4 0 0 1 5.7 0l2.3 2.3a4 4 0 0 1 0 5.7L17 39l-11 4 4-11z" fill="currentColor"/><path d="M29 11l8 8M32 8l8 8" stroke="#dbe7f5" stroke-width="1.6"/></svg></button>
+    <button class="ico" id="shareBtn" aria-label="分享"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M17 18h-6v26h26V18h-6"/><path d="M24 30V4M16 11l8-8 8 8"/></svg></button>
+  </div>
+  <div class="nav">
+    <button id="prevBtn" aria-label="上個月"><svg viewBox="0 0 40 32"><path d="M2 16L38 1 28 16 38 31z"/></svg></button>
+    <div class="title" id="title"></div>
+    <button id="nextBtn" aria-label="下個月"><svg viewBox="0 0 40 32"><path d="M38 16L2 1 12 16 2 31z"/></svg></button>
+  </div>
+  <div class="week"><div>週日</div><div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div>週六</div></div>
+  <div class="grid" id="grid"></div>
+  <div class="stats" id="stats"></div>
+</main>
+
+<div id="palette"><div class="hint"><span>選一個班別，再點日期套用</span><span id="palDone" style="color:#2f7de1">完成</span></div><div class="row" id="palRow"></div></div>
+<div class="mask" id="mask"><div class="sheet" id="sheet"></div></div>
+<div id="toast"></div>
+
+<script>
+const APP_VER='v1（2026-10-21）';
+const KEY='shift-helper-v1';
+const HELP=[
+  '【看班表】左右箭頭或左右滑動切換月份；按左上「Today」回到本月。今天會用綠色標示。',
+  '【單日設定】點任一天，可以選班別、寫備註。有備註的日子右上角會出現「*」。',
+  '【快速排班】按鉛筆進入編輯模式，下方選一個班別後連續點日期就能套用；選「清除」會恢復成循環預設值。再按一次鉛筆或「完成」離開。',
+  '【排班循環】選單 →「排班循環」：設定起始日和輪班順序（例如 日日休休夜夜休休），沒有手動設定的日子會自動依循環顯示，也會延伸到之後的月份。',
+  '【班別設定】選單 →「班別設定」：可以新增、改名、改顏色或刪除班別。',
+  '【分享】按右上分享鍵，會把本月班表做成圖片，可傳 LINE 或存到相簿。',
+  '【備份】資料存在這支手機的瀏覽器裡。選單 →「匯出備份」可複製一段文字保存；換手機時用「匯入備份」貼上即可還原。',
+  '【加入主畫面】在 Safari 按分享 →「加入主畫面」，之後就能像 App 一樣開啟、離線也能用。'
+];
+const DEF={
+  types:[
+    {id:'d',name:'日班',color:'#4da6f7'},
+    {id:'n',name:'夜班',color:'#f6cfa1'},
+    {id:'o',name:'休假',color:'#ffffff'},
+    {id:'r',name:'常日班',color:'#c9b8f0'},
+    {id:'a',name:'A班',color:'#ffe08a'},
+    {id:'b',name:'B班',color:'#a8e6c1'}
+  ],
+  days:{},          // 'YYYY-MM-DD': {t:'d', note:'...'}
+  cycle:{start:'',seq:[]}
+};
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!Array.isArray(S.types))S=JSON.parse(JSON.stringify(DEF));
+S.days=S.days||{};S.cycle=S.cycle||{start:'',seq:[]};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('儲存失敗')}}
+
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const dayNum=d=>Math.round(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const typeById=id=>S.types.find(t=>t.id===id);
+const WK=['日','一','二','三','四','五','六'];
+
+let today=new Date();today=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+let view=new Date(today.getFullYear(),today.getMonth(),1);
+let editing=false,brush=null;
+
+// 某天的班別：手動設定優先，否則依循環
+function shiftOf(key){
+  const e=S.days[key];
+  if(e&&e.t&&typeById(e.t))return typeById(e.t);
+  const c=S.cycle;
+  if(c.start&&c.seq.length){
+    const diff=dayNum(parse(key))-dayNum(parse(c.start));
+    if(diff>=0)return typeById(c.seq[diff%c.seq.length])||null;
+  }
+  return null;
+}
+function textColor(hex){
+  const h=(hex||'#fff').replace('#','');
+  const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);
+  return (r*299+g*587+b*114)/1000<120?'#fff':'#111';
+}
+function monthCells(){
+  const first=new Date(view.getFullYear(),view.getMonth(),1);
+  const start=new Date(first);start.setDate(1-first.getDay());
+  const out=[];
+  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);out.push(d)}
+  return out;
+}
+
+function render(){
+  $('title').textContent=view.getFullYear()+'年'+(view.getMonth()+1)+'月';
+  const isNow=view.getFullYear()===today.getFullYear()&&view.getMonth()===today.getMonth();
+  $('todayBtn').classList.toggle('hide',isNow);
+  const tk=ymd(today);
+  const cnt={};
+  $('grid').innerHTML=monthCells().map(d=>{
+    const k=ymd(d),t=shiftOf(k),out=d.getMonth()!==view.getMonth(),e=S.days[k];
+    if(!out&&t)cnt[t.id]=(cnt[t.id]||0)+1;
+    const name=t?t.name:'';
+    const cls=['cell',out?'out':'',k===tk?'today':'',name.length>=4?'s4':name.length===3?'s3':''].join(' ');
+    const st=t&&!out?`background:${t.color};color:${textColor(t.color)}`:'';
+    return `<div class="${cls}" data-k="${k}" style="${st}"><span class="d">${d.getDate()}</span><span class="s">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}</div>`;
+  }).join('');
+  $('stats').innerHTML=S.types.filter(t=>cnt[t.id]).map(t=>`<span><i class="dot" style="background:${t.color}"></i>${esc(t.name)} ${cnt[t.id]} 天</span>`).join('');
+  $('editBtn').classList.toggle('on',editing);
+}
+function go(m){view=new Date(view.getFullYear(),view.getMonth()+m,1);render()}
+
+$('prevBtn').onclick=()=>go(-1);
+$('nextBtn').onclick=()=>go(1);
+$('todayBtn').onclick=()=>{view=new Date(today.getFullYear(),today.getMonth(),1);render()};
+
+// 左右滑動換月
+let tx=null,ty=0;
+$('grid').addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+$('grid').addEventListener('touchend',e=>{
+  if(tx===null)return;const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;tx=null;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){swiped=true;go(dx<0?1:-1);setTimeout(()=>swiped=false,350)}
+},{passive:true});
+let swiped=false;
+
+$('grid').addEventListener('click',e=>{
+  if(swiped)return;
+  const c=e.target.closest('.cell');if(!c)return;
+  const k=c.dataset.k,d=parse(k);
+  if(editing){
+    if(!brush)return toast('請先在下方選一個班別');
+    setShift(k,brush==='clear'?null:brush);
+    if(d.getMonth()!==view.getMonth())return;
+    const n=$('grid').querySelector(`[data-k="${k}"]`);n&&n.classList.add('flash');
+    return;
+  }
+  if(d.getMonth()!==view.getMonth()){view=new Date(d.getFullYear(),d.getMonth(),1);render();return}
+  openDay(k);
+});
+
+function setShift(k,t){
+  const e=S.days[k]||{};
+  if(t)e.t=t;else delete e.t;
+  if(e.t||e.note)S.days[k]=e;else delete S.days[k];
+  save();render();
+}
+
+// 編輯模式
+function renderPalette(){
+  $('palRow').innerHTML=S.types.map(t=>`<button class="chip${brush===t.id?' sel':''}" data-t="${t.id}" style="background:${t.color};color:${textColor(t.color)}">${esc(t.name)}</button>`).join('')
+    +`<button class="chip${brush==='clear'?' sel':''}" data-t="clear">清除</button>`;
+}
+function setEditing(on){
+  editing=on;document.body.classList.toggle('editing',on);
+  $('palette').classList.toggle('show',on);
+  if(on){if(!brush)brush=S.types[0]&&S.types[0].id;renderPalette()}
+  render();
+}
+$('editBtn').onclick=()=>setEditing(!editing);
+$('palDone').onclick=()=>setEditing(false);
+$('palRow').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;brush=b.dataset.t;renderPalette()};
+
+// 底部視窗
+function openSheet(html){$('sheet').innerHTML=html;$('mask').classList.add('show');$('sheet').scrollTop=0}
+function closeSheet(){$('mask').classList.remove('show');$('sheet').innerHTML=''}
+$('mask').addEventListener('click',e=>{if(e.target===$('mask'))closeSheet()});
+
+function openDay(k){
+  const d=parse(k),e=S.days[k]||{},cur=shiftOf(k);
+  let sel=e.t||'';
+  const chips=()=>S.types.map(t=>`<button class="chip${sel===t.id?' sel':''}" data-t="${t.id}" style="background:${t.color};color:${textColor(t.color)}">${esc(t.name)}</button>`).join('')
+    +`<button class="chip${sel===''?' sel':''}" data-t="">${S.cycle.seq.length?'依循環':'未設定'}</button>`;
+  openSheet(`<h2>${d.getMonth()+1}月${d.getDate()}日（週${WK[d.getDay()]}）<button data-x>關閉</button></h2>
+    <div class="small">目前：${cur?esc(cur.name):'未設定'}${e.t?'（手動）':cur?'（循環）':''}</div>
+    <h3>班別</h3><div class="chips" id="dayChips">${chips()}</div>
+    <h3>備註</h3><textarea id="dayNote" placeholder="例如：支援、換班、加班 2 小時…">${esc(e.note||'')}</textarea>
+    <button class="btn" id="daySave">儲存</button>`);
+  $('dayChips').onclick=ev=>{const b=ev.target.closest('.chip');if(!b)return;sel=b.dataset.t;$('dayChips').innerHTML=chips()};
+  $('sheet').querySelector('[data-x]').onclick=closeSheet;
+  $('daySave').onclick=()=>{
+    const note=$('dayNote').value.trim(),n={};
+    if(sel)n.t=sel;if(note)n.note=note;
+    if(n.t||n.note)S.days[k]=n;else delete S.days[k];
+    save();closeSheet();render();
+  };
+}
+
+// 選單
+$('menuBtn').onclick=()=>{
+  openSheet(`<h2>選單<button data-x>關閉</button></h2><div class="menu">
+    <button class="btn" data-m="cycle">🔁 排班循環</button>
+    <button class="btn" data-m="types">🎨 班別設定</button>
+    <button class="btn" data-m="clear">🧹 清除本月手動設定</button>
+    <button class="btn" data-m="export">📤 匯出備份</button>
+    <button class="btn" data-m="import">📥 匯入備份</button>
+    <button class="btn" data-m="help">❓ 使用說明</button>
+  </div><p class="small" style="text-align:center;margin-top:14px">班表小幫手 ${APP_VER}</p>`);
+  $('sheet').querySelector('[data-x]').onclick=closeSheet;
+  $('sheet').querySelector('.menu').onclick=e=>{
+    const m=e.target.closest('[data-m]');if(!m)return;
+    ({cycle:openCycle,types:openTypes,clear:clearMonth,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
+  };
+};
+
+function openCycle(){
+  let seq=S.cycle.seq.filter(id=>typeById(id));
+  const start=S.cycle.start||ymd(today);
+  const seqHtml=()=>seq.length?seq.map(id=>{const t=typeById(id);return `<span style="background:${t.color};color:${textColor(t.color)}">${esc(t.name)}</span>`}).join(''):'<span class="ph">點下面的班別依序加入…</span>';
+  openSheet(`<h2>排班循環<button data-x>關閉</button></h2>
+    <div class="small">設定一輪的班別順序，沒有手動設定的日子會依這個循環自動顯示。</div>
+    <h3>起始日（循環的第 1 天）</h3><input type="date" id="cyStart" value="${start}">
+    <h3>循環順序（共 <b id="cyN">${seq.length}</b> 天）</h3><div class="seq" id="cySeq">${seqHtml()}</div>
+    <div class="chips" id="cyAdd" style="margin-top:8px">${S.types.map(t=>`<button class="chip" data-t="${t.id}" style="background:${t.color};color:${textColor(t.color)}">＋${esc(t.name)}</button>`).join('')}</div>
+    <div class="chips" style="margin-top:8px"><button class="chip" id="cyBack">⌫ 刪最後一個</button><button class="chip" id="cyClr">全部清空</button></div>
+    <button class="btn" id="cySave">儲存循環</button>
+    <button class="btn red" id="cyOff">停用循環</button>`);
+  const upd=()=>{$('cySeq').innerHTML=seqHtml();$('cyN').textContent=seq.length};
+  $('sheet').querySelector('[data-x]').onclick=closeSheet;
+  $('cyAdd').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;seq.push(b.dataset.t);upd()};
+  $('cyBack').onclick=()=>{seq.pop();upd()};
+  $('cyClr').onclick=()=>{seq=[];upd()};
+  $('cySave').onclick=()=>{
+    const s=$('cyStart').value;
+    if(!s)return toast('請選起始日');
+    if(!seq.length)return toast('請加入至少一個班別');
+    S.cycle={start:s,seq};save();closeSheet();render();toast('已套用循環');
+  };
+  $('cyOff').onclick=()=>{if(!confirm('停用循環？（手動設定的日子不受影響）'))return;S.cycle={start:'',seq:[]};save();closeSheet();render()};
+}
+
+function openTypes(){
+  const rows=()=>S.types.map((t,i)=>`<div class="trow" data-i="${i}"><input type="color" value="${t.color}"><input type="text" value="${esc(t.name)}" maxlength="5"><button data-del aria-label="刪除">✕</button></div>`).join('');
+  openSheet(`<h2>班別設定<button data-x>關閉</button></h2>
+    <div class="small">名稱最多 5 個字。刪除班別後，用到它的日子會變成空白。</div>
+    <div id="tyList" style="margin-top:10px">${rows()}</div>
+    <button class="btn gray" id="tyAdd">＋ 新增班別</button>
+    <button class="btn" id="tySave">儲存</button>`);
+  const collect=()=>{$('tyList').querySelectorAll('.trow').forEach(r=>{const t=S.types[+r.dataset.i];t.color=r.querySelector('[type=color]').value;t.name=r.querySelector('[type=text]').value.trim()||t.name})};
+  $('sheet').querySelector('[data-x]').onclick=()=>{closeSheet();render()};
+  $('tyList').onclick=e=>{
+    if(!e.target.closest('[data-del]'))return;
+    const i=+e.target.closest('.trow').dataset.i;
+    if(!confirm('刪除「'+S.types[i].name+'」？'))return;
+    collect();S.types.splice(i,1);$('tyList').innerHTML=rows();
+  };
+  $('tyAdd').onclick=()=>{collect();S.types.push({id:'t'+Date.now().toString(36),name:'新班別',color:'#ffd6e0'});$('tyList').innerHTML=rows()};
+  $('tySave').onclick=()=>{collect();save();closeSheet();if(brush&&brush!=='clear'&&!typeById(brush))brush=null;if(editing)renderPalette();render();toast('已儲存')};
+}
+
+function clearMonth(){
+  if(!confirm(`清除 ${view.getFullYear()}年${view.getMonth()+1}月 所有手動班別與備註？`))return;
+  const pre=view.getFullYear()+'-'+pad(view.getMonth()+1)+'-';
+  Object.keys(S.days).forEach(k=>{if(k.startsWith(pre))delete S.days[k]});
+  save();closeSheet();render();toast('已清除');
+}
+
+function openExport(){
+  const txt=JSON.stringify(S);
+  openSheet(`<h2>匯出備份<button data-x>關閉</button></h2>
+    <div class="small">把下面整段文字複製起來，貼到備忘錄或傳給自己保存。</div>
+    <textarea id="exTxt" style="height:160px;margin-top:8px" readonly>${esc(txt)}</textarea>
+    <button class="btn" id="exCopy">複製</button>`);
+  $('sheet').querySelector('[data-x]').onclick=closeSheet;
+  $('exCopy').onclick=async()=>{
+    try{await navigator.clipboard.writeText(txt);toast('已複製')}
+    catch(e){const t=$('exTxt');t.focus();t.select();try{document.execCommand('copy');toast('已複製')}catch(_){toast('請手動長按複製')}}
+  };
+}
+function openImport(){
+  openSheet(`<h2>匯入備份<button data-x>關閉</button></h2>
+    <div class="small">貼上之前匯出的文字。⚠️ 會取代目前所有資料。</div>
+    <textarea id="imTxt" style="height:160px;margin-top:8px" placeholder="貼在這裡"></textarea>
+    <button class="btn" id="imGo">匯入</button>`);
+  $('sheet').querySelector('[data-x]').onclick=closeSheet;
+  $('imGo').onclick=()=>{
+    let d;try{d=JSON.parse($('imTxt').value)}catch(e){return toast('格式不正確')}
+    if(!d||!Array.isArray(d.types)||typeof d.days!=='object')return toast('格式不正確');
+    if(!confirm('確定取代目前資料？'))return;
+    S={types:d.types,days:d.days||{},cycle:d.cycle||{start:'',seq:[]}};save();closeSheet();render();toast('匯入完成');
+  };
+}
+function openHelp(){
+  openSheet(`<h2>使用說明<button data-x>關閉</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`);
+  $('sheet').querySelector('[data-x]').onclick=closeSheet;
+}
+
+// 分享：把本月畫成圖片
+function drawMonth(){
+  const W=7*120,top=150,ch=150,cells=monthCells(),rows=6;
+  const cv=document.createElement('canvas');cv.width=W+20;cv.height=top+rows*ch+70;
+  const g=cv.getContext('2d'),F='-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif';
+  g.fillStyle='#dbe7f5';g.fillRect(0,0,cv.width,cv.height);
+  g.fillStyle='#111';g.textAlign='center';g.textBaseline='middle';
+  g.font='500 46px '+F;g.fillText(view.getFullYear()+'年'+(view.getMonth()+1)+'月',cv.width/2,55);
+  g.font='30px '+F;WK.forEach((w,i)=>g.fillText('週'+w,10+i*120+60,120));
+  const tk=ymd(today),cnt={};
+  cells.forEach((d,i)=>{
+    const x=10+(i%7)*120,y=top+Math.floor(i/7)*ch,k=ymd(d),t=shiftOf(k),out=d.getMonth()!==view.getMonth();
+    if(!out&&t)cnt[t.id]=(cnt[t.id]||0)+1;
+    g.fillStyle=out?'#d3e0f1':k===tk?'#7ef25a':t?t.color:'#fff';g.fillRect(x,y,120,ch);
+    g.strokeStyle='#8f8f8f';g.lineWidth=2;g.strokeRect(x,y,120,ch);
+    g.fillStyle=out?'#888':(k===tk||!t)?'#111':textColor(t.color);
+    g.font='34px '+F;g.fillText(d.getDate(),x+60,y+42);
+    if(t){const n=t.name;g.font=(n.length>=4?24:n.length===3?28:32)+'px '+F;g.fillText(n,x+60,y+108)}
+    const e=S.days[k];if(e&&e.note&&!out){g.font='bold 30px '+F;g.fillText('*',x+104,y+20)}
+  });
+  g.font='26px '+F;g.fillStyle='#334';
+  g.fillText(S.types.filter(t=>cnt[t.id]).map(t=>t.name+' '+cnt[t.id]+'天').join('　'),cv.width/2,top+rows*ch+36);
+  return cv;
+}
+$('shareBtn').onclick=()=>{
+  const cv=drawMonth(),name='班表_'+view.getFullYear()+'-'+pad(view.getMonth()+1)+'.png';
+  cv.toBlob(async b=>{
+    if(!b)return toast('產生圖片失敗');
+    const f=new File([b],name,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){
+      try{await navigator.share({files:[f],title:'班表'})}catch(e){}
+      return;
+    }
+    const url=URL.createObjectURL(b);
+    openSheet(`<h2>班表圖片<button data-x>關閉</button></h2><div class="small">長按圖片可以儲存或分享。</div>
+      <img src="${url}" style="width:100%;margin-top:8px;border-radius:8px"><a class="btn" style="text-align:center;text-decoration:none" href="${url}" download="${name}">下載圖片</a>`);
+    $('sheet').querySelector('[data-x]').onclick=closeSheet;
+  },'image/png');
+};
+
+let tt;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1600)}
+
+// 跨日自動更新「今天」
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)return;
+  const n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+  if(+t!==+today){today=t;render()}
+});
+
+render();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>

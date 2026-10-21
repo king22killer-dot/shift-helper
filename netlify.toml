@@ -1,0 +1,12 @@
+[build]
+  publish = "."
+
+# index.html 與 sw.js 不快取，確保手機能拿到新版
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
