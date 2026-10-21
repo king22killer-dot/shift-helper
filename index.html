@@ -247,7 +247,15 @@ body.editing #tabs{display:none}
 <div id="toast"></div>
 
 <script>
-const APP_VER='v9（2026-10-21）';
+// 手機上發生錯誤時直接顯示在畫面上，方便截圖回報
+function showErr(msg){
+  let b=document.getElementById('errBar');
+  if(!b){b=document.createElement('div');b.id='errBar';b.style.cssText='position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));z-index:60;background:#b91c1c;color:#fff;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.5;word-break:break-all';b.onclick=()=>b.remove();document.body.appendChild(b)}
+  b.textContent='⚠️ 發生錯誤（請截圖給開發者，點這裡關閉）：'+msg+'｜'+(typeof APP_VER!=='undefined'?APP_VER:'');
+}
+window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
+window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
+const APP_VER='v10（2026-10-22）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -264,6 +272,7 @@ const HELP=[
   '【過期待辦】月曆上的紅色數字是還沒做的待辦；如果那天的待辦都已經過期沒處理，數字會變成灰色。',
   '【班別設定】選單 →「班別設定」：可以新增、改名、改顏色或刪除班別。',
   '【分享】按右上分享鍵，把本月班表做成圖片，長按圖片即可儲存或傳 LINE。',
+  '【重設】選單 →「重設 App」會刪除全部資料（班表、循環、備忘錄、待辦、設定）並重新載入，畫面卡住或想從頭開始時使用。',
   '【備份】資料存在這支手機的瀏覽器裡。選單 →「匯出備份」複製一段文字保存；換手機時用「匯入備份」貼上即可還原（班表、備忘錄、待辦全部包含）。'
 ];
 const TYPES=[
@@ -305,7 +314,7 @@ let S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!Array.isArray(S.types))S=sampleData();
 S.days=S.days||{};S.cycle=S.cycle||{start:'',seq:[]};S.memos=S.memos||[];S.todos=S.todos||[];S.hol=S.hol||{show:true,off:false};
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('無法儲存：'+(e&&e.name||e))}}
 const typeById=id=>S.types.find(t=>t.id===id);
 
 let view=new Date(today.getFullYear(),today.getMonth(),1);
@@ -622,13 +631,14 @@ $('menuBtn').onclick=()=>{
     <button class="btn" data-m="clear">🧹 清除本月班別</button>
     <button class="btn" data-m="hol">🎌 國定假日</button>
     <button class="btn" data-m="wipe" style="color:var(--danger)">🗑 清除所有排班</button>
+    <button class="btn" data-m="reset" style="color:var(--danger)">♻️ 重設 App（清除全部資料）</button>
     <button class="btn" data-m="export">📤 匯出備份</button>
     <button class="btn" data-m="import">📥 匯入備份</button>
     <button class="btn" data-m="help">❓ 使用說明</button>
   </div><p class="small" style="text-align:center;margin-top:14px">班表小幫手 ${APP_VER}</p>`);
   $('sheet').querySelector('.menu').onclick=e=>{
     const m=e.target.closest('[data-m]');if(!m)return;
-    ({cycle:openCycle,hol:openHol,types:openTypes,clear:clearMonth,wipe:wipeShifts,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
+    ({cycle:openCycle,hol:openHol,types:openTypes,clear:clearMonth,wipe:wipeShifts,reset:resetApp,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
   };
 };
 function openCycle(){
@@ -697,6 +707,14 @@ function openHol(){
   $('hShow').onchange=()=>{S.hol.show=$('hShow').checked;save();renderCal()};
   $('hOff').onchange=()=>{S.hol.off=$('hOff').checked;save();renderCal();toast(S.hol.off?'國定假日已排成休假':'已取消')};
 }
+async function resetApp(){
+  if(!await ask('清除全部資料並重新開始？班表、排班循環、備忘錄、待辦、設定都會刪除，無法復原。','全部清除',true))return;
+  try{localStorage.removeItem(KEY)}catch(e){}
+  try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch(e){}
+  try{if(navigator.serviceWorker)for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch(e){}
+  S={types:JSON.parse(JSON.stringify(TYPES)),days:{},cycle:{start:'',seq:[]},memos:[],todos:[],hol:{show:true,off:false}};save();
+  location.reload();
+}
 async function wipeShifts(){
   if(!await ask('清除所有排班？包含每一天手動設定的班別和排班循環。備註、備忘錄、待辦會保留。','全部清除',true))return;
   Object.keys(S.days).forEach(k=>{delete S.days[k].t;if(!S.days[k].note)delete S.days[k]});
@@ -731,7 +749,7 @@ function openImport(){
     let d;try{d=JSON.parse($('imTxt').value)}catch(e){return toast('格式不正確，請貼上完整的備份文字')}
     if(!d||!Array.isArray(d.types))return toast('格式不正確，請貼上完整的備份文字');
     if(!await ask('確定用備份取代目前資料？','取代',true))return;
-    S={types:d.types,days:d.days||{},cycle:d.cycle||{start:'',seq:[]},memos:d.memos||[],todos:d.todos||[]};save();closeSheet();toast('匯入完成');
+    S={sample:!!d.sample,types:d.types,days:d.days||{},cycle:d.cycle||{start:'',seq:[]},memos:d.memos||[],todos:d.todos||[],hol:d.hol||{show:true,off:false}};save();closeSheet();toast('匯入完成');
   };
 }
 function openHelp(){openSheet(`<h2>使用說明<button data-x>關閉</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`)}
