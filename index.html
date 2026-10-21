@@ -32,8 +32,9 @@
   --cell:#1f2a3a;--out:#16202d;--outfg:#5f6d82;--accent:#5aa0ff;--icon:#8fb4e6;
   --today:#6fe04c;--todayline:#9bf77c;--danger:#ff6b6f;--warn:#fb923c;--chipline:#4a5568;--input:#0f1622;
   --badge:#ff6b6f;--soft:rgba(26,35,50,.8);color-scheme:dark}
-html{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);height:100%}
-body{margin:0;min-height:100%}
+/* 一個螢幕的 App 版面：頂欄／內容（班表不捲動，清單在內容區內捲動）／分頁列 */
+html{height:100%;overflow:hidden}
+body{margin:0;height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 body{font-family:var(--font);color:var(--fg);background:var(--bg1);
@@ -41,44 +42,46 @@ body{font-family:var(--font);color:var(--fg);background:var(--bg1);
     radial-gradient(circle at 70% 60%,var(--dot1) 0 1.5px,transparent 3px),
     radial-gradient(circle at 40% 80%,var(--dot2) 0 2px,transparent 4px),
     linear-gradient(135deg,var(--bg1),var(--bg2));
-  background-size:23px 23px,31px 31px,41px 41px,100% 100%;background-attachment:fixed;
+  background-size:23px 23px,31px 31px,41px 41px,100% 100%;
   -webkit-user-select:none;user-select:none;overscroll-behavior:none;font-size:15px}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
 button{font-family:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--hair);
-  padding:0 16px;display:flex;align-items:center;height:50px}
+header{flex:none;z-index:5;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:env(safe-area-inset-top,0px) 16px 0;display:flex;align-items:center;height:calc(48px + env(safe-area-inset-top,0px))}
 header h1{flex:1;text-align:center;font-size:18px;margin:0;font-weight:600;letter-spacing:1px}
 header .side{width:64px}
 header .menu-btn{background:none;border:0;color:var(--accent);font-size:17px;text-decoration:underline;padding:8px 0;width:64px;text-align:right}
-main{max-width:620px;margin:0 auto;padding:10px 16px calc(84px + env(safe-area-inset-bottom,0px))}
+main{flex:1;min-height:0;width:100%;max-width:620px;margin:0 auto;padding:8px max(10px,env(safe-area-inset-left,0px)) 8px max(10px,env(safe-area-inset-right,0px));overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
+main.fit{overflow:hidden}
+.view{flex:none}
+#v-cal{flex:1;min-height:0;display:flex;flex-direction:column}
 .view[hidden]{display:none}
 /* 範例提示 */
-.sample{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px dashed var(--chipline);border-radius:12px;padding:8px 12px;margin-bottom:8px;font-size:13px;color:var(--muted)}
+.sample{flex:none;display:flex;align-items:center;gap:10px;background:var(--soft);border:1px dashed var(--chipline);border-radius:12px;padding:8px 12px;margin-bottom:8px;font-size:13px;color:var(--muted)}
 .sample span{flex:1}
 .sample button{border:0;background:var(--accent);color:#fff;border-radius:8px;padding:7px 10px;font-size:13px;white-space:nowrap}
 /* 班表 */
-.tools{display:flex;align-items:center;height:60px}
-.tools .sp{flex:1}
-.ico{background:none;border:0;padding:6px;margin:0 2px;color:var(--icon);border-radius:10px}
-.ico svg{display:block;width:42px;height:42px}
+.bar{flex:none;display:flex;align-items:center;gap:2px;height:52px}
+.ico{flex:none;background:none;border:0;padding:5px;color:var(--icon);border-radius:10px}
+.ico svg{display:block;width:34px;height:34px}
 .ico.on{background:color-mix(in srgb,var(--icon) 22%,transparent)}
 .ico.hide{visibility:hidden}
-.nav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 4px}
-.nav button{background:none;border:0;padding:6px 10px;color:var(--fg)}
-.nav svg{width:38px;height:30px;display:block;fill:currentColor}
-.nav .title{font-size:25px;font-weight:500;font-variant-numeric:tabular-nums}
+.nav{flex:1;min-width:0;display:flex;align-items:center;justify-content:center}
+.nav button{flex:none;background:none;border:0;padding:6px 8px;color:var(--fg)}
+.nav svg{width:26px;height:22px;display:block;fill:currentColor}
+.nav .title{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:center;min-width:0}
 .week,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
-.week div{text-align:center;font-size:15px;padding:4px 0}
-.grid{border:1px solid var(--line);background:var(--line);gap:1px}
-.cell{position:relative;aspect-ratio:3/5;max-width:100%;background:var(--cell);color:var(--fg);display:flex;flex-direction:column;align-items:center;
-  justify-content:space-around;padding:4px 0;overflow:hidden;font-variant-numeric:tabular-nums}
+.week{flex:none}
+.week div{text-align:center;font-size:13px;padding:3px 0}
+.grid{flex:1;min-height:0;grid-template-rows:repeat(6,minmax(0,1fr));border:1px solid var(--line);background:var(--line);gap:1px}
+.cell{position:relative;min-height:0;background:var(--cell);color:var(--fg);display:flex;flex-direction:column;align-items:center;
+  justify-content:space-evenly;padding:2px 0;overflow:hidden;font-variant-numeric:tabular-nums}
 .cell .d{font-size:18px}
 .cell .s{font-size:16px;white-space:nowrap;letter-spacing:-.5px}
 .cell.s3 .s{font-size:13px}
 .cell.s4 .s{font-size:11px}
 .cell .star{position:absolute;top:1px;right:4px;font-size:14px;font-weight:700}
-.cell .td{position:absolute;bottom:3px;right:3px;min-width:16px;height:16px;border-radius:8px;background:var(--badge);color:#fff;font-size:10px;line-height:16px;text-align:center;padding:0 3px;font-weight:600}
+.cell .td{position:absolute;top:2px;left:2px;min-width:15px;height:15px;border-radius:8px;background:var(--badge);color:#fff;font-size:10px;line-height:15px;text-align:center;padding:0 3px;font-weight:600}
 .cell.out{background:var(--out)!important;color:var(--outfg)!important}
 .cell .td.old{background:#9aa3ae}
 .cell.out .td{opacity:.45}
@@ -94,7 +97,8 @@ main{max-width:620px;margin:0 auto;padding:10px 16px calc(84px + env(safe-area-i
 .cell.today::after{content:"";position:absolute;inset:0;border:2px solid var(--todayline);pointer-events:none}
 .cell.flash{animation:fl .3s}
 @keyframes fl{from{filter:brightness(.8)}to{filter:none}}
-.stats{margin:10px 0 0;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px}
+.stats{flex:none;margin:6px 0 0;font-size:12px;color:var(--muted);display:flex;gap:6px;overflow-x:auto;white-space:nowrap;min-height:22px}
+.stats span{flex:none}
 .stats span{background:var(--soft);border-radius:12px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--chipline)}
 /* 清單共用 */
@@ -139,7 +143,7 @@ main{max-width:620px;margin:0 auto;padding:10px 16px calc(84px + env(safe-area-i
 .memo.pin{border-color:var(--accent)}
 .newbtn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:8px 14px;font-size:15px}
 /* 分頁列 */
-#tabs{position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--surface);border-top:1px solid var(--hair);
+#tabs{flex:none;position:relative;z-index:7;background:var(--surface);border-top:1px solid var(--hair);
   display:flex;padding:4px max(8px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-right,0px))}
 #tabs button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);padding:6px 0;position:relative}
 #tabs button svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2}
@@ -147,14 +151,13 @@ main{max-width:620px;margin:0 auto;padding:10px 16px calc(84px + env(safe-area-i
 #tabs .n{position:absolute;top:2px;left:calc(50% + 8px);background:var(--badge);color:#fff;border-radius:8px;font-size:10px;min-width:16px;height:16px;line-height:16px;padding:0 4px}
 body.editing #tabs{display:none}
 /* 編輯列 */
-#palette{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--surface);border-top:1px solid var(--hair);
+#palette{flex:none;position:relative;z-index:8;background:var(--surface);border-top:1px solid var(--hair);
   padding:8px max(8px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));box-shadow:0 -4px 14px rgba(0,0,0,.12)}
 #palette .hint{font-size:12px;color:var(--muted);margin:0 4px 6px;display:flex;justify-content:space-between}
 #palette .hint button{background:none;border:0;color:var(--accent);font-size:15px;padding:0}
 #palette .row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
 .chip{flex:none;border:2px solid var(--chipline);border-radius:10px;padding:9px 12px;font-size:16px;min-width:60px;text-align:center;background:var(--cell);color:var(--fg)}
 .chip.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
-body.editing main{padding-bottom:130px}
 /* 底部視窗 */
 .mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--sheet);width:100%;max-width:620px;max-height:90vh;overflow:auto;border-radius:16px 16px 0 0;
@@ -196,7 +199,7 @@ body.editing main{padding-bottom:130px}
 #cfm .acts button{flex:1;border:0;border-radius:10px;padding:11px;font-size:16px;background:var(--hair);color:var(--fg)}
 #cfm .acts .ok{background:var(--accent);color:#fff}
 #cfm .acts .ok.red{background:var(--danger)}
-#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(0,0,0,.8);
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(0,0,0,.8);
   color:#fff;padding:9px 16px;border-radius:20px;font-size:15px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){.cell.flash{animation:none}#toast{transition:none}}
@@ -204,20 +207,15 @@ body.editing main{padding-bottom:130px}
 </head>
 <body>
 <header><div class="side"></div><h1>班表小幫手</h1><button class="menu-btn" id="menuBtn">選單</button></header>
-<main>
+<main class="fit">
   <div class="sample" id="sampleBar" hidden><span>目前是範例資料，可以先點點看。</span><button id="sampleClr">清除範例，開始使用</button></div>
 
   <section class="view" id="v-cal">
-    <div class="tools">
+    <div class="bar">
       <button class="ico" id="todayBtn" aria-label="回到今天"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="3.5"/><rect x="4" y="9" width="40" height="9" rx="4" fill="currentColor"/><rect x="13" y="4" width="4" height="10" rx="2" fill="currentColor"/><rect x="31" y="4" width="4" height="10" rx="2" fill="currentColor"/><text x="24" y="35" font-size="12.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="Arial,sans-serif">Today</text></svg></button>
-      <div class="sp"></div>
+      <div class="nav"><button id="prevBtn" aria-label="上個月"><svg viewBox="0 0 40 32"><path d="M2 16L38 1 28 16 38 31z"/></svg></button><div class="title" id="title"></div><button id="nextBtn" aria-label="下個月"><svg viewBox="0 0 40 32"><path d="M38 16L2 1 12 16 2 31z"/></svg></button></div>
       <button class="ico" id="editBtn" aria-label="快速排班"><svg viewBox="0 0 48 48"><path d="M34.5 5.5a4 4 0 0 1 5.7 0l2.3 2.3a4 4 0 0 1 0 5.7L17 39l-11 4 4-11z" fill="currentColor"/></svg></button>
       <button class="ico" id="shareBtn" aria-label="分享班表圖片"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M17 18h-6v26h26V18h-6"/><path d="M24 30V4M16 11l8-8 8 8"/></svg></button>
-    </div>
-    <div class="nav">
-      <button id="prevBtn" aria-label="上個月"><svg viewBox="0 0 40 32"><path d="M2 16L38 1 28 16 38 31z"/></svg></button>
-      <div class="title" id="title"></div>
-      <button id="nextBtn" aria-label="下個月"><svg viewBox="0 0 40 32"><path d="M38 16L2 1 12 16 2 31z"/></svg></button>
     </div>
     <div class="week"><div>週日</div><div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div>週六</div></div>
     <div class="grid" id="grid"></div>
@@ -249,7 +247,7 @@ body.editing main{padding-bottom:130px}
 <div id="toast"></div>
 
 <script>
-const APP_VER='v8（2026-10-21）';
+const APP_VER='v9（2026-10-21）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -602,7 +600,8 @@ function setTab(t){
   tab=t;if(editing&&t!=='cal')setEditing(false);
   ['cal','memo','todo'].forEach(x=>$('v-'+x).hidden=x!==t);
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
-  renderAll();window.scrollTo(0,0);
+  document.querySelector('main').classList.toggle('fit',t==='cal');
+  renderAll();document.querySelector('main').scrollTop=0;
 }
 $('tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)setTab(b.dataset.tab)};
 function renderAll(){
