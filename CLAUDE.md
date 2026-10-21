@@ -20,10 +20,10 @@ iPhone 用的月曆班表網頁 App。純靜態網站，沒有建置步驟，部
 ## 資料
 - 全部存在手機 localStorage（key `shift-helper-v1`）：
   - `types`（班別）、`days`（`YYYY-MM-DD` → `{t, note}`，`t:'x'` 代表手動清成空白）
-  - `cycle`（`start`、`seq`、`months`：排幾個月，最後一輪沒輪完會延到下個月排完，見 `cycleEnd()`）
+  - `cycles`：多組排班循環，每組 `{id, start, seq, months}`；`months` 排幾個月，最後一輪沒輪完會延到下個月排完（`cycleEnd()`）。重疊時以 `start` 較晚的為準（`cycleAt()`）。舊版單一 `cycle` 由 `migrateCycles()` 自動轉換。
   - `memos`（備忘錄）、`todos`（`date`、`days` 幾天完成、`monthly` 每月重複＋`doneM` 各月完成狀態）
   - `hol`（`show` 顯示國定假日、`off` 國定假日自動排休）
-- 某天班別 `shiftOf()`：手動設定 → 國定假日排休（有開才算）→ 排班循環。
+- 某天班別 `shiftOf()`：手動設定 → 國定假日排休（有開才算）→ 排班循環（`cycleAt()`）。
 - 國定假日寫死在 `HOLIDAYS`（目前有 2026、2027 年），每年人事行政總處公布新年度後要補上。
 
 ## 使用者偏好
