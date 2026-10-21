@@ -182,6 +182,14 @@ body.editing #tabs{display:none}
 .seq{display:flex;flex-wrap:wrap;gap:4px;min-height:44px;background:var(--input);border:1px solid var(--chipline);border-radius:10px;padding:6px}
 .seq span{padding:5px 8px;border-radius:6px;border:1px solid var(--chipline);font-size:14px}
 .seq .ph{color:var(--muted);border:0;padding:6px 2px}
+.cyrow{background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.cyhead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:15px;font-variant-numeric:tabular-nums}
+.cyhead span{font-size:12px;color:var(--muted)}
+.seq.mini{min-height:0;border:0;padding:6px 0;background:none}
+.seq.mini span{padding:2px 5px;font-size:12px}
+.cyacts{display:flex;gap:8px;justify-content:flex-end}
+.cyacts button{border:1px solid var(--hair);background:var(--sheet);border-radius:8px;padding:6px 14px;font-size:14px;color:var(--fg)}
+.cyacts .del{color:var(--danger)}
 .small{font-size:13px;color:var(--muted);line-height:1.5}
 .help p{margin:6px 0;line-height:1.65;font-size:15px}
 .minilist{background:var(--surface);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:8px}
@@ -259,14 +267,14 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v11（2026-10-22）';
+const APP_VER='v12（2026-10-22）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
   '【看班表】左右箭頭或左右滑動切換月份；按左上「Today」回到本月。今天會用綠色標示。',
   '【單日設定】點任一天，可以選班別、寫備註，也能直接新增這天的待辦。有備註的日子右上角有「*」，有未完成待辦的日子右下角有紅色數字。',
   '【快速排班】按鉛筆進入編輯模式，下方選一個班別後連續點日期就能套用；選「空白」把那天清空；有排班循環時另有「依循環」可以恢復成循環的班。按「完成」離開。',
-  '【排班循環】選單 →「排班循環」：設定起始日、輪班順序（例如 日日休休夜夜休休）和要排幾個月。最後一個月月底如果這一輪還沒輪完，會延到下個月把這輪排完才停。沒有手動設定的日子會自動依循環顯示。',
+  '【排班循環】選單 →「排班循環」→「新增排班循環」：設定起始日、輪班順序（例如 日日休休夜夜休休）和要排幾個月。可以設好幾組（例如 10 月一組、11 月一組），日期重疊時以開始日比較晚的那組為準。最後一個月月底如果這一輪還沒輪完，會延到下個月把這輪排完才停。沒有手動設定的日子會自動依循環顯示。',
   '【備忘錄】按「＋ 新增」寫一則，打字會自動儲存。可以搜尋，也可以「置頂」常用的那則。',
   '【待辦事項】輸入內容，日期可填可不填，按「新增」。有日期的待辦會出現在月曆上，並顯示那天是什麼班。點圓圈打勾完成，點文字可以修改或刪除。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
@@ -299,7 +307,7 @@ function sampleData(){
   const t=ymd(today);
   return {sample:true,types:JSON.parse(JSON.stringify(TYPES)),
     days:{[ymd(addDays(today,3))]:{t:'r',note:'（範例）支援白天訓練'}},
-    cycle:{start:ymd(new Date(today.getFullYear(),today.getMonth(),1)),seq:['d','d','o','o','n','n','o','o'],months:3},
+    cycles:[{id:uid(),start:ymd(new Date(today.getFullYear(),today.getMonth(),1)),seq:['d','d','o','o','n','n','o','o'],months:3}],
     memos:[
       {id:uid(),title:'（範例）交班注意事項',body:'2 號機壓力偏高，記得每小時看一次。\n倉庫鑰匙放在值班台左邊抽屜。',pin:true,at:Date.now()-36e5},
       {id:uid(),title:'（範例）年假規劃',body:'12 月底想排連休，記得 11/15 前跟組長說。',pin:false,at:Date.now()-864e5*2}
@@ -314,10 +322,16 @@ function sampleData(){
       {id:uid(),text:'（範例）更新通訊錄',date:ymd(addDays(today,-3)),done:true}
     ]};
 }
+// 舊資料只有一組 cycle，改成多組 cycles
+function migrateCycles(d){
+  const list=Array.isArray(d.cycles)?d.cycles:[];
+  if(d.cycle&&d.cycle.start&&d.cycle.seq&&d.cycle.seq.length)list.push({id:uid(),start:d.cycle.start,seq:d.cycle.seq,months:d.cycle.months||0});
+  return list.filter(c=>c&&c.start&&Array.isArray(c.seq)&&c.seq.length);
+}
 let S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!Array.isArray(S.types))S=sampleData();
-S.days=S.days||{};S.cycle=S.cycle||{start:'',seq:[]};S.memos=S.memos||[];S.todos=S.todos||[];S.hol=S.hol||{show:true,off:false};
+S.days=S.days||{};S.cycles=migrateCycles(S);delete S.cycle;S.memos=S.memos||[];S.todos=S.todos||[];S.hol=S.hol||{show:true,off:false};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('無法儲存：'+(e&&e.name||e))}}
 const typeById=id=>S.types.find(t=>t.id===id);
 
@@ -343,12 +357,18 @@ function shiftOf(key){
   if(e&&e.t===BLANK)return null;
   if(e&&e.t&&typeById(e.t))return typeById(e.t);
   if(S.hol.off&&HOLIDAYS[key]&&offType())return offType();
-  const c=S.cycle;
-  if(c.start&&c.seq.length){
-    const diff=dayNum(parse(key))-dayNum(parse(c.start)),end=cycleEnd(c);
-    if(diff>=0&&(!end||key<=end))return typeById(c.seq[diff%c.seq.length])||null;
-  }
-  return null;
+  const c=cycleAt(key);
+  return c?typeById(c.seq[(dayNum(parse(key))-dayNum(parse(c.start)))%c.seq.length])||null:null;
+}
+// 這天適用哪一組循環：有好幾組重疊時，以開始日比較晚的那組為準
+function cycleAt(key){
+  let best=null;
+  S.cycles.forEach(c=>{
+    if(!c.seq.length||c.start>key)return;
+    const end=cycleEnd(c);if(end&&key>end)return;
+    if(!best||c.start>=best.start)best=c;
+  });
+  return best;
 }
 // 第 N 個月的最後一天；months 為 0／未設定＝不限
 function cycleMonthEnd(c){
@@ -442,7 +462,7 @@ function setShift(k,t){
 function renderPalette(){
   $('palRow').innerHTML=S.types.map(t=>`<button class="chip${brush===t.id?' sel':''}" data-t="${t.id}" style="${chipStyle(t)}">${esc(t.name)}</button>`).join('')
     +`<button class="chip${brush===BLANK?' sel':''}" data-t="${BLANK}">空白</button>`
-    +(S.cycle.seq.length?`<button class="chip${brush==='auto'?' sel':''}" data-t="auto">依循環</button>`:'');
+    +(S.cycles.length?`<button class="chip${brush==='auto'?' sel':''}" data-t="auto">依循環</button>`:'');
 }
 function setEditing(on){
   editing=on;document.body.classList.toggle('editing',on);$('palette').hidden=!on;
@@ -507,7 +527,7 @@ function openDay(k){
   const d=parse(k),e=S.days[k]||{},cur=shiftOf(k);
   let sel=e.t||'';
   const chips=()=>S.types.map(t=>`<button class="chip${sel===t.id?' sel':''}" data-t="${t.id}" style="${chipStyle(t)}">${esc(t.name)}</button>`).join('')
-    +(S.cycle.seq.length?`<button class="chip${sel===BLANK?' sel':''}" data-t="${BLANK}">空白</button><button class="chip${sel===''?' sel':''}" data-t="">依循環</button>`
+    +(S.cycles.length?`<button class="chip${sel===BLANK?' sel':''}" data-t="${BLANK}">空白</button><button class="chip${sel===''?' sel':''}" data-t="">依循環</button>`
       :`<button class="chip${sel===''||sel===BLANK?' sel':''}" data-t="">空白</button>`);
   const list=()=>todoItems(ymAdd(ymOf(k),-1),ymOf(k)).filter(it=>covers(it,k)).map(it=>todoRow(it,false)).join('');
   const commit=()=>{const note=$('dayNote').value.trim(),n={};if(sel)n.t=sel;if(note)n.note=note;
@@ -624,7 +644,7 @@ function renderAll(){
 }
 $('sampleClr').onclick=async()=>{
   if(!await ask('清除所有範例（班表、備忘錄、待辦）？班別種類會保留。','清除'))return;
-  S={types:S.types,days:{},cycle:{start:'',seq:[]},memos:[],todos:[]};save();renderAll();toast('已清除，可以開始使用');
+  S={types:S.types,days:{},cycles:[],memos:[],todos:[],hol:S.hol};save();renderAll();toast('已清除，可以開始使用');
 };
 
 /* ===== 選單 ===== */
@@ -645,45 +665,82 @@ $('menuBtn').onclick=()=>{
     ({cycle:openCycle,hol:openHol,types:openTypes,clear:clearMonth,wipe:wipeShifts,reset:resetApp,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
   };
 };
+const fmtYMD=k=>{const d=parse(k);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`};
+function cycleRange(c){const e=cycleEnd(c);return fmtYMD(c.start)+' 起'+(e?' ～ '+fmtYMD(e):'，不限')}
 function openCycle(){
-  let seq=S.cycle.seq.filter(id=>typeById(id)),months=S.cycle.start?(S.cycle.months||0):3;
+  const list=[...S.cycles].sort((a,b)=>a.start<b.start?-1:1);
+  const seqMini=c=>c.seq.map(id=>{const t=typeById(id);return t?`<span style="${chipStyle(t)}">${esc(t.name)}</span>`:''}).join('');
+  openSheet(`<h2>排班循環<button data-x>關閉</button></h2>
+    <div class="small">可以設定好幾組循環，例如 10 月一組、11 月一組。日期重疊時，以<b>開始日比較晚</b>的那組為準；你手動設定的日子永遠優先。</div>
+    <div id="cyList" style="margin-top:10px">${list.length?list.map(c=>`<div class="cyrow" data-id="${c.id}">
+      <div class="cyhead"><b>${cycleRange(c)}</b><span>一輪 ${c.seq.length} 天${c.months?'・'+c.months+' 個月':''}</span></div>
+      <div class="seq mini">${seqMini(c)}</div>
+      <div class="cyacts"><button data-edit>修改</button><button data-del class="del">刪除</button></div></div>`).join('')
+      :'<div class="empty" style="padding:16px">還沒有排班循環。</div>'}</div>
+    <button class="btn" id="cyNew">＋ 新增排班循環</button>`);
+  $('cyNew').onclick=()=>editCycle(null);
+  $('cyList').onclick=async e=>{
+    const row=e.target.closest('.cyrow');if(!row)return;
+    const c=S.cycles.find(x=>x.id===row.dataset.id);if(!c)return;
+    if(e.target.closest('[data-edit]'))return editCycle(c.id);
+    if(e.target.closest('[data-del]')){
+      if(!await ask(`刪除「${cycleRange(c)}」這組循環？手動設定的日子不受影響。`,'刪除',true))return;
+      S.cycles=S.cycles.filter(x=>x.id!==c.id);save();renderCal();openCycle();
+    }
+  };
+}
+function editCycle(id){
+  const old=id?S.cycles.find(x=>x.id===id):null;
+  let seq=old?old.seq.filter(t=>typeById(t)):[],months=old?(old.months||0):1;
+  const last=[...S.cycles].sort((a,b)=>a.start<b.start?1:-1)[0];
+  // 新增時預設從目前看的月份 1 號開始
+  const defStart=old?old.start:ymd(new Date(view.getFullYear(),view.getMonth(),1));
   const MS=[1,2,3,6,12,0];
   const seqHtml=()=>seq.length?seq.map(id=>{const t=typeById(id);return `<span style="${chipStyle(t)}">${esc(t.name)}</span>`}).join(''):'<span class="ph">點下面的班別依序加入</span>';
   const monHtml=()=>MS.map(m=>`<button class="chip${months===m?' sel':''}" data-m="${m}">${m?m+' 個月':'不限'}</button>`).join('');
-  // 預覽：顯示每個月 1 號接到循環的第幾天，確認跨月是接著排
+  // 預覽：排到哪天、月底沒輪完延到哪天、和其他循環有沒有重疊
   const preview=()=>{
     const st=$('cyStart').value;
     if(!st||!seq.length)return '先選起始日、加入班別。';
     const c={start:st,seq,months},me=cycleMonthEnd(c),end=cycleEnd(c),d0=parse(st),L=seq.length;
     const ymdTxt=k=>{const d=parse(k);return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`};
-    if(!end)return '一直排下去，不設結束月份。每個月月底沒輪完的會直接接到下個月。';
-    const days=dayNum(parse(end))-dayNum(d0)+1;
-    let h=`排到 <b>${ymdTxt(end)}</b>，共 ${days} 天，剛好 ${days/L} 輪。`;
-    if(end!==me){
-      const ext=dayNum(parse(end))-dayNum(parse(me)),done=L-ext;
-      h+=`<br>${parse(me).getMonth()+1}月底這一輪才排到第 ${done} 天，還差 ${ext} 天，會<b>延到 ${parse(end).getMonth()+1}/${parse(end).getDate()}</b> 把這輪排完。`;
-    }else h+=`<br>${parse(me).getMonth()+1}月底剛好輪完，不用延。`;
+    let h;
+    if(!end)h='一直排下去，不設結束月份。每個月月底沒輪完的會直接接到下個月。';
+    else{
+      const days=dayNum(parse(end))-dayNum(d0)+1;
+      h=`排到 <b>${ymdTxt(end)}</b>，共 ${days} 天，剛好 ${days/L} 輪。`;
+      if(end!==me){
+        const ext=dayNum(parse(end))-dayNum(parse(me)),done=L-ext;
+        h+=`<br>${parse(me).getMonth()+1}月底這一輪才排到第 ${done} 天，還差 ${ext} 天，會<b>延到 ${parse(end).getMonth()+1}/${parse(end).getDate()}</b> 把這輪排完。`;
+      }else h+=`<br>${parse(me).getMonth()+1}月底剛好輪完，不用延。`;
+    }
+    const ov=S.cycles.filter(o=>o.id!==id).filter(o=>{const oe=cycleEnd(o);return (!end||o.start<=end)&&(!oe||st<=oe)});
+    if(ov.length)h+=`<br><span style="color:var(--warn)">和「${ov.map(cycleRange).join('」、「')}」日期重疊，重疊的日子以開始日比較晚的為準。</span>`;
     return h;
   };
-  openSheet(`<h2>排班循環<button data-x>關閉</button></h2>
+  openSheet(`<h2>${old?'修改排班循環':'新增排班循環'}<button data-back>返回</button></h2>
     <div class="small">設定一輪的班別順序，沒有手動設定的日子會依這個循環自動顯示。</div>
-    <h3>起始日（循環的第 1 天）</h3><input class="field" type="date" id="cyStart" value="${S.cycle.start||ymd(today)}">
+    <h3>起始日（循環的第 1 天）</h3><input class="field" type="date" id="cyStart" value="${defStart}">
     <h3>循環順序（一輪 <b id="cyN">${seq.length}</b> 天）</h3><div class="seq" id="cySeq">${seqHtml()}</div>
     <div class="chips" id="cyAdd" style="margin-top:8px">${S.types.map(t=>`<button class="chip" data-t="${t.id}" style="${chipStyle(t)}">＋${esc(t.name)}</button>`).join('')}</div>
-    <div class="chips" style="margin-top:8px"><button class="chip" id="cyBack">⌫ 刪最後一個</button><button class="chip" id="cyClr">全部清空</button></div>
+    <div class="chips" style="margin-top:8px"><button class="chip" id="cyBack">⌫ 刪最後一個</button><button class="chip" id="cyClr">全部清空</button>${!old&&last?'<button class="chip" id="cyCopy">複製上一組順序</button>':''}</div>
     <h3>要排幾個月（從起始日那個月算起）</h3><div class="chips" id="cyMon">${monHtml()}</div>
     <div class="small" id="cyPrev" style="margin-top:10px;background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:10px 12px"></div>
-    <button class="btn" id="cySave">儲存循環</button><button class="btn red" id="cyOff">停用循環</button>`);
+    <button class="btn" id="cySave">儲存</button>`);
   const upd=()=>{$('cySeq').innerHTML=seqHtml();$('cyN').textContent=seq.length;$('cyMon').innerHTML=monHtml();$('cyPrev').innerHTML=preview()};
   upd();
+  $('sheet').querySelector('[data-back]').onclick=()=>openCycle();
   $('cyStart').oninput=upd;
   $('cyMon').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;months=+b.dataset.m;upd()};
   $('cyAdd').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;seq.push(b.dataset.t);upd()};
   $('cyBack').onclick=()=>{seq.pop();upd()};
   $('cyClr').onclick=()=>{seq=[];upd()};
-  $('cySave').onclick=()=>{const s=$('cyStart').value;if(!s)return toast('請選起始日');if(!seq.length)return toast('請加入至少一個班別');
-    S.cycle={start:s,seq,months};save();closeSheet();toast(months?`已套用 ${months} 個月`:'已套用循環')};
-  $('cyOff').onclick=async()=>{if(!await ask('停用循環？手動設定的日子不受影響。','停用',true))return;S.cycle={start:'',seq:[]};save();closeSheet()};
+  const cp=$('cyCopy');if(cp)cp.onclick=()=>{seq=last.seq.filter(t=>typeById(t));upd()};
+  $('cySave').onclick=()=>{
+    const st=$('cyStart').value;if(!st)return toast('請選起始日');if(!seq.length)return toast('請加入至少一個班別');
+    if(old)Object.assign(old,{start:st,seq,months});else S.cycles.push({id:uid(),start:st,seq,months});
+    save();renderCal();toast(months?`已套用 ${months} 個月`:'已套用循環');openCycle();
+  };
 }
 function openTypes(){
   const rows=()=>S.types.map((t,i)=>`<div class="trow" data-i="${i}"><input type="color" value="${t.color}" aria-label="顏色"><input class="field" type="text" value="${esc(t.name)}" maxlength="5" aria-label="名稱"><button data-del aria-label="刪除">✕</button></div>`).join('');
@@ -716,13 +773,13 @@ async function resetApp(){
   try{localStorage.removeItem(KEY)}catch(e){}
   try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch(e){}
   try{if(navigator.serviceWorker)for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch(e){}
-  S={types:JSON.parse(JSON.stringify(TYPES)),days:{},cycle:{start:'',seq:[]},memos:[],todos:[],hol:{show:true,off:false}};save();
+  S={types:JSON.parse(JSON.stringify(TYPES)),days:{},cycles:[],memos:[],todos:[],hol:{show:true,off:false}};save();
   location.reload();
 }
 async function wipeShifts(){
-  if(!await ask('清除所有排班？包含每一天手動設定的班別和排班循環。備註、備忘錄、待辦會保留。','全部清除',true))return;
+  if(!await ask('清除所有排班？包含每一天手動設定的班別和全部排班循環。備註、備忘錄、待辦會保留。','全部清除',true))return;
   Object.keys(S.days).forEach(k=>{delete S.days[k].t;if(!S.days[k].note)delete S.days[k]});
-  S.cycle={start:'',seq:[]};save();closeSheet();toast('已清除所有排班');
+  S.cycles=[];save();closeSheet();toast('已清除所有排班');
 }
 async function clearMonth(){
   const y=view.getFullYear(),m=view.getMonth();
@@ -753,7 +810,7 @@ function openImport(){
     let d;try{d=JSON.parse($('imTxt').value)}catch(e){return toast('格式不正確，請貼上完整的備份文字')}
     if(!d||!Array.isArray(d.types))return toast('格式不正確，請貼上完整的備份文字');
     if(!await ask('確定用備份取代目前資料？','取代',true))return;
-    S={sample:!!d.sample,types:d.types,days:d.days||{},cycle:d.cycle||{start:'',seq:[]},memos:d.memos||[],todos:d.todos||[],hol:d.hol||{show:true,off:false}};save();closeSheet();toast('匯入完成');
+    S={sample:!!d.sample,types:d.types,days:d.days||{},cycles:migrateCycles(d),memos:d.memos||[],todos:d.todos||[],hol:d.hol||{show:true,off:false}};save();closeSheet();toast('匯入完成');
   };
 }
 function openHelp(){openSheet(`<h2>使用說明<button data-x>關閉</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`)}
