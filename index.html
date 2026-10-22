@@ -158,6 +158,24 @@ main.fit{overflow:hidden}
 .prow.done .tx{text-decoration:line-through;color:var(--muted)}
 .prow .tm{flex:none;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
 .prow.late .tm,.prow.late .tx small{color:var(--danger)}
+.form{background:var(--surface);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.fr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-top:1px solid var(--hair);font-size:15px;min-height:48px}
+.fr:first-child{border-top:0}
+.fr span{flex:1;min-width:0}
+.fr span small{display:block;font-size:11px;color:var(--muted)}
+.fr input,.fr select{font-size:15px;color:var(--accent);background:none;border:0;text-align:right;font-family:inherit;max-width:60%}
+.fr input[type=number]{width:60px;border:1px solid var(--hair);border-radius:6px;text-align:center;color:var(--fg);padding:4px}
+.sw2{appearance:none;-webkit-appearance:none;width:50px!important;height:30px;border-radius:15px;background:var(--hair)!important;position:relative;transition:background .2s;flex:none;cursor:pointer}
+.sw2::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:12px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .2s}
+.sw2:checked{background:var(--accent)!important}
+.sw2:checked::after{left:23px}
+#remBar{position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:45;background:var(--surface);border:1px solid var(--hair);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.25);padding:12px;display:flex;gap:12px;align-items:center}
+#remBar .ic{width:44px;height:44px;border-radius:22px;background:#8b5cf6;color:#fff;display:grid;place-items:center;font-size:22px;flex:none}
+#remBar .tx{flex:1;min-width:0}
+#remBar .tx b{display:block;font-size:15px}
+#remBar .tx span{font-size:13px;color:var(--muted)}
+#remBar button{border:0;border-radius:8px;padding:8px 10px;font-size:14px;background:var(--hair);color:var(--fg)}
+#remBar button.ok{background:var(--accent);color:#fff}
 .cols{display:flex;flex-wrap:wrap;gap:10px}
 .cols button{width:30px;height:30px;border-radius:15px;border:3px solid transparent;padding:0}
 .cols button.on{border-color:var(--fg)}
@@ -349,7 +367,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v14（2026-10-22）';
+const APP_VER='v15（2026-10-22）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -362,6 +380,8 @@ const HELP=[
   '【錄音】備忘錄裡按「🎙 錄音」開始（第一次要允許麥克風），再按一次停止，就會存進備忘錄，可以直接播放。手寫和錄音只存在這支手機，不包含在「匯出備份」的文字裡。',
   '【待辦事項】輸入內容，日期可填可不填，按「新增」。有日期的待辦會出現在月曆上，並顯示那天是什麼班。點圓圈打勾完成，點文字可以修改或刪除。',
   '【待辦月曆】待辦分頁上方可切換「月曆／清單」。月曆會把待辦畫成彩色橫條（好幾天的會連成一條），日期右上的小點是那天的班別顏色。點某一天，下方「今日計劃」列出那天的待辦，可以直接打勾；按「＋ 新增」可以設定時間和顏色。',
+  '【提醒】新增或修改待辦時，可以設日期、時間、重複（每天／每週／每月）、提早提醒，並打開「新增至 iPhone 行事曆」：儲存後按「加入」，iPhone 就會準時跳通知（App 沒開也會響）。App 開著的時候，時間到畫面上方也會跳出提醒。',
+  '【外觀】選單 →「外觀」：可選跟隨手機、淺色、深色，或依時間自動切換（預設早上 6:00 淺色、晚上 6:00 深色，可以自己改）。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
   '【每月固定】勾「🔁 每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
   '【清除排班】選單 →「清除本月班別」把正在看的這個月全部變成空白（連循環的班也清掉，備註保留）；「清除所有排班」會清掉全部手動班別和排班循環，備註、備忘錄、待辦會保留。',
@@ -479,13 +499,24 @@ function monthCells(){
 const ymOf=k=>k.slice(0,7);
 const ymAdd=(ym,n)=>{const[y,m]=ym.split('-').map(Number),d=new Date(y,m-1+n,1);return d.getFullYear()+'-'+pad(d.getMonth()+1)};
 // 每月重複的待辦在某個月的日期（31 號遇到小月就排月底）
+// 重複方式：day 每天、week 每週、month 每月（舊資料用 monthly:true 代表每月）
+const repOf=t=>t.date?(t.repeat||(t.monthly?'month':'')):'';
+const REP_TXT={day:'每天',week:'每週',month:'每月'};
 function occDate(t,ym){const[y,m]=ym.split('-').map(Number),day=parse(t.date).getDate(),last=new Date(y,m,0).getDate();return ym+'-'+pad(Math.min(day,last))}
 const dueOf=(date,days)=>days>1?ymd(addDays(parse(date),days-1)):date;
 // 把待辦展開成一筆一筆（每月重複的會在 from～to 每個月各一筆）
 function todoItems(fromYm,toYm){
   const out=[];
   S.todos.forEach(t=>{
-    if(!t.monthly||!t.date){out.push({t,key:t.id,date:t.date||'',due:t.date?dueOf(t.date,t.days):'',done:!!t.done});return}
+    const r=repOf(t);
+    if(!r){out.push({t,key:t.id,date:t.date||'',due:t.date?dueOf(t.date,t.days):'',done:!!t.done});return}
+    if(r==='day'||r==='week'){
+      const step=r==='day'?1:7,from=parse(fromYm+'-01'),toK=ymd(new Date(+toYm.slice(0,4),+toYm.slice(5),0));
+      let d=parse(t.date);
+      if(d<from){const k=Math.ceil((dayNum(from)-dayNum(d))/step);d=addDays(d,k*step)}
+      for(;ymd(d)<=toK;d=addDays(d,step)){const date=ymd(d);out.push({t,key:t.id+'@'+date,rd:1,date,due:dueOf(date,t.days),done:!!(t.doneM&&t.doneM[date])})}
+      return;
+    }
     for(let ym=fromYm>ymOf(t.date)?fromYm:ymOf(t.date);ym<=toYm;ym=ymAdd(ym,1)){
       const date=occDate(t,ym);
       out.push({t,key:t.id+'@'+ym,ym,date,due:dueOf(date,t.days),done:!!(t.doneM&&t.doneM[ym])});
@@ -587,7 +618,9 @@ function todoRow(it,showDate){
   if(days>1)m+=` · 共 ${days} 天`;
   if(late)m+=' · 已過期';
   else if(!it.done&&days>1&&it.date<=tk&&tk<=it.due)m+=` · 還剩 ${dayNum(parse(it.due))-dayNum(today)+1} 天`;
-  if(t.monthly)m+=` <span class="tag">🔁 每月 ${parse(t.date).getDate()} 號</span>`;
+  const rp=repOf(t);
+  if(rp)m+=` <span class="tag">🔁 ${rp==='month'?'每月 '+parse(t.date).getDate()+' 號':rp==='week'?'每週'+WK[parse(t.date).getDay()]:'每天'}</span>`;
+  if(t.cal)m+=' 📅';
   if(showDate&&sh)m+=` <span class="tag" style="${chipStyle(sh)}">${esc(sh.name)}</span>`;
   const meta=m?`<div class="meta${late?' late':''}">${m}</div>`:'';
   return `<div class="todo${it.done?' done':''}" data-key="${it.key}"><button class="chk" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><div class="txt">${esc(t.text)}</div>${meta}</button></div>`;
@@ -640,6 +673,8 @@ function openDay(k){
 function listItems(){
   const tk=ymd(today),cur=ymOf(tk),all=todoItems(ymAdd(cur,-1),ymAdd(cur,2)),out=[],seen={};
   all.forEach(it=>{
+    // 每天／每週：只列今天這次和下一次，過去沒做的不算過期
+    if(it.rd){if(covers(it,tk))out.push(it);else if(it.date>tk&&!seen[it.t.id]){seen[it.t.id]=1;out.push(it)}return}
     if(!it.ym){out.push(it);return}
     if(it.date<=tk){if(!it.done||it.ym===cur)out.push(it);return}
     if(!seen[it.t.id]){seen[it.t.id]=1;out.push(it)}
@@ -695,7 +730,7 @@ function renderPlan(){
     const t=it.t,days=t.days>1?t.days:1,late=!it.done&&it.due<tk;let sub='';
     if(days>1)sub=`${fmtMD(it.date)}～${fmtMD(it.due)}`+(late?' · 已過期':!it.done&&it.date<=tk&&tk<=it.due?` · 還剩 ${dayNum(parse(it.due))-dayNum(today)+1} 天`:'');
     else if(late)sub='已過期';
-    if(t.monthly)sub+=(sub?' · ':'')+'🔁 每月';
+    if(repOf(t))sub+=(sub?' · ':'')+'🔁 '+REP_TXT[repOf(t)];
     return `<div class="todo prow${it.done?' done':''}${late?' late':''}" data-key="${it.key}"><button class="bx" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><span class="cl" style="background:${colorOf(t)}"></span><span class="tx">${esc(t.text)}${sub?`<small>${sub}</small>`:''}</span><span class="tm">${t.time?'⏰ '+t.time:''}</span></button></div>`;
   }).join(''):'<div class="empty" style="padding:14px">這天沒有待辦。按「＋ 新增」加一件事。</div>';
 }
@@ -726,41 +761,86 @@ function renderTodoList(){
   if(done.length)h+=`<div class="group"><h3><button id="doneTog">${showDone?'▾':'▸'} 已完成（${done.length}）</button>${showDone?'<button id="doneClr">清除已完成</button>':''}</h3>${showDone?`<div class="list">${done.map(i=>todoRow(i,true)).join('')}</div>`:''}</div>`;
   $('todoList').innerHTML=h;
   const tg=$('doneTog');if(tg)tg.onclick=()=>{showDone=!showDone;renderTodos()};
-  const dc=$('doneClr');if(dc)dc.onclick=async()=>{if(!await ask('刪除全部已完成的待辦？（每月重複的不會刪）','刪除',true))return;S.todos=S.todos.filter(t=>t.monthly||!t.done);save();renderAll()};
+  const dc=$('doneClr');if(dc)dc.onclick=async()=>{if(!await ask('刪除全部已完成的待辦？（重複的待辦不會刪）','刪除',true))return;S.todos=S.todos.filter(t=>repOf(t)||!t.done);save();renderAll()};
 }
 bindTodoClicks($('todoList'),()=>renderAll());
 $('todoForm').onsubmit=e=>{e.preventDefault();const v=$('todoTxt').value.trim();if(!v)return $('todoTxt').focus();
   addTodo(v,$('todoDate').value,$('todoDays').value,$('todoRep').checked);
   $('todoTxt').value='';$('todoDate').value='';$('todoDays').value='';$('todoRep').checked=false;renderAll();toast('已新增')};
+const REMIND=[[0,'準時'],[5,'5 分鐘前'],[15,'15 分鐘前'],[30,'30 分鐘前'],[60,'1 小時前'],[1440,'1 天前']];
 function editTodo(id,presetDate){
   const t=id?S.todos.find(x=>x.id===id):{id:uid(),text:'',date:presetDate||'',done:false};if(!t)return;
   const isNew=!id;let col=t.color||'';
   const colHtml=()=>`<button data-c="" class="${col?'':'on'}" style="background:conic-gradient(${TCOL.join(',')})" aria-label="自動"></button>`+TCOL.map(c=>`<button data-c="${c}" class="${col===c?'on':''}" style="background:${c}" aria-label="顏色"></button>`).join('');
+  const r0=repOf(t);
   openSheet(`<h2>${isNew?'新增待辦':'修改待辦'}<button data-x>取消</button></h2>
     <textarea id="etTxt" placeholder="要做什麼？">${esc(t.text)}</textarea>
-    <h3 id="etDateLbl">${t.monthly?'第一次的日期（之後每月同一天）':'開始日期（可不填）'}</h3><div class="row2"><input class="field" type="date" id="etDate" value="${t.date||''}"><button type="button" id="etNoDate" style="background:var(--hair);color:var(--fg)">不排日期</button></div>
-    <h3>時間（可不填）</h3><div class="row2"><input class="field" type="time" id="etTime" value="${t.time||''}"><button type="button" id="etNoTime" style="background:var(--hair);color:var(--fg)">不設時間</button></div>
-    <div class="opts" style="padding:12px 2px 0"><label>共 <input type="number" id="etDays" min="1" max="365" inputmode="numeric" value="${t.days||1}"> 天完成</label><label><input type="checkbox" id="etRep"${t.monthly?' checked':''}> 🔁 每月同一天</label></div>
+    <h3>提醒</h3>
+    <div class="form">
+      <label class="fr"><span>📅 日期</span><input type="date" id="etDate" value="${t.date||''}"></label>
+      <label class="fr"><span>⏰ 時間</span><input type="time" id="etTime" value="${t.time||''}"></label>
+      <label class="fr"><span>🔁 重複</span><select id="etRep"><option value="">無</option><option value="day">每天</option><option value="week">每週</option><option value="month">每月</option></select></label>
+      <label class="fr"><span>🔔 提早提醒</span><select id="etRem">${REMIND.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+      <label class="fr"><span>⏳ 幾天完成</span><input type="number" id="etDays" min="1" max="365" inputmode="numeric" value="${t.days||1}"></label>
+      <label class="fr"><span>📲 新增至 iPhone 行事曆<small>由 iPhone 準時跳通知</small></span><input type="checkbox" id="etCal" class="sw2"${t.cal?' checked':''}></label>
+    </div>
+    <div class="small" style="margin-top:6px">沒填時間的話，行事曆會在當天早上 9:00 提醒。</div>
     <h3>顏色（月曆上的橫條）</h3><div class="cols" id="etCol">${colHtml()}</div>
-    <button class="btn" id="etSave">${isNew?'新增':'儲存'}</button>${isNew?'':`<button class="btn red" id="etDel">${t.monthly?'刪除（所有月份）':'刪除'}</button>`}`);
+    <button class="btn" id="etSave">${isNew?'新增':'儲存'}</button>
+    ${isNew?'':`<button class="btn gray" id="etIcs">📲 再加一次到 iPhone 行事曆</button><button class="btn red" id="etDel">${r0?'刪除（全部重複）':'刪除'}</button>`}`);
+  $('etRep').value=r0;$('etRem').value=String(t.remind||0);
   if(isNew)setTimeout(()=>$('etTxt').focus(),50);
-  $('etNoDate').onclick=()=>{$('etDate').value='';$('etRep').checked=false};
-  $('etNoTime').onclick=()=>$('etTime').value='';
   $('etCol').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;col=b.dataset.c;$('etCol').innerHTML=colHtml()};
-  $('etRep').onchange=()=>$('etDateLbl').textContent=$('etRep').checked?'第一次的日期（之後每月同一天）':'開始日期（可不填）';
-  $('etSave').onclick=()=>{
-    const v=$('etTxt').value.trim();if(!v)return toast('請輸入要做的事');
-    const days=Math.max(1,Math.min(365,parseInt($('etDays').value)||1)),rep=$('etRep').checked,tm=$('etTime').value;
-    let date=$('etDate').value||'';if((days>1||rep||tm)&&!date)date=ymd(today);
+  const collect=()=>{
+    const v=$('etTxt').value.trim();if(!v){toast('請輸入要做的事');return false}
+    const days=Math.max(1,Math.min(365,parseInt($('etDays').value)||1)),rp=$('etRep').value,tm=$('etTime').value,rem=+$('etRem').value,cal=$('etCal').checked;
+    let date=$('etDate').value||'';if((days>1||rp||tm||cal)&&!date)date=ymd(today);
     t.text=v;t.date=date;if(days>1)t.days=days;else delete t.days;
     if(tm)t.time=tm;else delete t.time;
+    if(rem)t.remind=rem;else delete t.remind;
     if(col)t.color=col;else delete t.color;
-    if(rep){t.monthly=true;t.doneM=t.doneM||{}}else{delete t.monthly;delete t.doneM}
+    delete t.monthly;if(rp){t.repeat=rp;t.doneM=t.doneM||{}}else{delete t.repeat;delete t.doneM}
+    if(cal)t.cal=true;else delete t.cal;
+    return true;
+  };
+  $('etSave').onclick=()=>{
+    const wasCal=!!t.cal,changed=isNew||JSON.stringify([t.text,t.date,t.time,t.repeat||(t.monthly?'month':''),t.remind,t.days]);
+    if(!collect())return;
     if(isNew)S.todos.push(t);
     save();closeSheet();if(isNew)toast('已新增');
+    const now=JSON.stringify([t.text,t.date,t.time,t.repeat,t.remind,t.days]);
+    if(t.cal&&(isNew||!wasCal||changed!==now))addToCalendar(t,!isNew&&wasCal);
   };
-  const del=$('etDel');if(del)del.onclick=async()=>{if(!await ask(t.monthly?'刪除這個每月待辦？所有月份都會一起刪掉。':'刪除這個待辦？','刪除',true))return;S.todos=S.todos.filter(x=>x.id!==id);save();closeSheet()};
+  const ic=$('etIcs');if(ic)ic.onclick=()=>{if(!collect())return;save();closeSheet();addToCalendar(t,false)};
+  const del=$('etDel');if(del)del.onclick=async()=>{if(!await ask(r0?'刪除這個重複待辦？所有日期都會一起刪掉。':'刪除這個待辦？','刪除',true))return;
+    S.todos=S.todos.filter(x=>x.id!==id);save();closeSheet();if(t.cal)toast('記得到 iPhone 行事曆把這個提醒也刪掉')};
 }
+// 產生 .ics 行事曆檔，交給 iPhone 的「行事曆」加入並準時提醒
+function icsOf(t){
+  const e=x=>String(x).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/([,;])/g,'\\$1');
+  const dt=k=>k.replace(/-/g,''),now=new Date(),stamp=now.toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  const due=dueOf(t.date,t.days),rp=repOf(t),rem=t.remind||0,L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//shift-helper//TW','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+    'UID:'+t.id+'@shift-helper','DTSTAMP:'+stamp,'SUMMARY:'+e(t.text)];
+  if(t.time){
+    const[h,mi]=t.time.split(':').map(Number),st=parse(t.date);st.setHours(h,mi);
+    const en=t.days>1?(()=>{const x=parse(due);x.setHours(h,mi+30);return x})():new Date(+st+30*60000);
+    const f=d=>ymd(d).replace(/-/g,'')+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+    L.push('DTSTART:'+f(st),'DTEND:'+f(en));
+  }else L.push('DTSTART;VALUE=DATE:'+dt(t.date),'DTEND;VALUE=DATE:'+dt(ymd(addDays(parse(due),1))));
+  if(rp)L.push('RRULE:FREQ='+{day:'DAILY',week:'WEEKLY',month:'MONTHLY'}[rp]);
+  // 有時間：提早 N 分鐘；全天：當天 9:00 再往前 N 分鐘
+  const m=t.time?-rem:540-rem;
+  L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e(t.text),'TRIGGER:'+(m<0?'-':'')+'PT'+Math.abs(m)+'M','END:VALARM','END:VEVENT','END:VCALENDAR');
+  return L.join('\r\n')+'\r\n';
+}
+function addToCalendar(t,again){
+  const url='data:text/calendar;charset=utf-8,'+encodeURIComponent(icsOf(t));
+  openSheet(`<h2>加到 iPhone 行事曆<button data-x>關閉</button></h2>
+    <div class="small">${again?'修改過的待辦要重新加一次，<b>舊的那筆請到「行事曆」刪掉</b>，以免重複提醒。<br>':''}按下面的按鈕，iPhone 會問要不要加入行事曆，選「加入全部」或「加入」。之後時間到，iPhone 會跳通知，App 沒開也會響。</div>
+    <a class="btn" id="icsGo" href="${url}" style="text-align:center;text-decoration:none">📲 加入「${esc(t.text)}」</a>
+    <div class="small" style="margin-top:10px">如果按了沒有反應：先用 Safari 開這個 App 的網址再按一次。</div>`);
+}
+
 function updateBadge(){
   const tk=ymd(today),n=listItems().filter(i=>!i.done&&i.date&&i.date<=tk).length;
   $('todoN').hidden=!n;$('todoN').textContent=n;
@@ -950,6 +1030,7 @@ $('menuBtn').onclick=()=>{
     <button class="btn" data-m="cycle">🔁 排班循環</button>
     <button class="btn" data-m="types">🎨 班別設定</button>
     <button class="btn" data-m="clear">🧹 清除本月班別</button>
+    <button class="btn" data-m="look">🌓 外觀（深色模式）</button>
     <button class="btn" data-m="hol">🎌 國定假日</button>
     <button class="btn" data-m="wipe" style="color:var(--danger)">🗑 清除所有排班</button>
     <button class="btn" data-m="reset" style="color:var(--danger)">♻️ 重設 App（清除全部資料）</button>
@@ -959,7 +1040,7 @@ $('menuBtn').onclick=()=>{
   </div><p class="small" style="text-align:center;margin-top:14px">班表小幫手 ${APP_VER}</p>`);
   $('sheet').querySelector('.menu').onclick=e=>{
     const m=e.target.closest('[data-m]');if(!m)return;
-    ({cycle:openCycle,hol:openHol,types:openTypes,clear:clearMonth,wipe:wipeShifts,reset:resetApp,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
+    ({cycle:openCycle,look:openLook,hol:openHol,types:openTypes,clear:clearMonth,wipe:wipeShifts,reset:resetApp,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
   };
 };
 const fmtYMD=k=>{const d=parse(k);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`};
@@ -1054,6 +1135,27 @@ function openTypes(){
   };
   $('tyAdd').onclick=()=>{collect();S.types.push({id:'t'+uid(),name:'新班別',color:'#ffd6e0'});$('tyList').innerHTML=rows()};
   $('tySave').onclick=()=>{collect();save();if(brush&&brush!==BLANK&&brush!=='auto'&&!typeById(brush))brush=null;if(editing)renderPalette();closeSheet();toast('已儲存')};
+}
+// 外觀：auto 跟隨手機、light、dark、time 依時間（白天淺色、晚上深色）
+const LOOK=[['auto','跟隨手機設定'],['light','淺色'],['dark','深色'],['time','依時間自動切換']];
+function applyTheme(){
+  const th=S.theme||{mode:'auto'},root=document.documentElement;let m=th.mode;
+  if(m==='time'){const n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes()),a=th.day||'06:00',b=th.night||'18:00';
+    m=(a<=b?(hm>=a&&hm<b):(hm>=a||hm<b))?'light':'dark'}
+  if(m==='light'||m==='dark')root.dataset.theme=m;else delete root.dataset.theme;
+  const meta=document.querySelector('meta[name=theme-color]');
+  if(meta)meta.content=getComputedStyle(root).getPropertyValue('--surface').trim()||'#ffffff';
+}
+function openLook(){
+  const th=S.theme||{mode:'auto'};
+  openSheet(`<h2>外觀<button data-x>關閉</button></h2>
+    <div class="form" id="lkList">${LOOK.map(([v,l])=>`<label class="fr"><span>${l}${v==='auto'?'<small>手機設定成深色，App 就是深色</small>':v==='time'?'<small>白天淺色、晚上深色</small>':''}</span><input type="radio" name="lk" value="${v}"${th.mode===v?' checked':''}></label>`).join('')}</div>
+    <div id="lkTime" ${th.mode==='time'?'':'hidden'}><h3>時間</h3><div class="form">
+      <label class="fr"><span>☀️ 淺色開始</span><input type="time" id="lkDay" value="${th.day||'06:00'}"></label>
+      <label class="fr"><span>🌙 深色開始</span><input type="time" id="lkNight" value="${th.night||'18:00'}"></label></div></div>`);
+  const upd=()=>{const v=($('lkList').querySelector('input:checked')||{}).value||'auto';
+    S.theme={mode:v,day:$('lkDay').value||'06:00',night:$('lkNight').value||'18:00'};$('lkTime').hidden=v!=='time';save();applyTheme()};
+  $('lkList').onchange=upd;$('lkDay').onchange=$('lkNight').onchange=upd;
 }
 function openHol(){
   const ot=offType(),ys=[...new Set(Object.keys(HOLIDAYS).map(k=>k.slice(0,4)))];
@@ -1156,7 +1258,31 @@ document.addEventListener('visibilitychange',()=>{
   const n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());
   if(+t!==+today){today=t;renderAll()}
 });
+// App 開著時，到了待辦的提醒時間就跳出橫幅
+function checkReminders(){
+  if($('remBar'))return;
+  const now=new Date(),tk=ymd(now);S.rem=S.rem||{};
+  const it=todoItems(ymAdd(ymOf(tk),-1),ymAdd(ymOf(tk),1)).find(i=>{
+    if(i.done||!i.t.time||!i.date)return false;
+    const[h,mi]=i.t.time.split(':').map(Number),at=parse(i.date);at.setHours(h,mi);const fire=+at-(i.t.remind||0)*60000;
+    return now>=fire&&now-fire<6*3600000&&!S.rem[i.key];
+  });
+  if(!it)return;
+  const b=document.createElement('div');b.id='remBar';
+  b.innerHTML=`<div class="ic">⏰</div><div class="tx"><b>${esc(it.t.text)}</b><span>${fmtMD(it.date)} ${it.t.time}</span></div><button class="ok" data-a="done">完成</button><button data-a="ok">知道了</button>`;
+  b.onclick=e=>{const a=e.target.closest('[data-a]');if(!a)return;S.rem[it.key]=1;
+    if(a.dataset.a==='done')toggleItem(it.key);
+    // 只留最近的紀錄
+    const ks=Object.keys(S.rem);if(ks.length>200)ks.slice(0,ks.length-200).forEach(k=>delete S.rem[k]);
+    save();b.remove();renderAll();setTimeout(checkReminders,300)};
+  document.body.appendChild(b);
+  try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}
+}
+setInterval(()=>{applyTheme();checkReminders()},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){applyTheme();checkReminders()}});
+applyTheme();
 renderAll();
+setTimeout(checkReminders,800);
 if('serviceWorker' in navigator&&location.protocol==='https:'&&window.top===window)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
