@@ -24,6 +24,7 @@ iPhone 用的月曆班表網頁 App。純靜態網站，沒有建置步驟，部
   - `memos`（備忘錄，`files: [{id, type:'draw'|'audio', at, dur}]`；手寫 PNG／錄音檔本身存在 IndexedDB `shift-helper-files` 的 `files` store，用 `fileGet/filePut/fileDel`，不在匯出備份裡）、`todos`（`date`、`time` 時間、`color` 月曆橫條顏色（沒設就依 id 自動配色，`colorOf()`）、`days` 幾天完成、`repeat` 重複 `day`/`week`/`month`（舊資料 `monthly:true`＝每月，用 `repOf()` 讀）＋`doneM` 完成狀態（每月用 `YYYY-MM`、每天／每週用日期當 key）、`remind` 提早幾分鐘、`cal` 已加入 iPhone 行事曆）
   - `theme`：外觀 `{mode:'auto'|'light'|'dark'|'time', day, night}`（`applyTheme()`）
   - `rem`：App 開著時已跳過的提醒（`checkReminders()`）
+  - `calTodo`：班表上待辦的顯示方式 `bar` 彩色橫條（預設）／`num` 紅色數字／`off`（`renderCal()`，一週一列 `.wrow`，最多 2 條）
   - `todoView`：待辦分頁顯示「月曆」(`cal`，`renderTodoCal()`) 或「清單」(`list`，`renderTodoList()`)
   - `hol`（`show` 顯示國定假日、`off` 國定假日自動排休）
 - 某天班別 `shiftOf()`：手動設定 → 國定假日排休（有開才算）→ 排班循環（`cycleAt()`）。

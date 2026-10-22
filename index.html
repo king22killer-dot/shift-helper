@@ -76,7 +76,15 @@ main.fit{overflow:hidden}
 .week,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 .week{flex:none}
 .week div{text-align:center;font-size:13px;padding:3px 0}
-.grid{flex:1;min-height:0;grid-template-rows:repeat(6,minmax(0,1fr));border:1px solid var(--line);background:var(--line);gap:1px}
+.grid{flex:1;min-height:0;display:flex!important;flex-direction:column;border:1px solid var(--line);background:var(--line);gap:1px}
+.wrow{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;position:relative}
+.wrow.l1 .cell,.wrow.l2 .cell{justify-content:flex-start;gap:2px;padding-top:2px}
+.wrow.l1 .cell .hn,.wrow.l2 .cell .hn{margin:0}
+.wrow .cell .d,.wrow .cell .s{line-height:1.15}
+.cbar{position:absolute;z-index:1;height:12px;font-size:9px;line-height:12px;border-radius:3px;padding:0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;font-weight:600}
+.cbar.late{background:#9aa3ae!important;color:#fff!important}
+.cbar.dim{opacity:.5}
+.cell .more{position:absolute;top:1px;left:2px;font-size:9px;font-weight:600;color:inherit;opacity:.8}
 .cell{position:relative;min-height:0;background:var(--cell);color:var(--fg);display:flex;flex-direction:column;align-items:center;
   justify-content:space-evenly;padding:2px 0;overflow:hidden;font-variant-numeric:tabular-nums}
 .cell .d{font-size:18px}
@@ -367,7 +375,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v15（2026-10-22）';
+const APP_VER='v16（2026-10-22）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -386,7 +394,7 @@ const HELP=[
   '【每月固定】勾「🔁 每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
   '【清除排班】選單 →「清除本月班別」把正在看的這個月全部變成空白（連循環的班也清掉，備註保留）；「清除所有排班」會清掉全部手動班別和排班循環，備註、備忘錄、待辦會保留。',
   '【國定假日】內建 2026、2027 年國定假日（含補假），日期下方會標出節日（紅字），補假用黃底咖啡字標示「補假」，點那天可看是哪個節日的補假。選單 →「國定假日」可以關掉顯示，或讓國定假日自動排成休假（手動設定的日子優先）。',
-  '【過期待辦】月曆上的紅色數字是還沒做的待辦；如果那天的待辦都已經過期沒處理，數字會變成灰色。',
+  '【班表上的待辦】還沒做的待辦會在班表格子下方畫成彩色橫條（好幾天的連成一條），過期沒做的是灰色，一週最多兩條，放不下的會在格子左上顯示「+1」。選單 →「外觀」可以改成紅色數字或不顯示。',
   '【班別設定】選單 →「班別設定」：可以新增、改名、改顏色或刪除班別。',
   '【分享】按右上分享鍵，把本月班表做成圖片，長按圖片即可儲存或傳 LINE。',
   '【重設】選單 →「重設 App」會刪除全部資料（班表、循環、備忘錄、待辦、設定）並重新載入，畫面卡住或想從頭開始時使用。',
@@ -537,13 +545,40 @@ function renderCal(){
   $('todayBtn').classList.toggle('hide',view.getFullYear()===today.getFullYear()&&view.getMonth()===today.getMonth());
   const tk=ymd(today),cnt={},cells=monthCells();
   calItems=todoItems(ymAdd(ymOf(ymd(cells[0])),-1),ymOf(ymd(cells[41])));
-  $('grid').innerHTML=cells.map(d=>{
-    const k=ymd(d),t=shiftOf(k),out=d.getMonth()!==view.getMonth(),e=S.days[k],ot=openTodos(k),n=ot.length,hn=S.hol.show?HOLIDAYS[k]:'';
-    if(!out&&t)cnt[t.id]=(cnt[t.id]||0)+1;
-    const name=t?t.name:'';
-    const cls=['cell',out?'out':'',k===tk?'today':'',name.length>=4?'s4':name.length===3?'s3':''].join(' ');
-    return `<div class="${cls}${hn?' hol':''}" data-k="${k}" style="${out?'':paint(t)}"><span class="d">${d.getDate()}</span>${hn?(hn.includes('補假')?`<span class="hn mk" title="${hn}">補假</span>`:`<span class="hn">${hn}</span>`):''}<span class="s">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}${n?`<span class="td${allLate(ot)?' old':''}">${n}</span>`:''}</div>`;
-  }).join('');
+  const mode=S.calTodo||'bar';let html='';
+  // 依每列實際高度決定能畫幾條（放不下就改用數字）
+  const gh=$('grid').clientHeight,rowH=gh?(gh-7)/6:84;
+  for(let w=0;w<6;w++){
+    const wk=cells.slice(w*7,w*7+7),wsK=ymd(wk[0]),weK=ymd(wk[6]);
+    // 這週要畫的橫條（沒做完的待辦；已完成的不畫）
+    let bars='',hidden=Array(7).fill(0),used=0;
+    const rowHol=S.hol.show&&wk.some(d=>HOLIDAYS[ymd(d)]),LANES=Math.max(0,Math.min(2,Math.floor((rowH-(rowHol?56:42))/13)));
+    const rowMode=mode==='bar'&&!LANES?'num':mode;
+    if(rowMode==='bar'){
+      const segs=calItems.filter(i=>!i.done&&i.date&&i.date<=weK&&i.due>=wsK).map(i=>({i,
+        a:i.date<wsK?0:dayNum(parse(i.date))-dayNum(wk[0]),b:i.due>weK?6:dayNum(parse(i.due))-dayNum(wk[0])}))
+        .sort((x,z)=>x.a-z.a||(z.b-z.a)-(x.b-x.a)||((x.i.t.time||'99')<(z.i.t.time||'99')?-1:1));
+      const lanes=[];
+      segs.forEach(sg=>{
+        let L=0;while(lanes[L]&&lanes[L].some(o=>!(sg.b<o.a||sg.a>o.b)))L++;
+        if(L>=LANES){for(let c=sg.a;c<=sg.b;c++)hidden[c]++;return}
+        (lanes[L]=lanes[L]||[]).push(sg);used=Math.max(used,L+1);
+        const c=colorOf(sg.i.t),late=sg.i.due<tk,dim=wk[sg.a].getMonth()!==view.getMonth()&&wk[sg.b].getMonth()!==view.getMonth();
+        bars+=`<span class="cbar${late?' late':''}${dim?' dim':''}" style="bottom:${2+L*13}px;left:calc(${sg.a}*(100% + 1px)/7 + 2px);width:calc(${sg.b-sg.a+1}*(100% + 1px)/7 - 5px);background:${c};color:${onColor(c)}">${esc(sg.i.t.text)}</span>`;
+      });
+    }
+    html+=`<div class="wrow${used?' l'+used:''}">`+wk.map((d,c)=>{
+      const k=ymd(d),t=shiftOf(k),out=d.getMonth()!==view.getMonth(),e=S.days[k],hn=S.hol.show?HOLIDAYS[k]:'';
+      if(!out&&t)cnt[t.id]=(cnt[t.id]||0)+1;
+      const name=t?t.name:'';
+      const cls=['cell',out?'out':'',k===tk?'today':'',name.length>=4?'s4':name.length===3?'s3':''].join(' ');
+      let badge='';
+      if(rowMode==='num'){const ot=openTodos(k);if(ot.length)badge=`<span class="td${allLate(ot)?' old':''}">${ot.length}</span>`}
+      else if(rowMode==='bar'&&hidden[c])badge=`<span class="more">+${hidden[c]}</span>`;
+      return `<div class="${cls}${hn?' hol':''}" data-k="${k}" style="${out?'':paint(t)}"><span class="d">${d.getDate()}</span>${hn?(hn.includes('補假')?`<span class="hn mk" title="${hn}">補假</span>`:`<span class="hn">${hn}</span>`):''}<span class="s">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}${badge}</div>`;
+    }).join('')+bars+'</div>';
+  }
+  $('grid').innerHTML=html;
   $('stats').innerHTML=S.types.filter(t=>cnt[t.id]).map(t=>`<span><i class="dot" style="background:${t.color}"></i>${esc(t.name)} ${cnt[t.id]} 天</span>`).join('');
   $('editBtn').classList.toggle('on',editing);
 }
@@ -1030,7 +1065,7 @@ $('menuBtn').onclick=()=>{
     <button class="btn" data-m="cycle">🔁 排班循環</button>
     <button class="btn" data-m="types">🎨 班別設定</button>
     <button class="btn" data-m="clear">🧹 清除本月班別</button>
-    <button class="btn" data-m="look">🌓 外觀（深色模式）</button>
+    <button class="btn" data-m="look">🌓 外觀（深色模式、待辦顯示）</button>
     <button class="btn" data-m="hol">🎌 國定假日</button>
     <button class="btn" data-m="wipe" style="color:var(--danger)">🗑 清除所有排班</button>
     <button class="btn" data-m="reset" style="color:var(--danger)">♻️ 重設 App（清除全部資料）</button>
@@ -1152,7 +1187,9 @@ function openLook(){
     <div class="form" id="lkList">${LOOK.map(([v,l])=>`<label class="fr"><span>${l}${v==='auto'?'<small>手機設定成深色，App 就是深色</small>':v==='time'?'<small>白天淺色、晚上深色</small>':''}</span><input type="radio" name="lk" value="${v}"${th.mode===v?' checked':''}></label>`).join('')}</div>
     <div id="lkTime" ${th.mode==='time'?'':'hidden'}><h3>時間</h3><div class="form">
       <label class="fr"><span>☀️ 淺色開始</span><input type="time" id="lkDay" value="${th.day||'06:00'}"></label>
-      <label class="fr"><span>🌙 深色開始</span><input type="time" id="lkNight" value="${th.night||'18:00'}"></label></div></div>`);
+      <label class="fr"><span>🌙 深色開始</span><input type="time" id="lkNight" value="${th.night||'18:00'}"></label></div></div>
+    <h3>班表上顯示待辦</h3><div class="form" id="lkTodo">${[['bar','彩色橫條','跟待辦月曆一樣，過期沒做的是灰色'],['num','紅色數字','只顯示那天有幾件'],['off','不顯示','']].map(([v,l,d])=>`<label class="fr"><span>${l}${d?`<small>${d}</small>`:''}</span><input type="radio" name="lkt" value="${v}"${(S.calTodo||'bar')===v?' checked':''}></label>`).join('')}</div>`);
+  $('lkTodo').onchange=()=>{S.calTodo=$('lkTodo').querySelector('input:checked').value;save();renderCal()};
   const upd=()=>{const v=($('lkList').querySelector('input:checked')||{}).value||'auto';
     S.theme={mode:v,day:$('lkDay').value||'06:00',night:$('lkNight').value||'18:00'};$('lkTime').hidden=v!=='time';save();applyTheme()};
   $('lkList').onchange=upd;$('lkDay').onchange=$('lkNight').onchange=upd;
@@ -1251,6 +1288,7 @@ $('shareBtn').onclick=()=>{
     <img src="${url}" alt="本月班表圖片" style="width:100%;margin-top:8px;border-radius:8px;-webkit-touch-callout:default">`);
 };
 
+window.addEventListener('resize',()=>{if(tab==='cal')renderCal()});
 let tt;
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1700)}
 document.addEventListener('visibilitychange',()=>{
