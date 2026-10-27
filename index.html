@@ -4,45 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="班表小幫手">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#151d4b">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <title>班表小幫手</title>
 <style>
-/* 版面：iOS 風格頂欄＋藍色紙紋底的月曆，下方分頁列切換 班表／備忘錄／待辦 */
+/* 版面：沿用「薪資出勤」的設計——深藍漸層頂欄、淺灰藍底、白色圓角卡片與日期格、底部分頁列（藍色底線） */
 :root{
-  --bg1:#dbe7f5;--bg2:#c9daef;--dot1:rgba(255,255,255,.55);--dot2:rgba(120,150,200,.18);
-  --surface:#ffffff;--sheet:#f4f6f9;--fg:#141922;--muted:#5f6b7a;--line:#8f969f;--hair:#d9dee6;
-  --cell:#ffffff;--out:#d3dfef;--outfg:#8a94a3;--accent:#2f7de1;--icon:#4a78b0;
-  --today:#7ef25a;--todayline:#2c9b12;--danger:#e5484d;--warn:#c2410c;--chipline:#b4bcc8;--input:#ffffff;
-  --badge:#e5484d;--soft:rgba(255,255,255,.72);
-  --font:-apple-system,BlinkMacSystemFont,"PingFang TC","Heiti TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --bg:#f1f4f9;--surface:#ffffff;--sheet:#ffffff;--fg:#0f1f3d;--ink2:#334155;--muted:#64748b;--line:#e2e8f0;--hair:#e2e8f0;
+  --cell:#ffffff;--out:#f8fafc;--outfg:#a3b0c2;--accent:#2549e0;--icon:#1e2f7d;--navy:#1e2f7d;--sky:#eef4ff;
+  --today:#fffbeb;--todayline:#fbbf24;--danger:#dc2626;--warn:#b45309;--chipline:#cbd5e1;--input:#ffffff;
+  --badge:#dc2626;--soft:#f1f5f9;--sun:#dc2626;--sat:#2549e0;--notebg:#fef3c7;--notefg:#78350f;
+  --hdr:linear-gradient(135deg,#151d4b,#1e339e 55%,#2549e0);--grad:linear-gradient(135deg,#1e339e,#2549e0);
+  --shadow:0 4px 6px -1px rgba(15,23,42,.06),0 2px 4px -2px rgba(15,23,42,.05);--shadow-sm:0 1px 2px rgba(15,23,42,.05);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg1:#142030;--bg2:#0e1622;--dot1:rgba(255,255,255,.05);--dot2:rgba(120,160,220,.08);
-  --surface:#1a2332;--sheet:#131b27;--fg:#e8edf5;--muted:#9aa6b8;--line:#3d4a5d;--hair:#2a3546;
-  --cell:#1f2a3a;--out:#16202d;--outfg:#5f6d82;--accent:#5aa0ff;--icon:#8fb4e6;
-  --today:#6fe04c;--todayline:#9bf77c;--danger:#ff6b6f;--warn:#fb923c;--chipline:#4a5568;--input:#0f1622;
-  --badge:#ff6b6f;--soft:rgba(26,35,50,.8);color-scheme:dark}}
+  --bg:#0b1220;--surface:#131c2e;--sheet:#131c2e;--fg:#e2e8f0;--ink2:#cbd5e1;--muted:#94a3b8;--line:#26334d;--hair:#26334d;
+  --cell:#162036;--out:#0f1729;--outfg:#4b5b75;--accent:#6d8bff;--icon:#a5b8ff;--navy:#a5b8ff;--sky:#1c2740;
+  --today:#2a2310;--todayline:#f59e0b;--danger:#f87171;--warn:#fbbf24;--chipline:#334155;--input:#0f1729;
+  --badge:#f87171;--soft:#1c2740;--sun:#f87171;--sat:#7c9cff;--notebg:#2e2610;--notefg:#fcd34d;
+  --hdr:linear-gradient(135deg,#0a0f2c,#14236b 55%,#1d3bb8);--grad:linear-gradient(135deg,#1e339e,#3b5bff);
+  --shadow:0 4px 10px rgba(0,0,0,.35);--shadow-sm:0 1px 2px rgba(0,0,0,.3);color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg1:#142030;--bg2:#0e1622;--dot1:rgba(255,255,255,.05);--dot2:rgba(120,160,220,.08);
-  --surface:#1a2332;--sheet:#131b27;--fg:#e8edf5;--muted:#9aa6b8;--line:#3d4a5d;--hair:#2a3546;
-  --cell:#1f2a3a;--out:#16202d;--outfg:#5f6d82;--accent:#5aa0ff;--icon:#8fb4e6;
-  --today:#6fe04c;--todayline:#9bf77c;--danger:#ff6b6f;--warn:#fb923c;--chipline:#4a5568;--input:#0f1622;
-  --badge:#ff6b6f;--soft:rgba(26,35,50,.8);color-scheme:dark}
+  --bg:#0b1220;--surface:#131c2e;--sheet:#131c2e;--fg:#e2e8f0;--ink2:#cbd5e1;--muted:#94a3b8;--line:#26334d;--hair:#26334d;
+  --cell:#162036;--out:#0f1729;--outfg:#4b5b75;--accent:#6d8bff;--icon:#a5b8ff;--navy:#a5b8ff;--sky:#1c2740;
+  --today:#2a2310;--todayline:#f59e0b;--danger:#f87171;--warn:#fbbf24;--chipline:#334155;--input:#0f1729;
+  --badge:#f87171;--soft:#1c2740;--sun:#f87171;--sat:#7c9cff;--notebg:#2e2610;--notefg:#fcd34d;
+  --hdr:linear-gradient(135deg,#0a0f2c,#14236b 55%,#1d3bb8);--grad:linear-gradient(135deg,#1e339e,#3b5bff);
+  --shadow:0 4px 10px rgba(0,0,0,.35);--shadow-sm:0 1px 2px rgba(0,0,0,.3);color-scheme:dark}
 /* 一個螢幕的 App 版面：頂欄／內容（班表不捲動，清單在內容區內捲動）／分頁列 */
 html{height:100%;overflow:hidden}
 body{margin:0;height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-body{font-family:var(--font);color:var(--fg);background:var(--bg1);
-  background-image:radial-gradient(circle at 20% 30%,var(--dot1) 0 2px,transparent 3px),
-    radial-gradient(circle at 70% 60%,var(--dot1) 0 1.5px,transparent 3px),
-    radial-gradient(circle at 40% 80%,var(--dot2) 0 2px,transparent 4px),
-    linear-gradient(135deg,var(--bg1),var(--bg2));
-  background-size:23px 23px,31px 31px,41px 41px,100% 100%;
+body{font-family:var(--font);color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased;
   -webkit-user-select:none;user-select:none;overscroll-behavior:none;font-size:15px}
 button{font-family:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -309,10 +307,111 @@ body.editing #tabs{display:none}
   color:#fff;padding:9px 16px;border-radius:20px;font-size:15px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){.cell.flash{animation:none}#toast{transition:none}}
+
+/* ===== 薪資出勤風格 ===== */
+header{background:var(--hdr);color:#fff;border:0;height:auto;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 12px;box-shadow:0 10px 15px -3px rgba(30,47,125,.2);gap:8px}
+header h1{text-align:left;display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;letter-spacing:.5px}
+header h1 .logo{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.15);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+header h1 .logo svg{width:20px;height:20px}
+header .menu-btn{width:auto;display:flex;align-items:center;gap:6px;color:#fff;text-decoration:none;font-size:15px;font-weight:600;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);border-radius:12px;padding:8px 12px}
+header .menu-btn svg{width:18px;height:18px}
+main{padding-top:12px}
+.sample{background:var(--notebg);color:var(--notefg);border:0;border-radius:12px}
+.sample button{background:var(--grad);border-radius:10px;font-weight:600}
+/* 工具列 */
+.bar{height:48px;margin-bottom:4px}
+.ico{width:40px;height:40px;padding:0;display:grid;place-items:center;border-radius:12px;background:var(--surface);color:var(--navy);box-shadow:var(--shadow-sm),inset 0 0 0 1px var(--line);margin-left:6px}
+.ico svg{width:24px;height:24px}
+.ico.on{background:var(--grad);color:#fff;box-shadow:0 4px 10px rgba(29,58,196,.3)}
+.nav{gap:6px}
+.nav button{width:36px;height:36px;padding:0;display:grid;place-items:center;border-radius:12px;background:var(--surface);color:var(--navy);box-shadow:var(--shadow-sm),inset 0 0 0 1px var(--line)}
+.nav svg{width:14px;height:12px}
+.nav .title{font-size:18px;font-weight:700;color:var(--navy);min-width:112px}
+.week div{font-size:13px;font-weight:600;color:var(--muted);padding:2px 0 5px}
+.week div:first-child{color:var(--sun)}.week div:last-child{color:var(--sat)}
+/* 月曆格 */
+.grid{background:none;border:0;gap:4px}
+.wrow{gap:4px}
+.cell{border-radius:12px;background:var(--cell);border:1px solid var(--line);box-shadow:var(--shadow-sm);justify-content:flex-start;gap:3px;padding:4px 1px}
+.cell .d{font-size:15px;font-weight:700;color:var(--ink2);line-height:1.2}
+.cell.sun .d{color:var(--sun)}.cell.sat .d{color:var(--sat)}
+.cell .s{font-size:12px;font-weight:700;line-height:16px;border-radius:6px;padding:0 5px;max-width:calc(100% - 2px);overflow:hidden;letter-spacing:0;background:var(--soft);color:var(--muted)}
+.cell .s:empty{display:none}
+.cell.s3 .s{font-size:11px;padding:0 3px}
+.cell.s4 .s{font-size:10px;padding:0 2px}
+.cell.out{background:var(--out)!important;border-color:transparent;box-shadow:none}
+.cell.out .d{color:var(--outfg)!important}
+.cell.out .s{opacity:.45}
+.cell.today{background:var(--today)!important;border:2px solid var(--todayline);color:inherit!important}
+.cell.today::after{display:none}
+.cell .hn{margin:0;font-size:10px;line-height:14px;border-radius:6px;padding:0 4px;background:#fee2e2;color:#b91c1c}
+.cell .hn.mk{background:#fef3c7;color:#92400e}
+.cell .star{color:var(--warn);top:2px;right:5px}
+.cell .td{top:3px;left:3px}
+.cell .more{color:var(--muted);top:3px;left:auto;right:4px}
+.cell:has(.more) .star{top:14px}
+.wrow.l1 .cell,.wrow.l2 .cell{gap:2px;padding-top:3px}
+.wrow.hdot .cell .hn{display:none}
+.wrow.hdot .cell.hol .d{color:var(--sun)}
+.wrow.hdot .cell.hol .d::after{content:"";display:inline-block;width:5px;height:5px;border-radius:3px;background:var(--sun);margin-left:2px;vertical-align:super}
+.cbar{height:14px;line-height:14px;font-size:10px;border-radius:7px;padding:0 5px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.cbar.late{text-shadow:none}
+.stats{margin-top:8px}
+.stats span{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink2);font-weight:500}
+/* 分頁列 */
+#tabs{background:color-mix(in srgb,var(--surface) 95%,transparent);border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -4px 20px rgba(15,31,61,.06);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#tabs button{font-size:12px;font-weight:500;color:#94a3b8;padding:8px 0 8px;min-height:58px}
+#tabs button svg{width:24px;height:24px;stroke-width:1.9}
+#tabs button.on{color:var(--accent)}
+#tabs button.on::after{content:"";position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:44px;height:3px;border-radius:3px;background:var(--accent)}
+#palette{border-radius:16px 16px 0 0;border-top:1px solid var(--line)}
+/* 標題、卡片 */
+.panel-head h2{font-size:20px;font-weight:700;color:var(--navy)}
+.tcal,.plan,.list,.memo,.addwrap,.addbar,.cyrow,.form,.hlist,.tgl,.minilist{border-radius:12px;border-color:color-mix(in srgb,var(--line) 70%,transparent);box-shadow:var(--shadow)}
+.memo b{color:var(--navy)}
+.group h3{font-weight:600}
+/* 按鈕 */
+.btn{border-radius:12px;min-height:46px;font-size:16px;font-weight:600;background:var(--grad);color:#fff;box-shadow:0 4px 10px rgba(29,58,196,.25)}
+.btn.gray{background:var(--soft);color:var(--navy);box-shadow:none}
+.btn.red{background:#fef2f2;color:#b91c1c;box-shadow:none}
+.menu .btn{background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:var(--shadow-sm);font-weight:500}
+.newbtn,.plan-h button,.addbar button,.row2 button,.sample button{background:var(--grad);border-radius:12px;font-weight:600}
+.chip{border-radius:999px;border:2px solid transparent;background:var(--soft);font-weight:600;min-height:40px}
+.chip.sel{border-color:var(--navy);box-shadow:inset 0 0 0 2px #fff}
+.seg{background:var(--surface);border-radius:14px;padding:4px;box-shadow:var(--shadow),inset 0 0 0 1px var(--line);gap:4px}
+.seg button{border-radius:10px;font-weight:600;color:var(--navy);padding:7px 14px}
+.seg button.on{background:var(--grad);color:#fff;box-shadow:0 4px 8px rgba(29,58,196,.25)}
+.field,.sheet textarea{border-radius:12px;border-color:var(--line);box-shadow:var(--shadow-sm)}
+.field:focus,.sheet textarea:focus{outline:none;border-color:#3b66f5;box-shadow:0 0 0 4px rgba(59,102,245,.15)}
+/* 待辦月曆 */
+.tnav button{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--surface);color:var(--navy);box-shadow:var(--shadow-sm),inset 0 0 0 1px var(--line)}
+.tnav svg{width:14px;height:12px}
+.tnav b{color:var(--navy)}
+.tweek span:first-child{color:var(--sun)}.tweek span:last-child{color:var(--sat)}
+.tday.today i{background:#f59e0b;color:#fff}
+.tday.sel{background:var(--sky)}
+.tbar{border-radius:7px;padding:0 5px;text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.prow .bx{border-radius:6px;border-color:var(--chipline)}
+.prow.done .bx{background:var(--accent);border-color:var(--accent)}
+/* 底部視窗、確認框、提示 */
+.mask{background:rgba(15,23,42,.4);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.sheet{background:var(--sheet);border-radius:24px 24px 0 0;padding-top:10px;box-shadow:0 -8px 30px rgba(15,31,61,.18)}
+.sheet::before{content:"";display:block;width:40px;height:6px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.sheet h2{color:var(--navy);font-weight:700}
+.sheet h3{color:var(--muted);font-weight:600;font-size:13px}
+#cfm{background:rgba(15,23,42,.4)}
+#cfm .box{border-radius:16px;padding:20px;box-shadow:0 25px 50px -12px rgba(15,23,42,.3)}
+#cfm .acts button{border-radius:12px;font-weight:600;background:var(--soft);color:var(--navy);min-height:44px}
+#cfm .acts .ok{background:var(--grad);color:#fff}
+#cfm .acts .ok.red{background:#dc2626}
+#toast{background:#1e2f7d;border-radius:999px;padding:10px 20px;font-size:14px;box-shadow:0 10px 15px -3px rgba(30,47,125,.3)}
+#remBar{border-radius:16px}
+#remBar button.ok{background:var(--grad)}
+#draw .tb.on{border-color:var(--accent)}
 </style>
 </head>
 <body>
-<header><div class="side"></div><h1>班表小幫手</h1><button class="menu-btn" id="menuBtn">選單</button></header>
+<header><h1><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M7.5 13.5h.01M12 13.5h.01M16.5 13.5h.01M7.5 17h.01M12 17h.01" stroke-width="2.6"/></svg></span>班表小幫手</h1><button class="menu-btn" id="menuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>選單</button></header>
 <main class="fit">
   <div class="sample" id="sampleBar" hidden><span>目前是範例資料，可以先點點看。</span><button id="sampleClr">清除範例，開始使用</button></div>
 
@@ -350,7 +449,7 @@ body.editing #tabs{display:none}
 </main>
 
 <nav id="tabs">
-  <button data-tab="cal" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>班表</button>
+  <button data-tab="cal" class="on"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M7.5 13.5h.01M12 13.5h.01M16.5 13.5h.01M7.5 17h.01M12 17h.01" stroke-width="2.6"/></svg>班表</button>
   <button data-tab="memo"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 12h8M8 16h6"/></svg>備忘錄</button>
   <button data-tab="todo"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/></svg>待辦<span class="n" id="todoN" hidden></span></button>
 </nav>
@@ -375,7 +474,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v16（2026-10-22）';
+const APP_VER='v17（2026-10-27）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -547,12 +646,15 @@ function renderCal(){
   calItems=todoItems(ymAdd(ymOf(ymd(cells[0])),-1),ymOf(ymd(cells[41])));
   const mode=S.calTodo||'bar';let html='';
   // 依每列實際高度決定能畫幾條（放不下就改用數字）
-  const gh=$('grid').clientHeight,rowH=gh?(gh-7)/6:84;
+  const gh=$('grid').clientHeight,rowH=gh?(gh-20)/6:84;
   for(let w=0;w<6;w++){
     const wk=cells.slice(w*7,w*7+7),wsK=ymd(wk[0]),weK=ymd(wk[6]);
     // 這週要畫的橫條（沒做完的待辦；已完成的不畫）
     let bars='',hidden=Array(7).fill(0),used=0;
-    const rowHol=S.hol.show&&wk.some(d=>HOLIDAYS[ymd(d)]),LANES=Math.max(0,Math.min(2,Math.floor((rowH-(rowHol?56:42))/13)));
+    // 格子內容約 44px，節日標籤再多 17px；放不下時把節日縮成日期旁的小紅點
+    const rowHol=S.hol.show&&wk.some(d=>HOLIDAYS[ymd(d)]),lanesOf=h=>Math.max(0,Math.min(2,Math.floor((rowH-h)/16)));
+    let LANES=lanesOf(rowHol?61:44),holDot=false;
+    if(rowHol&&mode==='bar'&&LANES<2&&lanesOf(44)>LANES&&calItems.some(i=>!i.done&&i.date&&i.date<=weK&&i.due>=wsK)){LANES=lanesOf(44);holDot=true}
     const rowMode=mode==='bar'&&!LANES?'num':mode;
     if(rowMode==='bar'){
       const segs=calItems.filter(i=>!i.done&&i.date&&i.date<=weK&&i.due>=wsK).map(i=>({i,
@@ -564,18 +666,18 @@ function renderCal(){
         if(L>=LANES){for(let c=sg.a;c<=sg.b;c++)hidden[c]++;return}
         (lanes[L]=lanes[L]||[]).push(sg);used=Math.max(used,L+1);
         const c=colorOf(sg.i.t),late=sg.i.due<tk,dim=wk[sg.a].getMonth()!==view.getMonth()&&wk[sg.b].getMonth()!==view.getMonth();
-        bars+=`<span class="cbar${late?' late':''}${dim?' dim':''}" style="bottom:${2+L*13}px;left:calc(${sg.a}*(100% + 1px)/7 + 2px);width:calc(${sg.b-sg.a+1}*(100% + 1px)/7 - 5px);background:${c};color:${onColor(c)}">${esc(sg.i.t.text)}</span>`;
+        bars+=`<span class="cbar${late?' late':''}${dim?' dim':''}" style="bottom:${3+L*16}px;left:calc(${sg.a}*(100% + 4px)/7 + 3px);width:calc(${sg.b-sg.a+1}*(100% + 4px)/7 - 10px);background:${c};color:${onColor(c)}">${esc(sg.i.t.text)}</span>`;
       });
     }
-    html+=`<div class="wrow${used?' l'+used:''}">`+wk.map((d,c)=>{
+    html+=`<div class="wrow${used?' l'+used:''}${holDot?' hdot':''}">`+wk.map((d,c)=>{
       const k=ymd(d),t=shiftOf(k),out=d.getMonth()!==view.getMonth(),e=S.days[k],hn=S.hol.show?HOLIDAYS[k]:'';
       if(!out&&t)cnt[t.id]=(cnt[t.id]||0)+1;
       const name=t?t.name:'';
-      const cls=['cell',out?'out':'',k===tk?'today':'',name.length>=4?'s4':name.length===3?'s3':''].join(' ');
+      const cls=['cell',out?'out':'',k===tk?'today':'',d.getDay()===0?'sun':d.getDay()===6?'sat':'',name.length>=4?'s4':name.length===3?'s3':''].join(' ');
       let badge='';
       if(rowMode==='num'){const ot=openTodos(k);if(ot.length)badge=`<span class="td${allLate(ot)?' old':''}">${ot.length}</span>`}
       else if(rowMode==='bar'&&hidden[c])badge=`<span class="more">+${hidden[c]}</span>`;
-      return `<div class="${cls}${hn?' hol':''}" data-k="${k}" style="${out?'':paint(t)}"><span class="d">${d.getDate()}</span>${hn?(hn.includes('補假')?`<span class="hn mk" title="${hn}">補假</span>`:`<span class="hn">${hn}</span>`):''}<span class="s">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}${badge}</div>`;
+      return `<div class="${cls}${hn?' hol':''}" data-k="${k}"><span class="d">${d.getDate()}</span>${hn?(hn.includes('補假')?`<span class="hn mk" title="${hn}">補假</span>`:`<span class="hn">${hn}</span>`):''}<span class="s" style="${t?chipStyle(t):''}">${esc(name)}</span>${e&&e.note?'<span class="star">*</span>':''}${badge}</div>`;
     }).join('')+bars+'</div>';
   }
   $('grid').innerHTML=html;
@@ -1178,8 +1280,9 @@ function applyTheme(){
   if(m==='time'){const n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes()),a=th.day||'06:00',b=th.night||'18:00';
     m=(a<=b?(hm>=a&&hm<b):(hm>=a||hm<b))?'light':'dark'}
   if(m==='light'||m==='dark')root.dataset.theme=m;else delete root.dataset.theme;
-  const meta=document.querySelector('meta[name=theme-color]');
-  if(meta)meta.content=getComputedStyle(root).getPropertyValue('--surface').trim()||'#ffffff';
+  // 頂欄是深藍漸層，狀態列跟著用深藍
+  const meta=document.querySelector('meta[name=theme-color]'),dark=getComputedStyle(root).colorScheme==='dark';
+  if(meta)meta.content=dark?'#0a0f2c':'#151d4b';
 }
 function openLook(){
   const th=S.theme||{mode:'auto'};
@@ -1257,7 +1360,7 @@ function drawMonth(){
   const W=7*120,top=150,ch=150,cells=monthCells();
   const cv=document.createElement('canvas');cv.width=W+20;cv.height=top+6*ch+70;
   const g=cv.getContext('2d'),F='-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif';
-  g.fillStyle='#dbe7f5';g.fillRect(0,0,cv.width,cv.height);
+  g.fillStyle='#f1f4f9';g.fillRect(0,0,cv.width,cv.height);
   g.fillStyle='#111';g.textAlign='center';g.textBaseline='middle';
   g.font='500 46px '+F;g.fillText(view.getFullYear()+'年'+(view.getMonth()+1)+'月',cv.width/2,55);
   g.font='30px '+F;WK.forEach((w,i)=>g.fillText('週'+w,10+i*120+60,120));
@@ -1265,7 +1368,7 @@ function drawMonth(){
   cells.forEach((d,i)=>{
     const x=10+(i%7)*120,y=top+Math.floor(i/7)*ch,k=ymd(d),t=shiftOf(k),out=d.getMonth()!==view.getMonth();
     if(!out&&t)cnt[t.id]=(cnt[t.id]||0)+1;
-    g.fillStyle=out?'#d3e0f1':k===tk?'#7ef25a':t?t.color:'#fff';g.fillRect(x,y,120,ch);
+    g.fillStyle=out?'#f8fafc':k===tk?'#fffbeb':t?t.color:'#fff';g.fillRect(x,y,120,ch);
     g.strokeStyle='#8f8f8f';g.lineWidth=2;g.strokeRect(x,y,120,ch);
     g.fillStyle=out?'#888':(k===tk||!t)?'#111':textColor(t.color);
     const hn=S.hol.show?HOLIDAYS[k]:'';
@@ -1298,7 +1401,8 @@ document.addEventListener('visibilitychange',()=>{
 });
 // App 開著時，到了待辦的提醒時間就跳出橫幅
 function checkReminders(){
-  if($('remBar'))return;
+  // 手寫畫面開著時先不跳，等關掉後下一次檢查再跳
+  if($('remBar')||!$('draw').hidden)return;
   const now=new Date(),tk=ymd(now);S.rem=S.rem||{};
   const it=todoItems(ymAdd(ymOf(tk),-1),ymAdd(ymOf(tk),1)).find(i=>{
     if(i.done||!i.t.time||!i.date)return false;
