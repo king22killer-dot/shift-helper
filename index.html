@@ -474,7 +474,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v17（2026-10-27）';
+const APP_VER='v18（2026-10-27）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -599,9 +599,11 @@ const textColor=hex=>lum(hex)<120?'#fff':'#111';
 // 白色班別（休假）沿用主題的格子色，深色模式才不會刺眼
 const paint=t=>!t||lum(t.color)>245?'':`background:${t.color};color:${textColor(t.color)}`;
 const chipStyle=t=>lum(t.color)>245?'':`background:${t.color};color:${textColor(t.color)}`;
+// 這個月要顯示幾週：從 1 號那週排到月底那週（4～6 週）
+function weeksOf(y,m){const f=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();return Math.ceil((f+n)/7)}
 function monthCells(){
-  const first=new Date(view.getFullYear(),view.getMonth(),1),start=addDays(first,-first.getDay());
-  return Array.from({length:42},(_,i)=>addDays(start,i));
+  const y=view.getFullYear(),m=view.getMonth(),first=new Date(y,m,1),start=addDays(first,-first.getDay());
+  return Array.from({length:weeksOf(y,m)*7},(_,i)=>addDays(start,i));
 }
 const ymOf=k=>k.slice(0,7);
 const ymAdd=(ym,n)=>{const[y,m]=ym.split('-').map(Number),d=new Date(y,m-1+n,1);return d.getFullYear()+'-'+pad(d.getMonth()+1)};
@@ -643,11 +645,12 @@ function renderCal(){
   $('title').textContent=view.getFullYear()+'年'+(view.getMonth()+1)+'月';
   $('todayBtn').classList.toggle('hide',view.getFullYear()===today.getFullYear()&&view.getMonth()===today.getMonth());
   const tk=ymd(today),cnt={},cells=monthCells();
-  calItems=todoItems(ymAdd(ymOf(ymd(cells[0])),-1),ymOf(ymd(cells[41])));
+  calItems=todoItems(ymAdd(ymOf(ymd(cells[0])),-1),ymOf(ymd(cells[cells.length-1])));
+  const NW=cells.length/7;
   const mode=S.calTodo||'bar';let html='';
   // 依每列實際高度決定能畫幾條（放不下就改用數字）
-  const gh=$('grid').clientHeight,rowH=gh?(gh-20)/6:84;
-  for(let w=0;w<6;w++){
+  const gh=$('grid').clientHeight,rowH=gh?(gh-(NW-1)*4)/NW:84;
+  for(let w=0;w<NW;w++){
     const wk=cells.slice(w*7,w*7+7),wsK=ymd(wk[0]),weK=ymd(wk[6]);
     // 這週要畫的橫條（沒做完的待辦；已完成的不畫）
     let bars='',hidden=Array(7).fill(0),used=0;
@@ -831,9 +834,10 @@ function renderTodoCal(){
   const y=tView.getFullYear(),mo=tView.getMonth(),tk=ymd(today);
   $('tTitle').textContent=y+'年'+(mo+1)+'月';
   const first=new Date(y,mo,1),start=addDays(first,-first.getDay());
-  const items=todoItems(ymAdd(ymOf(ymd(start)),-1),ymOf(ymd(addDays(start,41)))).filter(i=>i.date);
+  const NW=weeksOf(y,mo);
+  const items=todoItems(ymAdd(ymOf(ymd(start)),-1),ymOf(ymd(addDays(start,NW*7-1)))).filter(i=>i.date);
   const LANES=3;let h='';
-  for(let w=0;w<6;w++){
+  for(let w=0;w<NW;w++){
     const ws=addDays(start,w*7),wsK=ymd(ws),weK=ymd(addDays(ws,6));
     const segs=items.filter(i=>i.date<=weK&&i.due>=wsK).map(i=>{
       const a=i.date<wsK?0:dayNum(parse(i.date))-dayNum(ws),b=i.due>weK?6:dayNum(parse(i.due))-dayNum(ws);
@@ -1357,8 +1361,8 @@ function openHelp(){openSheet(`<h2>使用說明<button data-x>關閉</button></h
 
 /* ===== 分享圖片 ===== */
 function drawMonth(){
-  const W=7*120,top=150,ch=150,cells=monthCells();
-  const cv=document.createElement('canvas');cv.width=W+20;cv.height=top+6*ch+70;
+  const W=7*120,top=150,ch=150,cells=monthCells(),NW=cells.length/7;
+  const cv=document.createElement('canvas');cv.width=W+20;cv.height=top+NW*ch+70;
   const g=cv.getContext('2d'),F='-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif';
   g.fillStyle='#f1f4f9';g.fillRect(0,0,cv.width,cv.height);
   g.fillStyle='#111';g.textAlign='center';g.textBaseline='middle';
@@ -1381,7 +1385,7 @@ function drawMonth(){
     const e=S.days[k];if(e&&e.note&&!out){g.font='bold 30px '+F;g.fillText('*',x+104,y+20)}
   });
   g.font='26px '+F;g.fillStyle='#334';
-  g.fillText(S.types.filter(t=>cnt[t.id]).map(t=>t.name+' '+cnt[t.id]+'天').join('　'),cv.width/2,top+6*ch+36);
+  g.fillText(S.types.filter(t=>cnt[t.id]).map(t=>t.name+' '+cnt[t.id]+'天').join('　'),cv.width/2,top+NW*ch+36);
   return cv;
 }
 $('shareBtn').onclick=()=>{
