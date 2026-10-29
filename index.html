@@ -153,6 +153,8 @@ main.fit{overflow:hidden}
 .plan-h button{border:0;background:var(--accent);color:#fff;border-radius:8px;padding:6px 12px;font-size:14px}
 .prow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--hair)}
 .prow:first-child{border-top:0}
+.swipe>.prow{border-top:0}
+#planList .swipe+.swipe{border-top:1px solid var(--hair)}
 .prow .bx{flex:none;width:22px;height:22px;border:2px solid var(--fg);border-radius:4px;background:none;padding:0;display:grid;place-items:center}
 .prow .bx svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
 .prow.done .bx{background:var(--muted);border-color:var(--muted)}
@@ -192,6 +194,15 @@ main.fit{overflow:hidden}
 .list{background:var(--surface);border:1px solid var(--hair);border-radius:14px;overflow:hidden}
 .todo{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-top:1px solid var(--hair)}
 .todo:first-child{border-top:0}
+.swipe{position:relative;overflow:hidden}
+.swipe+.swipe{border-top:1px solid var(--hair)}
+.swipe>.todo{position:relative;z-index:1;background:var(--surface);border-top:0;transition:transform .22s cubic-bezier(.2,.8,.2,1);touch-action:pan-y}
+#planList .swipe>.todo{background:var(--surface)}
+.swipe.dragging>.todo{transition:none}
+.swipe.open>.todo{transform:translateX(-84px)}
+.sw-del{position:absolute;top:0;right:0;bottom:0;width:84px;border:0;background:#ef4444;color:#fff;font-size:15px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.sw-del span{font-size:13px}
+@media (prefers-reduced-motion:reduce){.swipe>.todo{transition:none}}
 .chk{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--chipline);background:none;padding:0;display:grid;place-items:center;margin-top:1px}
 .chk svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
 .todo.done .chk{background:var(--accent);border-color:var(--accent)}
@@ -474,7 +485,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v18（2026-10-27）';
+const APP_VER='v19（2026-10-29）';
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -489,6 +500,7 @@ const HELP=[
   '【待辦月曆】待辦分頁上方可切換「月曆／清單」。月曆會把待辦畫成彩色橫條（好幾天的會連成一條），日期右上的小點是那天的班別顏色。點某一天，下方「今日計劃」列出那天的待辦，可以直接打勾；按「＋ 新增」可以設定時間和顏色。',
   '【提醒】新增或修改待辦時，可以設日期、時間、重複（每天／每週／每月）、提早提醒，並打開「新增至 iPhone 行事曆」：儲存後按「加入」，iPhone 就會準時跳通知（App 沒開也會響）。App 開著的時候，時間到畫面上方也會跳出提醒。',
   '【外觀】選單 →「外觀」：可選跟隨手機、淺色、深色，或依時間自動切換（預設早上 6:00 淺色、晚上 6:00 深色，可以自己改）。',
+  '【刪除待辦】在待辦上往左滑，右邊會出現紅色「刪除」，按下去確認就刪掉；往右滑或點別的地方可以收回。也可以點待辦進去按「刪除」。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
   '【每月固定】勾「🔁 每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
   '【清除排班】選單 →「清除本月班別」把正在看的這個月全部變成空白（連循環的班也清掉，備註保留）；「清除所有排班」會清掉全部手動班別和排班循環，備註、備忘錄、待辦會保留。',
@@ -763,15 +775,49 @@ function todoRow(it,showDate){
   if(t.cal)m+=' 📅';
   if(showDate&&sh)m+=` <span class="tag" style="${chipStyle(sh)}">${esc(sh.name)}</span>`;
   const meta=m?`<div class="meta${late?' late':''}">${m}</div>`:'';
-  return `<div class="todo${it.done?' done':''}" data-key="${it.key}"><button class="chk" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><div class="txt">${esc(t.text)}</div>${meta}</button></div>`;
+  return swipeWrap(`<div class="todo${it.done?' done':''}" data-key="${it.key}"><button class="chk" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><div class="txt">${esc(t.text)}</div>${meta}</button></div>`);
 }
 function toggleItem(key){
   const[id,ym]=key.split('@'),t=S.todos.find(x=>x.id===id);if(!t)return;
   if(ym){t.doneM=t.doneM||{};if(t.doneM[ym])delete t.doneM[ym];else t.doneM[ym]=true}else t.done=!t.done;
   save();
 }
+// 左滑出現「刪除」：外框 .swipe 裡放待辦列和藏在後面的刪除鍵
+const SW_W=84;
+const swipeWrap=row=>`<div class="swipe">${row}<button class="sw-del" data-del aria-label="刪除">🗑<span>刪除</span></button></div>`;
+function closeSwipes(except){document.querySelectorAll('.swipe.open').forEach(x=>{if(x!==except)x.classList.remove('open')})}
+let swDrag=null,swJust=false;
+document.addEventListener('pointerdown',e=>{
+  const sw=e.target.closest('.swipe');
+  if(!sw||e.target.closest('.sw-del')){if(!e.target.closest('.sw-del'))closeSwipes();return}
+  closeSwipes(sw);
+  swDrag={sw,row:sw.querySelector('.todo'),x:e.clientX,y:e.clientY,base:sw.classList.contains('open')?-SW_W:0,on:false,tx:0};
+},true);
+document.addEventListener('pointermove',e=>{
+  const d=swDrag;if(!d)return;
+  const dx=e.clientX-d.x,dy=e.clientY-d.y;
+  if(!d.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){swDrag=null;return}if(Math.abs(dx)<8)return;d.on=true;d.sw.classList.add('dragging')}
+  d.tx=Math.max(-SW_W-20,Math.min(0,d.base+dx));d.row.style.transform=`translateX(${d.tx}px)`;
+});
+const swEnd=()=>{
+  const d=swDrag;swDrag=null;if(!d||!d.on)return;
+  d.sw.classList.remove('dragging');d.row.style.transform='';
+  d.sw.classList.toggle('open',d.tx<-SW_W/2);
+  swJust=true;setTimeout(()=>swJust=false,350);
+};
+document.addEventListener('pointerup',swEnd);document.addEventListener('pointercancel',swEnd);
+async function deleteTodoKey(key,after){
+  const t=S.todos.find(x=>x.id===key.split('@')[0]);if(!t)return;
+  if(!await ask(repOf(t)?`刪除「${t.text}」？這是重複的待辦，所有日期都會一起刪掉。`:`刪除「${t.text}」？`,'刪除',true)){closeSwipes();return}
+  S.todos=S.todos.filter(x=>x!==t);save();after();updateBadge();
+  toast(t.cal?'已刪除，記得到 iPhone 行事曆把提醒也刪掉':'已刪除');
+}
 function bindTodoClicks(root,after){
   root.onclick=e=>{
+    if(swJust)return;
+    const del=e.target.closest('[data-del]');
+    if(del){deleteTodoKey(del.closest('.swipe').querySelector('.todo').dataset.key,after);return}
+    const sw=e.target.closest('.swipe');if(sw&&sw.classList.contains('open')){sw.classList.remove('open');return}
     const row=e.target.closest('.todo');if(!row)return;
     if(e.target.closest('[data-chk]')){toggleItem(row.dataset.key);after();updateBadge();return}
     if(e.target.closest('[data-open]'))editTodo(row.dataset.key.split('@')[0]);
@@ -872,7 +918,7 @@ function renderPlan(){
     if(days>1)sub=`${fmtMD(it.date)}～${fmtMD(it.due)}`+(late?' · 已過期':!it.done&&it.date<=tk&&tk<=it.due?` · 還剩 ${dayNum(parse(it.due))-dayNum(today)+1} 天`:'');
     else if(late)sub='已過期';
     if(repOf(t))sub+=(sub?' · ':'')+'🔁 '+REP_TXT[repOf(t)];
-    return `<div class="todo prow${it.done?' done':''}${late?' late':''}" data-key="${it.key}"><button class="bx" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><span class="cl" style="background:${colorOf(t)}"></span><span class="tx">${esc(t.text)}${sub?`<small>${sub}</small>`:''}</span><span class="tm">${t.time?'⏰ '+t.time:''}</span></button></div>`;
+    return swipeWrap(`<div class="todo prow${it.done?' done':''}${late?' late':''}" data-key="${it.key}"><button class="bx" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><span class="cl" style="background:${colorOf(t)}"></span><span class="tx">${esc(t.text)}${sub?`<small>${sub}</small>`:''}</span><span class="tm">${t.time?'⏰ '+t.time:''}</span></button></div>`);
   }).join(''):'<div class="empty" style="padding:14px">這天沒有待辦。按「＋ 新增」加一件事。</div>';
 }
 $('tCal').onclick=e=>{
