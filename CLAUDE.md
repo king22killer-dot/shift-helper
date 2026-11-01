@@ -31,7 +31,9 @@ iPhone 用的月曆班表網頁 App。純靜態網站，沒有建置步驟，部
 - 國定假日寫死在 `HOLIDAYS`（目前有 2026、2027 年），每年人事行政總處公布新年度後要補上。
 
 ## 提醒的做法
-- 網頁 App 在 iPhone 上不能自己定時跳通知，所以用「加到 iPhone 行事曆」：`icsOf()` 產生 .ics（含 VALARM、RRULE），用 data: 網址交給 iPhone 行事曆。
+- 網頁 App 在 iPhone 上不能自己定時跳通知，所以交給 iPhone 自己的 App 提醒（`addToCalendar()` 的視窗有兩個選項）：
+  - 行事曆：`icsOf()` 產生 .ics（含 VALARM、RRULE）。主畫面 App 不吃 data: 網址，所以 `icsUrl()` 把內容 base64url 放在 `todo.ics?d=`，由 `sw.js` 轉成真正的 `text/calendar` 回應（沒有 Service Worker 時才退回 data: 網址）。
+  - 提醒事項：`shortcutUrl()` 開 `shortcuts://run-shortcut?name=班表提醒&input=text&text=<JSON>`，使用者要先照 `openShortcutHelp()` 的步驟建立「班表提醒」捷徑（JSON 的鍵：標題、提醒、日期、時間、重複）。從主畫面開的 App 預設先推這個。
 - App 開著時另外每 30 秒檢查一次，到時間在畫面上方跳出 `#remBar`。
 
 ## 介面設計
