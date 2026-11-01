@@ -544,7 +544,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v21（2026-11-01）';
+const APP_VER='v22（2026-11-01）';
 // Material Symbols 線條圖示
 const ic=n=>`<span class="ms" aria-hidden="true">${n}</span>`;
 const KEY='shift-helper-v1';
@@ -559,7 +559,7 @@ const HELP=[
   '【錄音】備忘錄裡按「錄音」開始（第一次要允許麥克風），再按一次停止，就會存進備忘錄，可以直接播放。手寫和錄音只存在這支手機，不包含在「匯出備份」的文字裡。',
   '【待辦事項】輸入內容，日期可填可不填，按「新增」。有日期的待辦會出現在月曆上，並顯示那天是什麼班。點圓圈打勾完成，點文字可以修改或刪除。',
   '【待辦月曆】待辦分頁上方可切換「月曆／清單」。月曆會把待辦畫成彩色橫條（好幾天的會連成一條），日期右上的小點是那天的班別顏色。點某一天，下方「今日計劃」列出那天的待辦，可以直接打勾；按「＋ 新增」可以設定時間和顏色。',
-  '【提醒】新增或修改待辦時，可以設日期、時間、重複、提早提醒，並打開「加到 iPhone 提醒」：儲存後可選「加到行事曆」或「用捷徑加到提醒事項」，之後時間到 iPhone 會跳通知（App 沒開也會響）。從主畫面開的 App 如果按「行事曆」沒反應，請用捷徑（第一次要照 App 裡的步驟建立「班表提醒」捷徑）。App 開著的時候，時間到畫面上方也會跳出提醒。',
+  '【提醒】新增或修改待辦時，可以設日期、時間、重複（每天／每週／每月）、提早提醒，並打開「新增至 iPhone 行事曆」：儲存後按「加到『行事曆』」→「加入」，之後時間到 iPhone 會跳通知（App 沒開也會響）。App 開著的時候，時間到畫面上方也會跳出提醒。',
   '【外觀】選單 →「外觀」：可選跟隨手機、淺色、深色，或依時間自動切換（預設早上 6:00 淺色、晚上 6:00 深色，可以自己改）。',
   '【刪除待辦】在待辦上往左滑，右邊會出現紅色「刪除」，按下去確認就刪掉；往右滑或點別的地方可以收回。也可以點待辦進去按「刪除」。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
@@ -1030,12 +1030,12 @@ function editTodo(id,presetDate){
       <label class="fr"><span>${ic('repeat')}重複</span><select id="etRep"><option value="">無</option><option value="day">每天</option><option value="week">每週</option><option value="month">每月</option></select></label>
       <label class="fr"><span>${ic('notifications')}提早提醒</span><select id="etRem">${REMIND.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
       <label class="fr"><span>${ic('hourglass_empty')}幾天完成</span><input type="number" id="etDays" min="1" max="365" inputmode="numeric" value="${t.days||1}"></label>
-      <label class="fr"><span>${ic('calendar_add_on')}加到 iPhone 提醒<small>行事曆或提醒事項，App 沒開也會響</small></span><input type="checkbox" id="etCal" class="sw2"${t.cal?' checked':''}></label>
+      <label class="fr"><span>${ic('calendar_add_on')}新增至 iPhone 行事曆<small>由 iPhone 準時跳通知，App 沒開也會響</small></span><input type="checkbox" id="etCal" class="sw2"${t.cal?' checked':''}></label>
     </div>
     <div class="small" style="margin-top:6px">沒填時間的話，會在當天早上 9:00 提醒。</div>
     <h3>顏色（月曆上的橫條）</h3><div class="cols" id="etCol">${colHtml()}</div>
     <button class="btn" id="etSave">${ic(isNew?'add':'check')}${isNew?'新增':'儲存'}</button>
-    ${isNew?'':`<button class="btn gray" id="etIcs">${ic('calendar_add_on')}再加一次到 iPhone</button><button class="btn red" id="etDel">${ic('delete')}${r0?'刪除（全部重複）':'刪除'}</button>`}`);
+    ${isNew?'':`<button class="btn gray" id="etIcs">${ic('calendar_add_on')}再加一次到 iPhone 行事曆</button><button class="btn red" id="etDel">${ic('delete')}${r0?'刪除（全部重複）':'刪除'}</button>`}`);
   $('etRep').value=r0;$('etRem').value=String(t.remind||0);
   if(isNew)setTimeout(()=>$('etTxt').focus(),50);
   $('etCol').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;col=b.dataset.c;$('etCol').innerHTML=colHtml()};
@@ -1091,47 +1091,16 @@ function icsUrl(t){
   }
   return 'data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
 }
-// 「捷徑」：把待辦交給使用者自己建的捷徑，加到 iPhone 的「提醒事項」
-const SC_NAME='班表提醒';
 function alertAt(t){
   const d=parse(t.date);
   if(t.time){const[h,mi]=t.time.split(':').map(Number);d.setHours(h,mi)}else d.setHours(9,0);
   return new Date(+d-(t.remind||0)*60000);
 }
-function shortcutUrl(t){
-  const a=alertAt(t),f=d=>`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  const data={'標題':t.text,'提醒':f(a),'日期':t.date,'時間':t.time||'','重複':REP_TXT[repOf(t)]||'無'};
-  return 'shortcuts://run-shortcut?name='+encodeURIComponent(SC_NAME)+'&input=text&text='+encodeURIComponent(JSON.stringify(data));
-}
 function addToCalendar(t,again){
-  const sa=isStandalone(),rp=repOf(t);
-  const scBtn=`<a class="btn${sa?'':' gray'}" id="scGo" href="${shortcutUrl(t)}" style="text-decoration:none">${ic('checklist')}用「捷徑」加到提醒事項</a>`;
-  const calBtn=`<a class="btn${sa?' gray':''}" id="icsGo" href="${icsUrl(t)}" style="text-decoration:none">${ic('calendar_add_on')}加到「行事曆」</a>`;
-  openSheet(`<h2>加到 iPhone 提醒<button data-x aria-label="關閉">${ic('close')}</button></h2>
-    <div class="small">${again?'修改過的待辦要重新加一次，<b>舊的那筆請到「行事曆／提醒事項」刪掉</b>，以免重複提醒。<br>':''}「${esc(t.text)}」會在 <b>${fmtMD(ymd(alertAt(t)))} ${pad(alertAt(t).getHours())}:${pad(alertAt(t).getMinutes())}</b> 提醒。加到 iPhone 之後，App 沒開也會跳通知。</div>
-    ${sa?scBtn+calBtn:calBtn+scBtn}
-    <div class="small" style="margin-top:12px">
-      <b>行事曆</b>：按了會出現「加入行事曆」，選「加入」。從主畫面開的 App 有時按了沒反應，請改用捷徑，或用 Safari 開這個網址再按。<br>
-      <b>捷徑</b>：第一次要先在「捷徑」App 建一個叫「${SC_NAME}」的捷徑。${rp?'（重複的待辦，提醒事項只會先加第一次，重複請在提醒事項裡設定。）':''}
-    </div>
-    <button class="btn gray" id="scHelp">${ic('help')}怎麼建立「${SC_NAME}」捷徑</button>`);
-  $('scHelp').onclick=openShortcutHelp;
-}
-function openShortcutHelp(){
-  openSheet(`<h2>建立「${SC_NAME}」捷徑<button data-x aria-label="關閉">${ic('close')}</button></h2>
-    <div class="help">
-      <p>只要做一次，之後按「用『捷徑』加到提醒事項」就會自動加到 iPhone 內建的「提醒事項」，時間到跳通知。</p>
-      <p><b>1.</b> 打開 iPhone 內建的「捷徑」App，按右上角「＋」。</p>
-      <p><b>2.</b> 點最上面的名稱，改成「<b>${SC_NAME}</b>」（要一字不差）。</p>
-      <p><b>3.</b> 按「加入動作」，搜尋「<b>字典</b>」，選「<b>取得字典</b>」。它要寫成「從 <b>捷徑輸入</b> 取得字典」；如果不是，點那個藍字改成「捷徑輸入」。</p>
-      <p><b>4.</b> 再搜尋「<b>取得字典值</b>」加進來，把「鍵」設成「<b>標題</b>」。</p>
-      <p><b>5.</b> 再加一個「<b>取得字典值</b>」，「鍵」設成「<b>提醒</b>」。</p>
-      <p><b>6.</b> 搜尋「<b>加入新的提醒事項</b>」加進來：
-        <br>・提醒事項的內容點一下，從鍵盤上方選第 4 步的「字典值」。
-        <br>・展開選項，打開「<b>提醒我</b>」→ 選「<b>於某時間</b>」，時間點一下，選第 5 步的「字典值」。</p>
-      <p><b>7.</b> 按右上「完成」。第一次執行時，iPhone 會問能不能使用提醒事項，按「允許」。</p>
-      <p>完成後回到班表小幫手按「用『捷徑』加到提醒事項」，畫面會切到捷徑跑一下，再切回來就好了。</p>
-    </div>`);
+  const a=alertAt(t);
+  openSheet(`<h2>加到 iPhone 行事曆<button data-x aria-label="關閉">${ic('close')}</button></h2>
+    <div class="small">${again?'修改過的待辦要重新加一次，<b>舊的那筆請到「行事曆」刪掉</b>，以免重複提醒。<br>':''}「${esc(t.text)}」會在 <b>${fmtMD(ymd(a))} ${pad(a.getHours())}:${pad(a.getMinutes())}</b> 提醒。按下面的按鈕，選「加入」，之後 App 沒開也會跳通知。</div>
+    <a class="btn" id="icsGo" href="${icsUrl(t)}" style="text-decoration:none">${ic('calendar_add_on')}加到「行事曆」</a>`);
 }
 
 function updateBadge(){
