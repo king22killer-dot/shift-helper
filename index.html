@@ -9,6 +9,8 @@
 <meta name="theme-color" content="#151d4b">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&icon_names=add,alarm,arrow_back,autorenew,backspace,block,calendar_add_on,calendar_month,calendar_today,check,checklist,chevron_left,chevron_right,clear_all,close,content_copy,contrast,dark_mode,delete,delete_sweep,download,draw,edit,edit_calendar,event_available,event_busy,event_repeat,expand_less,expand_more,flag,help,hourglass_empty,ink_eraser,ios_share,light_mode,line_weight,list,menu,mic,notifications,palette,push_pin,repeat,restart_alt,schedule,search,sticky_note_2,stop,task_alt,timer_off,today,undo,upload,view_agenda&display=block">
 <title>班表小幫手</title>
 <style>
 /* 版面：沿用「薪資出勤」的設計——深藍漸層頂欄、淺灰藍底、白色圓角卡片與日期格、底部分頁列（藍色底線） */
@@ -419,19 +421,76 @@ main{padding-top:12px}
 #remBar{border-radius:16px}
 #remBar button.ok{background:var(--grad)}
 #draw .tb.on{border-color:var(--accent)}
+
+/* ===== Material Symbols 圖示 ===== */
+.ms{font-family:"Material Symbols Outlined";font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;display:inline-block;width:1em;height:1em;overflow:hidden;flex:none;vertical-align:-.2em;
+  -webkit-font-smoothing:antialiased;font-feature-settings:"liga";font-variation-settings:"FILL" 0,"wght" 300,"GRAD" 0,"opsz" 24}
+html:not(.ms-ok) .ms{color:transparent}
+button .ms,a.btn .ms{margin-right:6px}
+button[aria-label]>.ms:only-child{margin:0}
+.ico .ms{font-size:24px;margin:0}
+.nav button .ms,.tnav button .ms{font-size:22px;margin:0}
+header h1 .logo .ms{font-size:22px;margin:0}
+header .menu-btn .ms{font-size:20px;margin:0}
+#tabs button .ms{font-size:26px;margin:0}
+#tabs button.on .ms{font-variation-settings:"FILL" 0,"wght" 500,"GRAD" 0,"opsz" 24}
+.sheet h2 button{display:inline-flex;align-items:center}
+.sheet h2 button .ms{font-size:22px}
+.btn,.menu .btn,a.btn{display:flex;align-items:center;justify-content:center}
+.menu .btn{justify-content:flex-start}
+.menu .btn .ms{font-size:22px;margin-right:12px;color:var(--accent)}
+.menu .btn[data-m=wipe] .ms,.menu .btn[data-m=reset] .ms{color:var(--danger)}
+.chip,.newbtn,.plan-h button,.addbar button,.row2 button,.sample button,#palDone,.mtools button,.sheet-foot button,.cyacts button,#draw .tb,#draw .dtop button,.seg button,#cfm .acts button,#remBar button,.group h3 button{display:inline-flex;align-items:center;justify-content:center}
+.chip .ms,.cyacts button .ms,.sheet-foot button .ms,#draw .tb .ms,.group h3 button .ms{font-size:18px;margin-right:4px}
+.mtools button .ms{font-size:22px}
+.sw-del .ms{font-size:24px;margin:0}
+.x .ms{font-size:16px;margin:0}
+.fr span .ms{font-size:20px;margin-right:8px;color:var(--muted)}
+.opts label .ms{font-size:18px;margin-right:2px}
+.todo .meta .ms,.prow .tm .ms,.prow small .ms,.tag .ms{font-size:14px;margin-right:2px;vertical-align:-.15em}
+.memo b .ms,.memo .ic .ms{font-size:16px;margin-right:3px;color:var(--accent)}
+.aud span .ms{font-size:16px;margin-right:2px}
+#remBar .ic .ms{font-size:26px;color:#fff}
+.search{position:relative;display:block;margin-bottom:12px}
+.search .ms{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:20px;pointer-events:none}
+.search .field{padding-left:40px}
+/* ===== 現代極簡風：扁平、細線、少陰影 ===== */
+:root{--hdr:#1e2f7d;--grad:#2549e0;--shadow:0 1px 2px rgba(15,23,42,.04);--shadow-sm:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--hdr:#111a3d;--grad:#4466ff;--shadow:none;--shadow-sm:none}}
+:root[data-theme="dark"]{--hdr:#111a3d;--grad:#4466ff;--shadow:none;--shadow-sm:none}
+header{box-shadow:none;padding-bottom:10px}
+header h1{font-size:19px;font-weight:600;letter-spacing:.3px}
+header h1 .logo{background:rgba(255,255,255,.1);box-shadow:none;border-radius:10px;width:34px;height:34px}
+header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);font-weight:500}
+.btn,.newbtn,.plan-h button,.addbar button,.row2 button,.sample button,#cfm .acts .ok,#remBar button.ok{box-shadow:none!important}
+.btn{font-weight:500;min-height:48px}
+.seg{box-shadow:inset 0 0 0 1px var(--line)}
+.seg button.on{box-shadow:none}
+.ico,.nav button,.tnav button{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.ico.on{box-shadow:none}
+.cell{box-shadow:none}
+.tcal,.plan,.list,.memo,.addwrap,.addbar,.cyrow,.form,.hlist,.tgl,.minilist{box-shadow:none;border-color:var(--line)}
+.menu .btn{box-shadow:none;border-color:var(--line);min-height:52px}
+.stats span{font-weight:400}
+#tabs{box-shadow:none;border-radius:0;background:var(--surface)}
+#tabs button{font-weight:400}
+#tabs button.on{font-weight:600}
+.sheet{box-shadow:0 -1px 0 var(--line)}
+#toast{box-shadow:none}
+.panel-head h2,.sheet h2{font-weight:600}
 </style>
 </head>
 <body>
-<header><h1><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M7.5 13.5h.01M12 13.5h.01M16.5 13.5h.01M7.5 17h.01M12 17h.01" stroke-width="2.6"/></svg></span>班表小幫手</h1><button class="menu-btn" id="menuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>選單</button></header>
+<header><h1><span class="logo"><span class="ms" aria-hidden="true">calendar_month</span></span>班表小幫手</h1><button class="menu-btn" id="menuBtn"><span class="ms" aria-hidden="true">menu</span>選單</button></header>
 <main class="fit">
-  <div class="sample" id="sampleBar" hidden><span>目前是範例資料，可以先點點看。</span><button id="sampleClr">清除範例，開始使用</button></div>
+  <div class="sample" id="sampleBar" hidden><span>目前是範例資料，可以先點點看。</span><button id="sampleClr"><span class="ms" aria-hidden="true">restart_alt</span>清除範例，開始使用</button></div>
 
   <section class="view" id="v-cal">
     <div class="bar">
-      <div class="bl"><button class="ico" id="todayBtn" aria-label="回到今天"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="3.5"/><rect x="4" y="9" width="40" height="9" rx="4" fill="currentColor"/><rect x="13" y="4" width="4" height="10" rx="2" fill="currentColor"/><rect x="31" y="4" width="4" height="10" rx="2" fill="currentColor"/><text x="24" y="35" font-size="12.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="Arial,sans-serif">Today</text></svg></button></div>
-      <div class="nav"><button id="prevBtn" aria-label="上個月"><svg viewBox="0 0 40 32"><path d="M2 16L38 1 28 16 38 31z"/></svg></button><div class="title" id="title"></div><button id="nextBtn" aria-label="下個月"><svg viewBox="0 0 40 32"><path d="M38 16L2 1 12 16 2 31z"/></svg></button></div>
-      <div class="br"><button class="ico" id="editBtn" aria-label="快速排班"><svg viewBox="0 0 48 48"><path d="M34.5 5.5a4 4 0 0 1 5.7 0l2.3 2.3a4 4 0 0 1 0 5.7L17 39l-11 4 4-11z" fill="currentColor"/></svg></button>
-      <button class="ico" id="shareBtn" aria-label="分享班表圖片"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M17 18h-6v26h26V18h-6"/><path d="M24 30V4M16 11l8-8 8 8"/></svg></button></div>
+      <div class="bl"><button class="ico" id="todayBtn" aria-label="回到今天"><span class="ms" aria-hidden="true">today</span></button></div>
+      <div class="nav"><button id="prevBtn" aria-label="上個月"><span class="ms" aria-hidden="true">chevron_left</span></button><div class="title" id="title"></div><button id="nextBtn" aria-label="下個月"><span class="ms" aria-hidden="true">chevron_right</span></button></div>
+      <div class="br"><button class="ico" id="editBtn" aria-label="快速排班"><span class="ms" aria-hidden="true">edit_calendar</span></button>
+      <button class="ico" id="shareBtn" aria-label="分享班表圖片"><span class="ms" aria-hidden="true">ios_share</span></button></div>
     </div>
     <div class="week"><div>週日</div><div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div>週六</div></div>
     <div class="grid" id="grid"></div>
@@ -439,40 +498,40 @@ main{padding-top:12px}
   </section>
 
   <section class="view" id="v-memo" hidden>
-    <div class="panel-head"><h2>備忘錄</h2><button class="newbtn" id="memoNew">＋ 新增</button></div>
-    <input class="field" id="memoQ" type="search" placeholder="搜尋備忘錄" style="margin-bottom:12px">
+    <div class="panel-head"><h2>備忘錄</h2><button class="newbtn" id="memoNew"><span class="ms" aria-hidden="true">add</span>新增</button></div>
+    <label class="search"><span class="ms" aria-hidden="true">search</span><input class="field" id="memoQ" type="search" placeholder="搜尋備忘錄"></label>
     <div class="memos" id="memoList"></div>
   </section>
 
   <section class="view" id="v-todo" hidden>
-    <div class="panel-head"><h2>待辦事項</h2><div class="seg" id="todoSeg"><button data-v="cal">月曆</button><button data-v="list">清單</button></div></div>
+    <div class="panel-head"><h2>待辦事項</h2><div class="seg" id="todoSeg"><button data-v="cal"><span class="ms" aria-hidden="true">calendar_month</span>月曆</button><button data-v="list"><span class="ms" aria-hidden="true">list</span>清單</button></div></div>
     <div id="todoCalWrap">
-      <div class="tnav"><button id="tPrev" aria-label="上個月"><svg viewBox="0 0 40 32"><path d="M2 16L38 1 28 16 38 31z"/></svg></button><b id="tTitle"></b><button id="tNext" aria-label="下個月"><svg viewBox="0 0 40 32"><path d="M38 16L2 1 12 16 2 31z"/></svg></button></div>
+      <div class="tnav"><button id="tPrev" aria-label="上個月"><span class="ms" aria-hidden="true">chevron_left</span></button><b id="tTitle"></b><button id="tNext" aria-label="下個月"><span class="ms" aria-hidden="true">chevron_right</span></button></div>
       <div class="tcal"><div class="tweek"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div><div id="tCal"></div></div>
-      <div class="plan"><div class="plan-h"><b id="planTitle">今日計劃</b><button id="planAdd">＋ 新增</button></div><div id="planList"></div></div>
+      <div class="plan"><div class="plan-h"><b id="planTitle">今日計劃</b><button id="planAdd"><span class="ms" aria-hidden="true">add</span>新增</button></div><div id="planList"></div></div>
     </div>
     <div id="todoListWrap" hidden>
-    <form class="addwrap" id="todoForm"><div class="addbar"><input class="field" id="todoTxt" placeholder="新增待辦…" autocomplete="off"><button>新增</button></div>
-      <div class="opts"><label>日期 <input type="date" id="todoDate"></label><label>共 <input type="number" id="todoDays" min="1" max="365" inputmode="numeric" placeholder="1"> 天完成</label><label><input type="checkbox" id="todoRep"> 🔁 每月同一天</label></div></form>
+    <form class="addwrap" id="todoForm"><div class="addbar"><input class="field" id="todoTxt" placeholder="新增待辦…" autocomplete="off"><button><span class="ms" aria-hidden="true">add</span>新增</button></div>
+      <div class="opts"><label>日期 <input type="date" id="todoDate"></label><label>共 <input type="number" id="todoDays" min="1" max="365" inputmode="numeric" placeholder="1"> 天完成</label><label><input type="checkbox" id="todoRep"> <span class="ms" aria-hidden="true">repeat</span>每月同一天</label></div></form>
     <div id="todoList"></div>
     </div>
   </section>
 </main>
 
 <nav id="tabs">
-  <button data-tab="cal" class="on"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M7.5 13.5h.01M12 13.5h.01M16.5 13.5h.01M7.5 17h.01M12 17h.01" stroke-width="2.6"/></svg>班表</button>
-  <button data-tab="memo"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 12h8M8 16h6"/></svg>備忘錄</button>
-  <button data-tab="todo"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/></svg>待辦<span class="n" id="todoN" hidden></span></button>
+  <button data-tab="cal" class="on"><span class="ms" aria-hidden="true">calendar_month</span>班表</button>
+  <button data-tab="memo"><span class="ms" aria-hidden="true">sticky_note_2</span>備忘錄</button>
+  <button data-tab="todo"><span class="ms" aria-hidden="true">task_alt</span>待辦<span class="n" id="todoN" hidden></span></button>
 </nav>
-<div id="palette" hidden><div class="hint"><span>選一個班別，再點日期套用</span><button id="palDone">完成</button></div><div class="row" id="palRow"></div></div>
+<div id="palette" hidden><div class="hint"><span>選一個班別，再點日期套用</span><button id="palDone"><span class="ms" aria-hidden="true">check</span>完成</button></div><div class="row" id="palRow"></div></div>
 <div class="mask" id="mask" hidden><div class="sheet" id="sheet"></div></div>
 <div id="cfm" hidden><div class="box"><p id="cfmMsg"></p><div class="acts"><button id="cfmNo">取消</button><button class="ok" id="cfmOk">確定</button></div></div></div>
-<div id="draw" hidden><div class="dtop"><button id="dwCancel">取消</button><b>手寫</b><button id="dwSave">儲存</button></div>
+<div id="draw" hidden><div class="dtop"><button id="dwCancel"><span class="ms" aria-hidden="true">close</span>取消</button><b>手寫</b><button id="dwSave"><span class="ms" aria-hidden="true">check</span>儲存</button></div>
   <div class="pad"><canvas id="dwCv"></canvas></div>
   <div class="dbar" id="dwBar">
     <button class="sw on" data-c="#111111" style="background:#111" aria-label="黑色"></button><button class="sw" data-c="#d11a1a" style="background:#d11a1a" aria-label="紅色"></button><button class="sw" data-c="#1d5fc9" style="background:#1d5fc9" aria-label="藍色"></button><button class="sw" data-c="#15803d" style="background:#15803d" aria-label="綠色"></button>
     <button class="tb" data-w="2">細</button><button class="tb on" data-w="4">中</button><button class="tb" data-w="8">粗</button>
-    <button class="tb" id="dwEr">橡皮擦</button><button class="tb" id="dwUndo">↶ 復原</button><button class="tb" id="dwClr">清除</button>
+    <button class="tb" id="dwEr"><span class="ms" aria-hidden="true">ink_eraser</span>橡皮擦</button><button class="tb" id="dwUndo"><span class="ms" aria-hidden="true">undo</span>復原</button><button class="tb" id="dwClr"><span class="ms" aria-hidden="true">delete</span>清除</button>
   </div></div>
 <div id="toast"></div>
 
@@ -485,7 +544,9 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v19（2026-10-29）';
+const APP_VER='v20（2026-11-01）';
+// Material Symbols 線條圖示
+const ic=n=>`<span class="ms" aria-hidden="true">${n}</span>`;
 const KEY='shift-helper-v1';
 const HELP=[
   '【下方分頁】「班表」看月曆、「備忘錄」記事、「待辦」列出要做的事。',
@@ -494,15 +555,15 @@ const HELP=[
   '【快速排班】按鉛筆進入編輯模式，下方選一個班別後連續點日期就能套用；選「空白」把那天清空；有排班循環時另有「依循環」可以恢復成循環的班。按「完成」離開。',
   '【排班循環】選單 →「排班循環」→「新增排班循環」：設定起始日、輪班順序（例如 日日休休夜夜休休）和要排幾個月。可以設好幾組（例如 10 月一組、11 月一組），日期重疊時以開始日比較晚的那組為準。最後一個月月底如果這一輪還沒輪完，會延到下個月把這輪排完才停。沒有手動設定的日子會自動依循環顯示。',
   '【備忘錄】按「＋ 新增」寫一則，打字會自動儲存。可以搜尋，也可以「置頂」常用的那則。',
-  '【手寫】備忘錄裡按「✍️ 手寫」用手指寫字或畫圖，可換顏色、粗細、橡皮擦、復原，按「儲存」加進備忘錄。點縮圖可以再修改。',
-  '【錄音】備忘錄裡按「🎙 錄音」開始（第一次要允許麥克風），再按一次停止，就會存進備忘錄，可以直接播放。手寫和錄音只存在這支手機，不包含在「匯出備份」的文字裡。',
+  '【手寫】備忘錄裡按「手寫」用手指寫字或畫圖，可換顏色、粗細、橡皮擦、復原，按「儲存」加進備忘錄。點縮圖可以再修改。',
+  '【錄音】備忘錄裡按「錄音」開始（第一次要允許麥克風），再按一次停止，就會存進備忘錄，可以直接播放。手寫和錄音只存在這支手機，不包含在「匯出備份」的文字裡。',
   '【待辦事項】輸入內容，日期可填可不填，按「新增」。有日期的待辦會出現在月曆上，並顯示那天是什麼班。點圓圈打勾完成，點文字可以修改或刪除。',
   '【待辦月曆】待辦分頁上方可切換「月曆／清單」。月曆會把待辦畫成彩色橫條（好幾天的會連成一條），日期右上的小點是那天的班別顏色。點某一天，下方「今日計劃」列出那天的待辦，可以直接打勾；按「＋ 新增」可以設定時間和顏色。',
   '【提醒】新增或修改待辦時，可以設日期、時間、重複（每天／每週／每月）、提早提醒，並打開「新增至 iPhone 行事曆」：儲存後按「加入」，iPhone 就會準時跳通知（App 沒開也會響）。App 開著的時候，時間到畫面上方也會跳出提醒。',
   '【外觀】選單 →「外觀」：可選跟隨手機、淺色、深色，或依時間自動切換（預設早上 6:00 淺色、晚上 6:00 深色，可以自己改）。',
   '【刪除待辦】在待辦上往左滑，右邊會出現紅色「刪除」，按下去確認就刪掉；往右滑或點別的地方可以收回。也可以點待辦進去按「刪除」。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
-  '【每月固定】勾「🔁 每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
+  '【每月固定】勾「每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
   '【清除排班】選單 →「清除本月班別」把正在看的這個月全部變成空白（連循環的班也清掉，備註保留）；「清除所有排班」會清掉全部手動班別和排班循環，備註、備忘錄、待辦會保留。',
   '【國定假日】內建 2026、2027 年國定假日（含補假），日期下方會標出節日（紅字），補假用黃底咖啡字標示「補假」，點那天可看是哪個節日的補假。選單 →「國定假日」可以關掉顯示，或讓國定假日自動排成休假（手動設定的日子優先）。',
   '【班表上的待辦】還沒做的待辦會在班表格子下方畫成彩色橫條（好幾天的連成一條），過期沒做的是灰色，一週最多兩條，放不下的會在格子左上顯示「+1」。選單 →「外觀」可以改成紅色數字或不顯示。',
@@ -765,14 +826,14 @@ function todoRow(it,showDate){
   const sh=it.date?shiftOf(it.date):null,days=t.days>1?t.days:1;
   let m='';
   if(showDate&&it.date)m+=days>1?`${fmtMD(it.date)}～${fmtMD(it.due)}`:fmtMD(it.date);
-  if(t.time)m+=(m?' ':'')+'⏰ '+t.time;
+  if(t.time)m+=(m?' ':'')+ic('schedule')+t.time;
   if(!showDate&&days>1)m+=`${fmtMD(it.date)}～${fmtMD(it.due)}`;
   if(days>1)m+=` · 共 ${days} 天`;
   if(late)m+=' · 已過期';
   else if(!it.done&&days>1&&it.date<=tk&&tk<=it.due)m+=` · 還剩 ${dayNum(parse(it.due))-dayNum(today)+1} 天`;
   const rp=repOf(t);
-  if(rp)m+=` <span class="tag">🔁 ${rp==='month'?'每月 '+parse(t.date).getDate()+' 號':rp==='week'?'每週'+WK[parse(t.date).getDay()]:'每天'}</span>`;
-  if(t.cal)m+=' 📅';
+  if(rp)m+=` <span class="tag">${ic('repeat')}${rp==='month'?'每月 '+parse(t.date).getDate()+' 號':rp==='week'?'每週'+WK[parse(t.date).getDay()]:'每天'}</span>`;
+  if(t.cal)m+=' '+ic('event_available');
   if(showDate&&sh)m+=` <span class="tag" style="${chipStyle(sh)}">${esc(sh.name)}</span>`;
   const meta=m?`<div class="meta${late?' late':''}">${m}</div>`:'';
   return swipeWrap(`<div class="todo${it.done?' done':''}" data-key="${it.key}"><button class="chk" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><div class="txt">${esc(t.text)}</div>${meta}</button></div>`);
@@ -784,7 +845,7 @@ function toggleItem(key){
 }
 // 左滑出現「刪除」：外框 .swipe 裡放待辦列和藏在後面的刪除鍵
 const SW_W=84;
-const swipeWrap=row=>`<div class="swipe">${row}<button class="sw-del" data-del aria-label="刪除">🗑<span>刪除</span></button></div>`;
+const swipeWrap=row=>`<div class="swipe">${row}<button class="sw-del" data-del aria-label="刪除">${ic('delete')}<span>刪除</span></button></div>`;
 function closeSwipes(except){document.querySelectorAll('.swipe.open').forEach(x=>{if(x!==except)x.classList.remove('open')})}
 let swDrag=null,swJust=false;
 document.addEventListener('pointerdown',e=>{
@@ -841,13 +902,13 @@ function openDay(k){
   const list=()=>todoItems(ymAdd(ymOf(k),-1),ymOf(k)).filter(it=>covers(it,k)).map(it=>todoRow(it,false)).join('');
   const commit=()=>{const note=$('dayNote').value.trim(),n={};if(sel)n.t=sel;if(note)n.note=note;
     if(n.t||n.note)S.days[k]=n;else delete S.days[k];save()};
-  openSheet(`<h2><span>${d.getMonth()+1}月${d.getDate()}日（週${WK[d.getDay()]}）${HOLIDAYS[k]?` <span style="color:var(--danger);font-size:15px">${HOLIDAYS[k]}</span>`:''}</span><button data-x>完成</button></h2>
+  openSheet(`<h2><span>${d.getMonth()+1}月${d.getDate()}日（週${WK[d.getDay()]}）${HOLIDAYS[k]?` <span style="color:var(--danger);font-size:15px">${HOLIDAYS[k]}</span>`:''}</span><button data-x>${ic('check')}完成</button></h2>
     <div class="small">目前：${cur?esc(cur.name):'空白'}${e.t?'（手動設定）':cur?'（依循環）':''}</div>
     <h3>班別</h3><div class="chips" id="dayChips">${chips()}</div>
     <h3>備註</h3><textarea id="dayNote" placeholder="例如：支援、換班、加班 2 小時">${esc(e.note||'')}</textarea>
     <h3>這天的待辦</h3><div class="minilist" id="dayTodos">${list()}</div>
-    <form id="dayAdd"><div class="row2"><input class="field" id="dayTodo" placeholder="新增這天開始的待辦…" autocomplete="off"><button>新增</button></div>
-      <div class="opts"><label>共 <input type="number" id="dayDays" min="1" max="365" inputmode="numeric" placeholder="1"> 天完成</label><label><input type="checkbox" id="dayRep"> 🔁 每月 ${d.getDate()} 號</label></div></form>`,commit);
+    <form id="dayAdd"><div class="row2"><input class="field" id="dayTodo" placeholder="新增這天開始的待辦…" autocomplete="off"><button><span class="ms" aria-hidden="true">add</span>新增</button></div>
+      <div class="opts"><label>共 <input type="number" id="dayDays" min="1" max="365" inputmode="numeric" placeholder="1"> 天完成</label><label><input type="checkbox" id="dayRep"> ${ic('repeat')}每月 ${d.getDate()} 號</label></div></form>`,commit);
   $('dayChips').onclick=ev=>{const b=ev.target.closest('.chip');if(!b)return;sel=b.dataset.t;$('dayChips').innerHTML=chips()};
   bindTodoClicks($('dayTodos'),()=>$('dayTodos').innerHTML=list());
   $('dayAdd').onsubmit=ev=>{ev.preventDefault();const v=$('dayTodo').value.trim();if(!v)return;
@@ -917,8 +978,8 @@ function renderPlan(){
     const t=it.t,days=t.days>1?t.days:1,late=!it.done&&it.due<tk;let sub='';
     if(days>1)sub=`${fmtMD(it.date)}～${fmtMD(it.due)}`+(late?' · 已過期':!it.done&&it.date<=tk&&tk<=it.due?` · 還剩 ${dayNum(parse(it.due))-dayNum(today)+1} 天`:'');
     else if(late)sub='已過期';
-    if(repOf(t))sub+=(sub?' · ':'')+'🔁 '+REP_TXT[repOf(t)];
-    return swipeWrap(`<div class="todo prow${it.done?' done':''}${late?' late':''}" data-key="${it.key}"><button class="bx" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><span class="cl" style="background:${colorOf(t)}"></span><span class="tx">${esc(t.text)}${sub?`<small>${sub}</small>`:''}</span><span class="tm">${t.time?'⏰ '+t.time:''}</span></button></div>`);
+    if(repOf(t))sub+=(sub?' · ':'')+ic('repeat')+REP_TXT[repOf(t)];
+    return swipeWrap(`<div class="todo prow${it.done?' done':''}${late?' late':''}" data-key="${it.key}"><button class="bx" data-chk aria-label="${it.done?'標成未完成':'完成'}"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button><button class="body" data-open><span class="cl" style="background:${colorOf(t)}"></span><span class="tx">${esc(t.text)}${sub?`<small>${sub}</small>`:''}</span><span class="tm">${t.time?ic('schedule')+t.time:''}</span></button></div>`);
   }).join(''):'<div class="empty" style="padding:14px">這天沒有待辦。按「＋ 新增」加一件事。</div>';
 }
 $('tCal').onclick=e=>{
@@ -944,8 +1005,8 @@ function renderTodoList(){
   const soon=open.filter(i=>i.date>tk).sort((a,b)=>a.date<b.date?-1:1),none=open.filter(i=>!i.date);
   const grp=(title,arr,cls='',extra='')=>arr.length?`<div class="group"><h3 class="${cls}"><span>${title}（${arr.length}）</span>${extra}</h3><div class="list">${arr.map(i=>todoRow(i,true)).join('')}</div></div>`:'';
   let h=grp('已過期',late,'late')+grp('今天要做 · '+fmtMD(tk),now)+grp('之後',soon)+grp('沒有日期',none);
-  if(!open.length)h=`<div class="empty">沒有未完成的待辦 🎉<br>在上面輸入一件事，按「新增」。</div>`;
-  if(done.length)h+=`<div class="group"><h3><button id="doneTog">${showDone?'▾':'▸'} 已完成（${done.length}）</button>${showDone?'<button id="doneClr">清除已完成</button>':''}</h3>${showDone?`<div class="list">${done.map(i=>todoRow(i,true)).join('')}</div>`:''}</div>`;
+  if(!open.length)h=`<div class="empty">沒有未完成的待辦<br>在上面輸入一件事，按「新增」。</div>`;
+  if(done.length)h+=`<div class="group"><h3><button id="doneTog">${ic(showDone?'expand_less':'expand_more')}已完成（${done.length}）</button>${showDone?`<button id="doneClr">${ic('delete_sweep')}清除已完成</button>`:''}</h3>${showDone?`<div class="list">${done.map(i=>todoRow(i,true)).join('')}</div>`:''}</div>`;
   $('todoList').innerHTML=h;
   const tg=$('doneTog');if(tg)tg.onclick=()=>{showDone=!showDone;renderTodos()};
   const dc=$('doneClr');if(dc)dc.onclick=async()=>{if(!await ask('刪除全部已完成的待辦？（重複的待辦不會刪）','刪除',true))return;S.todos=S.todos.filter(t=>repOf(t)||!t.done);save();renderAll()};
@@ -960,21 +1021,21 @@ function editTodo(id,presetDate){
   const isNew=!id;let col=t.color||'';
   const colHtml=()=>`<button data-c="" class="${col?'':'on'}" style="background:conic-gradient(${TCOL.join(',')})" aria-label="自動"></button>`+TCOL.map(c=>`<button data-c="${c}" class="${col===c?'on':''}" style="background:${c}" aria-label="顏色"></button>`).join('');
   const r0=repOf(t);
-  openSheet(`<h2>${isNew?'新增待辦':'修改待辦'}<button data-x>取消</button></h2>
+  openSheet(`<h2>${isNew?'新增待辦':'修改待辦'}<button data-x>${ic('close')}取消</button></h2>
     <textarea id="etTxt" placeholder="要做什麼？">${esc(t.text)}</textarea>
     <h3>提醒</h3>
     <div class="form">
-      <label class="fr"><span>📅 日期</span><input type="date" id="etDate" value="${t.date||''}"></label>
-      <label class="fr"><span>⏰ 時間</span><input type="time" id="etTime" value="${t.time||''}"></label>
-      <label class="fr"><span>🔁 重複</span><select id="etRep"><option value="">無</option><option value="day">每天</option><option value="week">每週</option><option value="month">每月</option></select></label>
-      <label class="fr"><span>🔔 提早提醒</span><select id="etRem">${REMIND.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
-      <label class="fr"><span>⏳ 幾天完成</span><input type="number" id="etDays" min="1" max="365" inputmode="numeric" value="${t.days||1}"></label>
-      <label class="fr"><span>📲 新增至 iPhone 行事曆<small>由 iPhone 準時跳通知</small></span><input type="checkbox" id="etCal" class="sw2"${t.cal?' checked':''}></label>
+      <label class="fr"><span>${ic('calendar_today')}日期</span><input type="date" id="etDate" value="${t.date||''}"></label>
+      <label class="fr"><span>${ic('schedule')}時間</span><input type="time" id="etTime" value="${t.time||''}"></label>
+      <label class="fr"><span>${ic('repeat')}重複</span><select id="etRep"><option value="">無</option><option value="day">每天</option><option value="week">每週</option><option value="month">每月</option></select></label>
+      <label class="fr"><span>${ic('notifications')}提早提醒</span><select id="etRem">${REMIND.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+      <label class="fr"><span>${ic('hourglass_empty')}幾天完成</span><input type="number" id="etDays" min="1" max="365" inputmode="numeric" value="${t.days||1}"></label>
+      <label class="fr"><span>${ic('calendar_add_on')}新增至 iPhone 行事曆<small>由 iPhone 準時跳通知</small></span><input type="checkbox" id="etCal" class="sw2"${t.cal?' checked':''}></label>
     </div>
     <div class="small" style="margin-top:6px">沒填時間的話，行事曆會在當天早上 9:00 提醒。</div>
     <h3>顏色（月曆上的橫條）</h3><div class="cols" id="etCol">${colHtml()}</div>
-    <button class="btn" id="etSave">${isNew?'新增':'儲存'}</button>
-    ${isNew?'':`<button class="btn gray" id="etIcs">📲 再加一次到 iPhone 行事曆</button><button class="btn red" id="etDel">${r0?'刪除（全部重複）':'刪除'}</button>`}`);
+    <button class="btn" id="etSave">${ic(isNew?'add':'check')}${isNew?'新增':'儲存'}</button>
+    ${isNew?'':`<button class="btn gray" id="etIcs">${ic('calendar_add_on')}再加一次到 iPhone 行事曆</button><button class="btn red" id="etDel">${ic('delete')}${r0?'刪除（全部重複）':'刪除'}</button>`}`);
   $('etRep').value=r0;$('etRem').value=String(t.remind||0);
   if(isNew)setTimeout(()=>$('etTxt').focus(),50);
   $('etCol').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;col=b.dataset.c;$('etCol').innerHTML=colHtml()};
@@ -998,7 +1059,7 @@ function editTodo(id,presetDate){
     const now=JSON.stringify([t.text,t.date,t.time,t.repeat,t.remind,t.days]);
     if(t.cal&&(isNew||!wasCal||changed!==now))addToCalendar(t,!isNew&&wasCal);
   };
-  const ic=$('etIcs');if(ic)ic.onclick=()=>{if(!collect())return;save();closeSheet();addToCalendar(t,false)};
+  const icsBtn=$('etIcs');if(icsBtn)icsBtn.onclick=()=>{if(!collect())return;save();closeSheet();addToCalendar(t,false)};
   const del=$('etDel');if(del)del.onclick=async()=>{if(!await ask(r0?'刪除這個重複待辦？所有日期都會一起刪掉。':'刪除這個待辦？','刪除',true))return;
     S.todos=S.todos.filter(x=>x.id!==id);save();closeSheet();if(t.cal)toast('記得到 iPhone 行事曆把這個提醒也刪掉')};
 }
@@ -1022,9 +1083,9 @@ function icsOf(t){
 }
 function addToCalendar(t,again){
   const url='data:text/calendar;charset=utf-8,'+encodeURIComponent(icsOf(t));
-  openSheet(`<h2>加到 iPhone 行事曆<button data-x>關閉</button></h2>
+  openSheet(`<h2>加到 iPhone 行事曆<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <div class="small">${again?'修改過的待辦要重新加一次，<b>舊的那筆請到「行事曆」刪掉</b>，以免重複提醒。<br>':''}按下面的按鈕，iPhone 會問要不要加入行事曆，選「加入全部」或「加入」。之後時間到，iPhone 會跳通知，App 沒開也會響。</div>
-    <a class="btn" id="icsGo" href="${url}" style="text-align:center;text-decoration:none">📲 加入「${esc(t.text)}」</a>
+    <a class="btn" id="icsGo" href="${url}" style="text-align:center;text-decoration:none">${ic('calendar_add_on')}加入「${esc(t.text)}」</a>
     <div class="small" style="margin-top:10px">如果按了沒有反應：先用 Safari 開這個 App 的網址再按一次。</div>`);
 }
 
@@ -1037,12 +1098,12 @@ function updateBadge(){
 const fmtAt=ms=>{const d=new Date(ms);return ymd(d)===ymd(new Date())?pad(d.getHours())+':'+pad(d.getMinutes()):(d.getMonth()+1)+'/'+d.getDate()};
 function memoIcons(m){
   const f=m.files||[],d=f.filter(x=>x.type==='draw').length,a=f.filter(x=>x.type==='audio').length;
-  return d||a?`<span class="ic">${d?'✍️ '+d+'　':''}${a?'🎙 '+a:''}</span>`:'';
+  return d||a?`<span class="ic">${d?ic('draw')+d+'　':''}${a?ic('mic')+a:''}</span>`:'';
 }
 function renderMemos(){
   const q=$('memoQ').value.trim().toLowerCase();
   const arr=S.memos.filter(m=>!q||(m.title+'\n'+m.body).toLowerCase().includes(q)).sort((a,b)=>(b.pin-a.pin)||(b.at-a.at));
-  $('memoList').innerHTML=arr.length?arr.map(m=>`<button class="memo${m.pin?' pin':''}" data-id="${m.id}"><b>${m.pin?'📌 ':''}${esc(m.title||'（無標題）')}</b><p>${esc(m.body)}</p>${memoIcons(m)}<small>${fmtAt(m.at)}</small></button>`).join('')
+  $('memoList').innerHTML=arr.length?arr.map(m=>`<button class="memo${m.pin?' pin':''}" data-id="${m.id}"><b>${m.pin?ic('push_pin'):''}${esc(m.title||'（無標題）')}</b><p>${esc(m.body)}</p>${memoIcons(m)}<small>${fmtAt(m.at)}</small></button>`).join('')
     :`<div class="empty" style="grid-column:1/-1">${q?'找不到符合的備忘錄。':'還沒有備忘錄。<br>按右上「＋ 新增」寫第一則。'}</div>`;
 }
 $('memoQ').oninput=renderMemos;
@@ -1142,22 +1203,22 @@ function editMemo(id){
     if(added){m.at=Date.now();save()}
     if($('mmAt'))$('mmAt').textContent=added?'已儲存 '+fmtAt(m.at):'';
   };
-  openSheet(`<h2><span>${isNew?'新備忘錄':'備忘錄'}</span><button data-x>完成</button></h2>
+  openSheet(`<h2><span>${isNew?'新備忘錄':'備忘錄'}</span><button data-x>${ic('check')}完成</button></h2>
     <input class="field memo-title" id="mmT" placeholder="標題" value="${esc(m.title)}">
     <textarea class="memo-body" id="mmB" placeholder="寫點什麼…">${esc(m.body)}</textarea>
-    <div class="mtools"><button id="mmDraw">✍️ 手寫</button><button id="mmRec">🎙 錄音</button></div>
+    <div class="mtools"><button id="mmDraw">${ic('draw')}手寫</button><button id="mmRec">${ic('mic')}錄音</button></div>
     <div class="atts" id="mmAtts"></div>
-    <div class="sheet-foot"><span id="mmAt">${added?'最後修改 '+fmtAt(m.at):''}</span><span class="sp"></span><button id="mmPin">${m.pin?'取消置頂':'📌 置頂'}</button><button class="del" id="mmDel"${added?'':' hidden'}>刪除</button></div>`,
+    <div class="sheet-foot"><span id="mmAt">${added?'最後修改 '+fmtAt(m.at):''}</span><span class="sp"></span><button id="mmPin">${ic('push_pin')}${m.pin?'取消置頂':'置頂'}</button><button class="del" id="mmDel"${added?'':' hidden'}>${ic('delete')}刪除</button></div>`,
     ()=>{stopRec();urls.forEach(u=>URL.revokeObjectURL(u));
       if(added&&!hasContent()){S.memos=S.memos.filter(x=>x.id!==m.id);save()}});
   async function renderAtts(){
     const box=$('mmAtts');if(!box)return;
     const parts=await Promise.all(m.files.map(async f=>{
       let b=null;try{b=await fileGet(f.id)}catch(e){}
-      if(!b)return f.type==='audio'?`<div class="aud" data-f="${f.id}"><span>找不到錄音檔</span><button class="x" data-rm aria-label="刪除">✕</button></div>`:'';
+      if(!b)return f.type==='audio'?`<div class="aud" data-f="${f.id}"><span>找不到錄音檔</span><button class="x" data-rm aria-label="刪除">${ic('close')}</button></div>`:'';
       const u=URL.createObjectURL(b);urls.push(u);
-      return f.type==='draw'?`<button class="att" data-f="${f.id}" aria-label="修改手寫"><img src="${u}" alt="手寫"><span class="x" data-rm role="button" aria-label="刪除">✕</span></button>`
-        :`<div class="aud" data-f="${f.id}"><span>🎙 ${fmtDur(f.dur||0)}</span><audio controls preload="metadata" src="${u}"></audio><button class="x" data-rm aria-label="刪除">✕</button></div>`;
+      return f.type==='draw'?`<button class="att" data-f="${f.id}" aria-label="修改手寫"><img src="${u}" alt="手寫"><span class="x" data-rm role="button" aria-label="刪除">${ic('close')}</span></button>`
+        :`<div class="aud" data-f="${f.id}"><span>${ic('mic')}${fmtDur(f.dur||0)}</span><audio controls preload="metadata" src="${u}"></audio><button class="x" data-rm aria-label="刪除">${ic('close')}</button></div>`;
     }));
     if($('mmAtts'))$('mmAtts').innerHTML=parts.join('');
   }
@@ -1172,9 +1233,9 @@ function editMemo(id){
   $('mmRec').onclick=async()=>{
     if(rec){stopRec();return}
     const btn=$('mmRec');
-    const ok=await startRec((bl,dur)=>{addFile('audio',bl,{dur});if($('mmRec')){$('mmRec').classList.remove('rec');$('mmRec').textContent='🎙 錄音'}},
-      sec=>{if($('mmRec'))$('mmRec').textContent='■ 停止錄音 '+fmtDur(sec)});
-    if(ok){btn.classList.add('rec');btn.textContent='■ 停止錄音 0:00'}
+    const ok=await startRec((bl,dur)=>{addFile('audio',bl,{dur});if($('mmRec')){$('mmRec').classList.remove('rec');$('mmRec').innerHTML=ic('mic')+'錄音'}},
+      sec=>{if($('mmRec'))$('mmRec').innerHTML=ic('stop')+'停止錄音 '+fmtDur(sec)});
+    if(ok){btn.classList.add('rec');btn.innerHTML=ic('stop')+'停止錄音 0:00'}
   };
   $('mmAtts').onclick=async e=>{
     const el=e.target.closest('[data-f]');if(!el)return;
@@ -1186,7 +1247,7 @@ function editMemo(id){
     }
     if(f.type==='draw'){const old=await fileGet(f.id).catch(()=>null);const bl=await openDraw(old);if(bl){await filePut(f.id,bl);f.at=Date.now();sync();renderAtts()}}
   };
-  $('mmPin').onclick=()=>{m.pin=!m.pin;$('mmPin').textContent=m.pin?'取消置頂':'📌 置頂';sync();if(!added)toast('先寫點內容再置頂')};
+  $('mmPin').onclick=()=>{m.pin=!m.pin;$('mmPin').innerHTML=ic('push_pin')+(m.pin?'取消置頂':'置頂');sync();if(!added)toast('先寫點內容再置頂')};
   $('mmDel').onclick=async()=>{if(!await ask('刪除這則備忘錄？（手寫和錄音也會一起刪掉）','刪除',true))return;
     stopRec();m.files.forEach(f=>fileDel(f.id));S.memos=S.memos.filter(x=>x.id!==m.id);save();onClose=null;urls.forEach(u=>URL.revokeObjectURL(u));closeSheet()};
   if(isNew)setTimeout(()=>$('mmT').focus(),50);
@@ -1213,17 +1274,17 @@ $('sampleClr').onclick=async()=>{
 
 /* ===== 選單 ===== */
 $('menuBtn').onclick=()=>{
-  openSheet(`<h2>選單<button data-x>關閉</button></h2><div class="menu">
-    <button class="btn" data-m="cycle">🔁 排班循環</button>
-    <button class="btn" data-m="types">🎨 班別設定</button>
-    <button class="btn" data-m="clear">🧹 清除本月班別</button>
-    <button class="btn" data-m="look">🌓 外觀（深色模式、待辦顯示）</button>
-    <button class="btn" data-m="hol">🎌 國定假日</button>
-    <button class="btn" data-m="wipe" style="color:var(--danger)">🗑 清除所有排班</button>
-    <button class="btn" data-m="reset" style="color:var(--danger)">♻️ 重設 App（清除全部資料）</button>
-    <button class="btn" data-m="export">📤 匯出備份</button>
-    <button class="btn" data-m="import">📥 匯入備份</button>
-    <button class="btn" data-m="help">❓ 使用說明</button>
+  openSheet(`<h2>選單<button data-x aria-label="關閉">${ic('close')}</button></h2><div class="menu">
+    <button class="btn" data-m="cycle">${ic('event_repeat')}排班循環</button>
+    <button class="btn" data-m="types">${ic('palette')}班別設定</button>
+    <button class="btn" data-m="clear">${ic('event_busy')}清除本月班別</button>
+    <button class="btn" data-m="look">${ic('contrast')}外觀（深色模式、待辦顯示）</button>
+    <button class="btn" data-m="hol">${ic('flag')}國定假日</button>
+    <button class="btn" data-m="wipe" style="color:var(--danger)">${ic('delete_sweep')}清除所有排班</button>
+    <button class="btn" data-m="reset" style="color:var(--danger)">${ic('restart_alt')}重設 App（清除全部資料）</button>
+    <button class="btn" data-m="export">${ic('upload')}匯出備份</button>
+    <button class="btn" data-m="import">${ic('download')}匯入備份</button>
+    <button class="btn" data-m="help">${ic('help')}使用說明</button>
   </div><p class="small" style="text-align:center;margin-top:14px">班表小幫手 ${APP_VER}</p>`);
   $('sheet').querySelector('.menu').onclick=e=>{
     const m=e.target.closest('[data-m]');if(!m)return;
@@ -1235,14 +1296,14 @@ function cycleRange(c){const e=cycleEnd(c);return fmtYMD(c.start)+' 起'+(e?' �
 function openCycle(){
   const list=[...S.cycles].sort((a,b)=>a.start<b.start?-1:1);
   const seqMini=c=>c.seq.map(id=>{const t=typeById(id);return t?`<span style="${chipStyle(t)}">${esc(t.name)}</span>`:''}).join('');
-  openSheet(`<h2>排班循環<button data-x>關閉</button></h2>
+  openSheet(`<h2>排班循環<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <div class="small">可以設定好幾組循環，例如 10 月一組、11 月一組。日期重疊時，以<b>開始日比較晚</b>的那組為準；你手動設定的日子永遠優先。</div>
     <div id="cyList" style="margin-top:10px">${list.length?list.map(c=>`<div class="cyrow" data-id="${c.id}">
       <div class="cyhead"><b>${cycleRange(c)}</b><span>一輪 ${c.seq.length} 天${c.months?'・'+c.months+' 個月':''}</span></div>
       <div class="seq mini">${seqMini(c)}</div>
-      <div class="cyacts"><button data-edit>修改</button><button data-del class="del">刪除</button></div></div>`).join('')
+      <div class="cyacts"><button data-edit>${ic('edit')}修改</button><button data-del class="del">${ic('delete')}刪除</button></div></div>`).join('')
       :'<div class="empty" style="padding:16px">還沒有排班循環。</div>'}</div>
-    <button class="btn" id="cyNew">＋ 新增排班循環</button>`);
+    <button class="btn" id="cyNew">${ic('add')}新增排班循環</button>`);
   $('cyNew').onclick=()=>editCycle(null);
   $('cyList').onclick=async e=>{
     const row=e.target.closest('.cyrow');if(!row)return;
@@ -1283,15 +1344,15 @@ function editCycle(id){
     if(ov.length)h+=`<br><span style="color:var(--warn)">和「${ov.map(cycleRange).join('」、「')}」日期重疊，重疊的日子以開始日比較晚的為準。</span>`;
     return h;
   };
-  openSheet(`<h2>${old?'修改排班循環':'新增排班循環'}<button data-back>返回</button></h2>
+  openSheet(`<h2>${old?'修改排班循環':'新增排班循環'}<button data-back>${ic('arrow_back')}返回</button></h2>
     <div class="small">設定一輪的班別順序，沒有手動設定的日子會依這個循環自動顯示。</div>
     <h3>起始日（循環的第 1 天）</h3><input class="field" type="date" id="cyStart" value="${defStart}">
     <h3>循環順序（一輪 <b id="cyN">${seq.length}</b> 天）</h3><div class="seq" id="cySeq">${seqHtml()}</div>
-    <div class="chips" id="cyAdd" style="margin-top:8px">${S.types.map(t=>`<button class="chip" data-t="${t.id}" style="${chipStyle(t)}">＋${esc(t.name)}</button>`).join('')}</div>
-    <div class="chips" style="margin-top:8px"><button class="chip" id="cyBack">⌫ 刪最後一個</button><button class="chip" id="cyClr">全部清空</button>${!old&&last?'<button class="chip" id="cyCopy">複製上一組順序</button>':''}</div>
+    <div class="chips" id="cyAdd" style="margin-top:8px">${S.types.map(t=>`<button class="chip" data-t="${t.id}" style="${chipStyle(t)}">${ic('add')}${esc(t.name)}</button>`).join('')}</div>
+    <div class="chips" style="margin-top:8px"><button class="chip" id="cyBack">${ic('backspace')}刪最後一個</button><button class="chip" id="cyClr">${ic('clear_all')}全部清空</button>${!old&&last?`<button class="chip" id="cyCopy">${ic('content_copy')}複製上一組順序</button>`:''}</div>
     <h3>要排幾個月（從起始日那個月算起）</h3><div class="chips" id="cyMon">${monHtml()}</div>
     <div class="small" id="cyPrev" style="margin-top:10px;background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:10px 12px"></div>
-    <button class="btn" id="cySave">儲存</button>`);
+    <button class="btn" id="cySave">${ic('check')}儲存</button>`);
   const upd=()=>{$('cySeq').innerHTML=seqHtml();$('cyN').textContent=seq.length;$('cyMon').innerHTML=monHtml();$('cyPrev').innerHTML=preview()};
   upd();
   $('sheet').querySelector('[data-back]').onclick=()=>openCycle();
@@ -1308,11 +1369,11 @@ function editCycle(id){
   };
 }
 function openTypes(){
-  const rows=()=>S.types.map((t,i)=>`<div class="trow" data-i="${i}"><input type="color" value="${t.color}" aria-label="顏色"><input class="field" type="text" value="${esc(t.name)}" maxlength="5" aria-label="名稱"><button data-del aria-label="刪除">✕</button></div>`).join('');
-  openSheet(`<h2>班別設定<button data-x>關閉</button></h2>
+  const rows=()=>S.types.map((t,i)=>`<div class="trow" data-i="${i}"><input type="color" value="${t.color}" aria-label="顏色"><input class="field" type="text" value="${esc(t.name)}" maxlength="5" aria-label="名稱"><button data-del aria-label="刪除">${ic('delete')}</button></div>`).join('');
+  openSheet(`<h2>班別設定<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <div class="small">名稱最多 5 個字。刪除班別後，用到它的日子會變成空白。</div>
     <div id="tyList" style="margin-top:10px">${rows()}</div>
-    <button class="btn gray" id="tyAdd">＋ 新增班別</button><button class="btn" id="tySave">儲存</button>`);
+    <button class="btn gray" id="tyAdd">${ic('add')}新增班別</button><button class="btn" id="tySave">${ic('check')}儲存</button>`);
   const collect=()=>$('tyList').querySelectorAll('.trow').forEach(r=>{const t=S.types[+r.dataset.i];t.color=r.querySelector('[type=color]').value;t.name=r.querySelector('[type=text]').value.trim()||t.name});
   $('tyList').onclick=async e=>{
     if(!e.target.closest('[data-del]'))return;
@@ -1336,11 +1397,11 @@ function applyTheme(){
 }
 function openLook(){
   const th=S.theme||{mode:'auto'};
-  openSheet(`<h2>外觀<button data-x>關閉</button></h2>
+  openSheet(`<h2>外觀<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <div class="form" id="lkList">${LOOK.map(([v,l])=>`<label class="fr"><span>${l}${v==='auto'?'<small>手機設定成深色，App 就是深色</small>':v==='time'?'<small>白天淺色、晚上深色</small>':''}</span><input type="radio" name="lk" value="${v}"${th.mode===v?' checked':''}></label>`).join('')}</div>
     <div id="lkTime" ${th.mode==='time'?'':'hidden'}><h3>時間</h3><div class="form">
-      <label class="fr"><span>☀️ 淺色開始</span><input type="time" id="lkDay" value="${th.day||'06:00'}"></label>
-      <label class="fr"><span>🌙 深色開始</span><input type="time" id="lkNight" value="${th.night||'18:00'}"></label></div></div>
+      <label class="fr"><span>${ic('light_mode')}淺色開始</span><input type="time" id="lkDay" value="${th.day||'06:00'}"></label>
+      <label class="fr"><span>${ic('dark_mode')}深色開始</span><input type="time" id="lkNight" value="${th.night||'18:00'}"></label></div></div>
     <h3>班表上顯示待辦</h3><div class="form" id="lkTodo">${[['bar','彩色橫條','跟待辦月曆一樣，過期沒做的是灰色'],['num','紅色數字','只顯示那天有幾件'],['off','不顯示','']].map(([v,l,d])=>`<label class="fr"><span>${l}${d?`<small>${d}</small>`:''}</span><input type="radio" name="lkt" value="${v}"${(S.calTodo||'bar')===v?' checked':''}></label>`).join('')}</div>`);
   $('lkTodo').onchange=()=>{S.calTodo=$('lkTodo').querySelector('input:checked').value;save();renderCal()};
   const upd=()=>{const v=($('lkList').querySelector('input:checked')||{}).value||'auto';
@@ -1349,7 +1410,7 @@ function openLook(){
 }
 function openHol(){
   const ot=offType(),ys=[...new Set(Object.keys(HOLIDAYS).map(k=>k.slice(0,4)))];
-  openSheet(`<h2>國定假日<button data-x>關閉</button></h2>
+  openSheet(`<h2>國定假日<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <label class="tgl"><span>在班表上顯示國定假日<small>日期變紅色，並標出節日名稱</small></span><input type="checkbox" id="hShow"${S.hol.show?' checked':''}></label>
     <label class="tgl"><span>國定假日自動排成「${ot?esc(ot.name):'休假'}」<small>會蓋過排班循環；你手動設定的日子不受影響</small></span><input type="checkbox" id="hOff"${S.hol.off?' checked':''}${ot?'':' disabled'}></label>
     <div class="small" style="margin-top:12px">已內建 ${ys.join('、')} 年（依人事行政總處辦公日曆表，含補假）。</div>
@@ -1384,18 +1445,18 @@ async function clearMonth(){
 }
 function openExport(){
   const txt=JSON.stringify(S);
-  openSheet(`<h2>匯出備份<button data-x>關閉</button></h2>
+  openSheet(`<h2>匯出備份<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <div class="small">內含班表、備忘錄、待辦。把整段文字複製起來，貼到 LINE 給自己或存在別的地方。</div>
-    <textarea id="exTxt" style="height:160px;margin-top:8px" readonly>${esc(txt)}</textarea><button class="btn" id="exCopy">複製</button>`);
+    <textarea id="exTxt" style="height:160px;margin-top:8px" readonly>${esc(txt)}</textarea><button class="btn" id="exCopy">${ic('content_copy')}複製</button>`);
   $('exCopy').onclick=()=>{
     const fb=()=>{const t=$('exTxt');t.focus();t.select();toast('已選取，請按「拷貝」')};
     try{navigator.clipboard.writeText(txt).then(()=>toast('已複製'),fb)}catch(e){fb()}
   };
 }
 function openImport(){
-  openSheet(`<h2>匯入備份<button data-x>關閉</button></h2>
+  openSheet(`<h2>匯入備份<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <div class="small">貼上之前匯出的文字。會取代目前所有資料。</div>
-    <textarea id="imTxt" style="height:160px;margin-top:8px" placeholder="貼在這裡"></textarea><button class="btn" id="imGo">匯入</button>`);
+    <textarea id="imTxt" style="height:160px;margin-top:8px" placeholder="貼在這裡"></textarea><button class="btn" id="imGo">${ic('download')}匯入</button>`);
   $('imGo').onclick=async()=>{
     let d;try{d=JSON.parse($('imTxt').value)}catch(e){return toast('格式不正確，請貼上完整的備份文字')}
     if(!d||!Array.isArray(d.types))return toast('格式不正確，請貼上完整的備份文字');
@@ -1403,7 +1464,7 @@ function openImport(){
     S={sample:!!d.sample,types:d.types,days:d.days||{},cycles:migrateCycles(d),memos:d.memos||[],todos:d.todos||[],hol:d.hol||{show:true,off:false}};save();closeSheet();toast('匯入完成');
   };
 }
-function openHelp(){openSheet(`<h2>使用說明<button data-x>關閉</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`)}
+function openHelp(){openSheet(`<h2>使用說明<button data-x aria-label="關閉">${ic('close')}</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`)}
 
 /* ===== 分享圖片 ===== */
 function drawMonth(){
@@ -1436,7 +1497,7 @@ function drawMonth(){
 }
 $('shareBtn').onclick=()=>{
   const url=drawMonth().toDataURL('image/png');
-  openSheet(`<h2>${view.getFullYear()}年${view.getMonth()+1}月班表<button data-x>關閉</button></h2>
+  openSheet(`<h2>${view.getFullYear()}年${view.getMonth()+1}月班表<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <div class="small">長按圖片 →「儲存到照片」或「分享」傳到 LINE。</div>
     <img src="${url}" alt="本月班表圖片" style="width:100%;margin-top:8px;border-radius:8px;-webkit-touch-callout:default">`);
 };
@@ -1449,6 +1510,9 @@ document.addEventListener('visibilitychange',()=>{
   const n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());
   if(+t!==+today){today=t;renderAll()}
 });
+// 圖示字型載好才顯示（避免先看到 calendar_month 這類文字）
+(function(){const ok=()=>document.documentElement.classList.add('ms-ok');
+  try{document.fonts.load('24px "Material Symbols Outlined"','menu').then(f=>{if(f&&f.length)ok()});document.fonts.ready.then(()=>{if(document.fonts.check('24px "Material Symbols Outlined"','menu'))ok()})}catch(e){ok()}})();
 // App 開著時，到了待辦的提醒時間就跳出橫幅
 function checkReminders(){
   // 手寫畫面開著時先不跳，等關掉後下一次檢查再跳
@@ -1461,7 +1525,7 @@ function checkReminders(){
   });
   if(!it)return;
   const b=document.createElement('div');b.id='remBar';
-  b.innerHTML=`<div class="ic">⏰</div><div class="tx"><b>${esc(it.t.text)}</b><span>${fmtMD(it.date)} ${it.t.time}</span></div><button class="ok" data-a="done">完成</button><button data-a="ok">知道了</button>`;
+  b.innerHTML=`<div class="ic">${ic('alarm')}</div><div class="tx"><b>${esc(it.t.text)}</b><span>${fmtMD(it.date)} ${it.t.time}</span></div><button class="ok" data-a="done">${ic('check')}完成</button><button data-a="ok">知道了</button>`;
   b.onclick=e=>{const a=e.target.closest('[data-a]');if(!a)return;S.rem[it.key]=1;
     if(a.dataset.a==='done')toggleItem(it.key);
     // 只留最近的紀錄
