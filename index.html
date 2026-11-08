@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&icon_names=add,alarm,arrow_back,autorenew,backspace,block,calendar_add_on,calendar_month,calendar_today,check,checklist,chevron_left,chevron_right,clear_all,close,content_copy,contrast,dark_mode,delete,delete_sweep,download,draw,edit,edit_calendar,event_available,event_busy,event_repeat,expand_less,expand_more,flag,help,hourglass_empty,ink_eraser,ios_share,light_mode,line_weight,list,menu,mic,notifications,palette,push_pin,repeat,restart_alt,schedule,search,sticky_note_2,stop,task_alt,timer_off,today,undo,upload,view_agenda&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&icon_names=add,alarm,arrow_back,autorenew,backspace,block,calendar_add_on,calendar_month,calendar_today,check,checklist,chevron_left,chevron_right,clear_all,close,content_copy,contrast,dark_mode,date_range,delete,delete_sweep,download,draw,edit,edit_calendar,edit_note,event_available,event_busy,event_repeat,expand_less,expand_more,flag,help,hourglass_empty,ink_eraser,ios_share,light_mode,line_weight,list,menu,mic,notifications,palette,push_pin,repeat,restart_alt,schedule,search,star,sticky_note_2,stop,task_alt,timer_off,today,trending_up,undo,upload,view_agenda&display=block">
 <title>班表小幫手</title>
 <style>
 /* 版面：沿用「薪資出勤」的設計——深藍漸層頂欄、淺灰藍底、白色圓角卡片與日期格、底部分頁列（藍色底線） */
@@ -478,6 +478,49 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
 .sheet{box-shadow:0 -1px 0 var(--line)}
 #toast{box-shadow:none}
 .panel-head h2,.sheet h2{font-weight:600}
+
+/* ===== 工作日誌 ===== */
+#tabs button{font-size:11px}
+.lform{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.lform textarea{resize:none;height:auto;min-height:56px;font-size:16px}
+.lfav{display:flex;gap:6px;overflow-x:auto;align-items:center;padding-bottom:2px}
+.lfav:empty{display:none}
+.lfav .chip{min-height:32px;padding:4px 12px;font-size:13px;font-weight:500;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;display:inline-block;line-height:24px}
+.lfh{flex:none;font-size:12px;color:var(--muted);display:inline-flex;align-items:center}
+.lfh .ms{font-size:16px;margin-right:2px;color:#f59e0b}
+.lrow2{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lrow2 .field{width:auto;flex:1;min-width:0;padding:8px 10px;font-size:15px}
+.ltags{display:flex;gap:6px;flex-wrap:wrap}
+.ltags .ltag{flex:1;justify-content:center}
+.ltag{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:6px 10px;font-size:13px;min-height:34px}
+.ltag .ms{font-size:16px;margin-right:3px}
+.ltag.on.fav{background:#fef3c7;border-color:#f59e0b;color:#92400e}
+.ltag.on.week{background:var(--sky);border-color:var(--accent);color:var(--accent)}
+.ltag.on.perf{background:#dcfce7;border-color:#16a34a;color:#166534}
+.lbtn{border:0;background:var(--grad);color:#fff;border-radius:12px;padding:0 16px;min-height:38px;font-size:15px;font-weight:500;display:inline-flex;align-items:center;margin-left:auto}
+.lbtn .ms{margin-right:4px}
+.lseg{margin-bottom:10px;width:100%}
+.lseg button{flex:1;padding:7px 4px;font-size:13px}
+.lseg button .ms{font-size:16px;margin-right:3px}
+.lrow .body{display:block}
+.ltop{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:3px}
+.ltop b{color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums}
+.lpills{display:inline-flex;gap:4px;flex-wrap:wrap}
+.lpill{display:inline-flex;align-items:center;font-size:11px;border-radius:6px;padding:1px 6px}
+.lpill .ms{font-size:13px;margin-right:2px}
+.lpill.fav{background:#fef3c7;color:#92400e}
+.lpill.week{background:var(--sky);color:var(--accent)}
+.lpill.perf{background:#dcfce7;color:#166534}
+.group h3 .ms{font-size:16px;margin-right:4px;vertical-align:-.2em}
+.favrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line)}
+.favrow:first-child{border-top:0}
+.favrow>.ms{color:#f59e0b;font-size:20px}
+.favrow .txt{flex:1;min-width:0;font-size:15px;word-break:break-word}
+.favrow .lpills{display:flex;margin-top:4px}
+.favrow .lpills:empty{display:none}
+.favrow button{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:none;display:grid;place-items:center;color:var(--accent);padding:0}
+.favrow button .ms{margin:0;font-size:20px}
+.favrow .fdel{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -516,12 +559,25 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
     <div id="todoList"></div>
     </div>
   </section>
+  <section class="view" id="v-log" hidden>
+    <div class="panel-head"><h2>工作日誌</h2></div>
+    <form class="lform" id="logForm">
+      <div class="lfav" id="logFavs"></div>
+      <textarea class="field" id="logTxt" rows="2" placeholder="今天做了什麼？"></textarea>
+      <div class="ltags" id="logTags"></div>
+      <div class="lrow2"><input class="field" type="date" id="logDate" aria-label="日期"><button class="lbtn"><span class="ms" aria-hidden="true">add</span>新增</button></div>
+    </form>
+    <div class="seg lseg" id="logSeg"><button data-f="all">全部</button><button data-f="week"><span class="ms" aria-hidden="true">date_range</span>週報</button><button data-f="perf"><span class="ms" aria-hidden="true">trending_up</span>績效</button><button data-f="fav"><span class="ms" aria-hidden="true">star</span>常用</button></div>
+    <label class="search"><span class="ms" aria-hidden="true">search</span><input class="field" id="logQ" type="search" placeholder="搜尋日誌"></label>
+    <div id="logList"></div>
+  </section>
 </main>
 
 <nav id="tabs">
   <button data-tab="cal" class="on"><span class="ms" aria-hidden="true">calendar_month</span>班表</button>
   <button data-tab="memo"><span class="ms" aria-hidden="true">sticky_note_2</span>備忘錄</button>
   <button data-tab="todo"><span class="ms" aria-hidden="true">task_alt</span>待辦<span class="n" id="todoN" hidden></span></button>
+  <button data-tab="log"><span class="ms" aria-hidden="true">edit_note</span>日誌</button>
 </nav>
 <div id="palette" hidden><div class="hint"><span>選一個班別，再點日期套用</span><button id="palDone"><span class="ms" aria-hidden="true">check</span>完成</button></div><div class="row" id="palRow"></div></div>
 <div class="mask" id="mask" hidden><div class="sheet" id="sheet"></div></div>
@@ -544,7 +600,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v22（2026-11-01）';
+const APP_VER='v23（2026-11-08）';
 // Material Symbols 線條圖示
 const ic=n=>`<span class="ms" aria-hidden="true">${n}</span>`;
 const KEY='shift-helper-v1';
@@ -561,6 +617,7 @@ const HELP=[
   '【待辦月曆】待辦分頁上方可切換「月曆／清單」。月曆會把待辦畫成彩色橫條（好幾天的會連成一條），日期右上的小點是那天的班別顏色。點某一天，下方「今日計劃」列出那天的待辦，可以直接打勾；按「＋ 新增」可以設定時間和顏色。',
   '【提醒】新增或修改待辦時，可以設日期、時間、重複（每天／每週／每月）、提早提醒，並打開「新增至 iPhone 行事曆」：儲存後按「加到『行事曆』」→「加入」，之後時間到 iPhone 會跳通知（App 沒開也會響）。App 開著的時候，時間到畫面上方也會跳出提醒。',
   '【外觀】選單 →「外觀」：可選跟隨手機、淺色、深色，或依時間自動切換（預設早上 6:00 淺色、晚上 6:00 深色，可以自己改）。',
+  '【工作日誌】下方「日誌」分頁：寫下今天做了什麼，可以同時標「常用」「週報」「績效」。上面切換「週報」會依週（週一到週日）列出、「績效」依月份列出，每一組都能按「複製」整理成文字貼到 LINE 或 Email。標成「常用」的內容會自動記下來，之後新增時點一下就能帶入；在「常用」裡可以移除。往左滑可以刪除日誌。',
   '【刪除待辦】在待辦上往左滑，右邊會出現紅色「刪除」，按下去確認就刪掉；往右滑或點別的地方可以收回。也可以點待辦進去按「刪除」。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
   '【每月固定】勾「每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
@@ -593,6 +650,12 @@ function sampleData(){
   return {sample:true,types:JSON.parse(JSON.stringify(TYPES)),
     days:{[ymd(addDays(today,3))]:{t:'r',note:'（範例）支援白天訓練'}},
     cycles:[{id:uid(),start:ymd(new Date(today.getFullYear(),today.getMonth(),1)),seq:['d','d','o','o','n','n','o','o'],months:3}],
+    logs:[
+      {id:uid(),date:ymd(addDays(today,-1)),text:'（範例）完成 2 號機定期保養，更換濾網',tags:{week:1,perf:1},at:Date.now()},
+      {id:uid(),date:t,text:'（範例）巡檢全廠設備，無異常',tags:{fav:1,week:1},at:Date.now()},
+      {id:uid(),date:ymd(addDays(today,-9)),text:'（範例）協助新人教育訓練 4 小時',tags:{perf:1},at:Date.now()}
+    ],
+    logFav:[{id:uid(),text:'（範例）巡檢全廠設備，無異常',tags:{week:1}}],
     memos:[
       {id:uid(),title:'（範例）交班注意事項',body:'2 號機壓力偏高，記得每小時看一次。\n倉庫鑰匙放在值班台左邊抽屜。',pin:true,at:Date.now()-36e5},
       {id:uid(),title:'（範例）年假規劃',body:'12 月底想排連休，記得 11/15 前跟組長說。',pin:false,at:Date.now()-864e5*2}
@@ -617,7 +680,7 @@ function migrateCycles(d){
 let S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!Array.isArray(S.types))S=sampleData();
-S.days=S.days||{};S.cycles=migrateCycles(S);delete S.cycle;S.memos=S.memos||[];S.todos=S.todos||[];S.hol=S.hol||{show:true,off:false};
+S.days=S.days||{};S.cycles=migrateCycles(S);delete S.cycle;S.memos=S.memos||[];S.todos=S.todos||[];S.logs=S.logs||[];S.logFav=S.logFav||[];S.hol=S.hol||{show:true,off:false};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('無法儲存：'+(e&&e.name||e))}}
 const typeById=id=>S.types.find(t=>t.id===id);
 
@@ -1037,7 +1100,7 @@ function editTodo(id,presetDate){
     <button class="btn" id="etSave">${ic(isNew?'add':'check')}${isNew?'新增':'儲存'}</button>
     ${isNew?'':`<button class="btn gray" id="etIcs">${ic('calendar_add_on')}再加一次到 iPhone 行事曆</button><button class="btn red" id="etDel">${ic('delete')}${r0?'刪除（全部重複）':'刪除'}</button>`}`);
   $('etRep').value=r0;$('etRem').value=String(t.remind||0);
-  if(isNew)setTimeout(()=>$('etTxt').focus(),50);
+  if(isNew)setTimeout(()=>{const x=$('etTxt');if(x)x.focus()},50);
   $('etCol').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;col=b.dataset.c;$('etCol').innerHTML=colHtml()};
   const collect=()=>{
     const v=$('etTxt').value.trim();if(!v){toast('請輸入要做的事');return false}
@@ -1264,13 +1327,113 @@ function editMemo(id){
   $('mmPin').onclick=()=>{m.pin=!m.pin;$('mmPin').innerHTML=ic('push_pin')+(m.pin?'取消置頂':'置頂');sync();if(!added)toast('先寫點內容再置頂')};
   $('mmDel').onclick=async()=>{if(!await ask('刪除這則備忘錄？（手寫和錄音也會一起刪掉）','刪除',true))return;
     stopRec();m.files.forEach(f=>fileDel(f.id));S.memos=S.memos.filter(x=>x.id!==m.id);save();onClose=null;urls.forEach(u=>URL.revokeObjectURL(u));closeSheet()};
-  if(isNew)setTimeout(()=>$('mmT').focus(),50);
+  if(isNew)setTimeout(()=>{const x=$('mmT');if(x)x.focus()},50);
 }
+
+/* ===== 工作日誌 ===== */
+// 標籤可以同時有：fav 常用、week 週報、perf 績效
+const LTAG=[['fav','star','常用'],['week','date_range','週報'],['perf','trending_up','績效']];
+let logFilter='all',logNew={};
+const tagHtml=(tags,btn)=>LTAG.map(([k,i,n])=>btn?`<button type="button" class="ltag ${k}${tags[k]?' on':''}" data-tg="${k}">${ic(i)}${n}</button>`:(tags[k]?`<span class="lpill ${k}">${ic(i)}${n}</span>`:'')).join('');
+// 一週從星期一算起
+const weekStart=k=>{const d=parse(k);return ymd(addDays(d,-((d.getDay()+6)%7)))};
+const fmtWeek=ws=>{const e=addDays(parse(ws),6),a=parse(ws);return `${a.getFullYear()}/${a.getMonth()+1}/${a.getDate()}～${e.getMonth()+1}/${e.getDate()}`};
+// 標為常用時，把內容記到常用清單（相同內容只記一次）
+function rememberFav(text,tags){
+  const t=text.trim();if(!t)return;
+  const f=S.logFav.find(x=>x.text===t);
+  const tg={week:tags.week?1:0,perf:tags.perf?1:0};
+  if(f)f.tags=tg;else S.logFav.unshift({id:uid(),text:t,tags:tg});
+}
+function renderLogForm(){
+  if(!$('logDate').value)$('logDate').value=ymd(today);
+  $('logTags').innerHTML=tagHtml(logNew,true);
+  $('logFavs').innerHTML=S.logFav.length?`<span class="lfh">${ic('star')}常用</span>`+S.logFav.map(f=>`<button type="button" class="chip" data-fav="${f.id}">${esc(f.text)}</button>`).join(''):'';
+}
+function logRow(l){
+  const sh=shiftOf(l.date);
+  return swipeWrap(`<div class="todo lrow" data-lid="${l.id}"><button class="body" data-open><div class="ltop"><b>${fmtMD(l.date)}</b>${sh?`<span class="tag" style="${chipStyle(sh)}">${esc(sh.name)}</span>`:''}<span class="lpills">${tagHtml(l.tags||{},false)}</span></div><div class="txt">${esc(l.text).replace(/\n/g,'<br>')}</div></button></div>`);
+}
+function logReport(kind,label,arr){
+  const head=kind==='week'?`【週報】${label}`:`【績效紀錄】${label}`;
+  return head+'\n'+arr.map((l,i)=>`${i+1}. ${fmtMD(l.date)} ${l.text}`).join('\n');
+}
+function renderLogs(){
+  renderLogForm();
+  $('logSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===logFilter));
+  const q=$('logQ').value.trim().toLowerCase();
+  if(logFilter==='fav'){
+    const arr=S.logFav.filter(f=>!q||f.text.toLowerCase().includes(q));
+    $('logList').innerHTML=`<div class="small" style="margin:0 4px 8px">標成「常用」的內容會自動記在這裡，新增日誌時點一下就能帶入。</div>`+(arr.length?`<div class="list">${arr.map(f=>`<div class="favrow" data-fid="${f.id}"><span class="ms">star</span><div class="txt">${esc(f.text)}<div class="lpills">${tagHtml(f.tags||{},false)}</div></div><button class="fuse" data-use aria-label="用這則新增">${ic('add')}</button><button class="fdel" data-fdel aria-label="移出常用">${ic('close')}</button></div>`).join('')}</div>`:'<div class="empty">還沒有常用內容。<br>新增日誌時點「常用」就會記下來。</div>');
+    return;
+  }
+  let arr=S.logs.filter(l=>logFilter==='all'||(l.tags&&l.tags[logFilter])).filter(l=>!q||l.text.toLowerCase().includes(q))
+    .sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.at-a.at);
+  if(!arr.length){$('logList').innerHTML=`<div class="empty">${q?'找不到符合的日誌。':logFilter==='all'?'還沒有日誌。<br>在上面寫下今天做了什麼，按「新增」。':'還沒有標成「'+(logFilter==='week'?'週報':'績效')+'」的日誌。'}</div>`;return}
+  // 週報、全部：依週分組；績效：依月份分組
+  const byMonth=logFilter==='perf',groups=[];
+  arr.forEach(l=>{const g=byMonth?l.date.slice(0,7):weekStart(l.date);let G=groups.find(x=>x.k===g);if(!G)groups.push(G={k:g,items:[]});G.items.push(l)});
+  $('logList').innerHTML=groups.map(G=>{
+    const label=byMonth?`${G.k.slice(0,4)}年${+G.k.slice(5)}月`:fmtWeek(G.k);
+    const copy=logFilter!=='all'?`<button data-copy="${G.k}">${ic('content_copy')}複製</button>`:'';
+    return `<div class="group"><h3><span>${byMonth?'':ic('date_range')}${label}（${G.items.length}）</span>${copy}</h3><div class="list">${G.items.map(logRow).join('')}</div></div>`;
+  }).join('');
+  $('logList').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{
+    const G=groups.find(x=>x.k===b.dataset.copy),items=[...G.items].sort((a,c)=>a.date<c.date?-1:1);
+    const txt=logReport(logFilter,byMonth?`${G.k.slice(0,4)}年${+G.k.slice(5)}月`:fmtWeek(G.k),items);
+    try{navigator.clipboard.writeText(txt).then(()=>toast('已複製，可以貼到 LINE 或 Email'),()=>showCopy(txt))}catch(e){showCopy(txt)}
+  });
+}
+function showCopy(txt){
+  openSheet(`<h2>複製內容<button data-x aria-label="關閉">${ic('close')}</button></h2><div class="small">長按下面的文字 →「全選」→「拷貝」。</div><textarea readonly style="height:240px;margin-top:8px">${esc(txt)}</textarea>`);
+}
+$('logSeg').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;logFilter=b.dataset.f;renderLogs()};
+$('logQ').oninput=renderLogs;
+$('logTags').onclick=e=>{const b=e.target.closest('[data-tg]');if(!b)return;logNew[b.dataset.tg]=logNew[b.dataset.tg]?0:1;renderLogForm()};
+$('logFavs').onclick=e=>{const b=e.target.closest('[data-fav]');if(!b)return;const f=S.logFav.find(x=>x.id===b.dataset.fav);if(!f)return;
+  $('logTxt').value=f.text;logNew={fav:1,week:f.tags&&f.tags.week?1:0,perf:f.tags&&f.tags.perf?1:0};renderLogForm();$('logTxt').focus()};
+$('logForm').onsubmit=e=>{
+  e.preventDefault();const v=$('logTxt').value.trim();if(!v){$('logTxt').focus();return toast('請先寫內容')}
+  const tags={};LTAG.forEach(([k])=>{if(logNew[k])tags[k]=1});
+  S.logs.push({id:uid(),date:$('logDate').value||ymd(today),text:v,tags,at:Date.now()});
+  if(tags.fav)rememberFav(v,tags);
+  save();$('logTxt').value='';logNew={};renderLogs();toast(tags.fav?'已新增，並記到常用':'已新增');
+};
+function editLog(id){
+  const l=S.logs.find(x=>x.id===id);if(!l)return;let tg={...(l.tags||{})};
+  openSheet(`<h2>修改日誌<button data-x>${ic('close')}取消</button></h2>
+    <div class="form"><label class="fr"><span>${ic('calendar_today')}日期</span><input type="date" id="elDate" value="${l.date}"></label></div>
+    <textarea id="elTxt" style="height:120px;margin-top:10px">${esc(l.text)}</textarea>
+    <h3>標記（可以同時選）</h3><div class="ltags" id="elTags">${tagHtml(tg,true)}</div>
+    <button class="btn" id="elSave">${ic('check')}儲存</button><button class="btn red" id="elDel">${ic('delete')}刪除</button>`);
+  $('elTags').onclick=e=>{const b=e.target.closest('[data-tg]');if(!b)return;tg[b.dataset.tg]=tg[b.dataset.tg]?0:1;$('elTags').innerHTML=tagHtml(tg,true)};
+  $('elSave').onclick=()=>{const v=$('elTxt').value.trim();if(!v)return toast('內容不能空白');
+    const tags={};LTAG.forEach(([k])=>{if(tg[k])tags[k]=1});
+    l.text=v;l.date=$('elDate').value||l.date;l.tags=tags;if(tags.fav)rememberFav(v,tags);save();closeSheet();toast('已儲存')};
+  $('elDel').onclick=()=>deleteLog(id,closeSheet);
+}
+async function deleteLog(id,after){
+  const l=S.logs.find(x=>x.id===id);if(!l)return;
+  if(!await ask(`刪除這則日誌？\n「${l.text.slice(0,30)}${l.text.length>30?'…':''}」`,'刪除',true)){closeSwipes();return}
+  S.logs=S.logs.filter(x=>x!==l);save();after&&after();renderAll();toast('已刪除');
+}
+$('logList').onclick=async e=>{
+  if(swJust)return;
+  const fr=e.target.closest('.favrow');
+  if(fr){const f=S.logFav.find(x=>x.id===fr.dataset.fid);if(!f)return;
+    if(e.target.closest('[data-fdel]')){if(!await ask(`把「${f.text.slice(0,30)}」移出常用？（已寫的日誌不會刪）`,'移出',true))return;S.logFav=S.logFav.filter(x=>x!==f);save();renderLogs();return}
+    if(e.target.closest('[data-use]')){$('logTxt').value=f.text;logNew={fav:1,week:f.tags&&f.tags.week?1:0,perf:f.tags&&f.tags.perf?1:0};$('logDate').value=ymd(today);renderLogForm();document.querySelector('main').scrollTop=0;$('logTxt').focus()}
+    return}
+  const del=e.target.closest('[data-del]');
+  if(del){deleteLog(del.closest('.swipe').querySelector('[data-lid]').dataset.lid);return}
+  const sw=e.target.closest('.swipe');if(sw&&sw.classList.contains('open')){sw.classList.remove('open');return}
+  const row=e.target.closest('[data-lid]');if(row&&e.target.closest('[data-open]'))editLog(row.dataset.lid);
+};
 
 /* ===== 分頁 ===== */
 function setTab(t){
   tab=t;if(editing&&t!=='cal')setEditing(false);
-  ['cal','memo','todo'].forEach(x=>$('v-'+x).hidden=x!==t);
+  ['cal','memo','todo','log'].forEach(x=>$('v-'+x).hidden=x!==t);
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
   document.querySelector('main').classList.toggle('fit',t==='cal');
   renderAll();document.querySelector('main').scrollTop=0;
@@ -1278,12 +1441,12 @@ function setTab(t){
 $('tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)setTab(b.dataset.tab)};
 function renderAll(){
   $('sampleBar').hidden=!S.sample;
-  if(tab==='cal')renderCal();else if(tab==='memo')renderMemos();else renderTodos();
+  if(tab==='cal')renderCal();else if(tab==='memo')renderMemos();else if(tab==='log')renderLogs();else renderTodos();
   updateBadge();
 }
 $('sampleClr').onclick=async()=>{
-  if(!await ask('清除所有範例（班表、備忘錄、待辦）？班別種類會保留。','清除'))return;
-  S={types:S.types,days:{},cycles:[],memos:[],todos:[],hol:S.hol};save();renderAll();toast('已清除，可以開始使用');
+  if(!await ask('清除所有範例（班表、備忘錄、待辦、日誌）？班別種類會保留。','清除'))return;
+  S={types:S.types,days:{},cycles:[],memos:[],todos:[],logs:[],logFav:[],hol:S.hol};save();renderAll();toast('已清除，可以開始使用');
 };
 
 /* ===== 選單 ===== */
@@ -1433,12 +1596,12 @@ function openHol(){
   $('hOff').onchange=()=>{S.hol.off=$('hOff').checked;save();renderCal();toast(S.hol.off?'國定假日已排成休假':'已取消')};
 }
 async function resetApp(){
-  if(!await ask('清除全部資料並重新開始？班表、排班循環、備忘錄（含手寫和錄音）、待辦、設定都會刪除，無法復原。','全部清除',true))return;
+  if(!await ask('清除全部資料並重新開始？班表、排班循環、備忘錄（含手寫和錄音）、待辦、工作日誌、設定都會刪除，無法復原。','全部清除',true))return;
   try{localStorage.removeItem(KEY)}catch(e){}
   try{indexedDB.deleteDatabase(FDB)}catch(e){}
   try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch(e){}
   try{if(navigator.serviceWorker)for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch(e){}
-  S={types:JSON.parse(JSON.stringify(TYPES)),days:{},cycles:[],memos:[],todos:[],hol:{show:true,off:false}};save();
+  S={types:JSON.parse(JSON.stringify(TYPES)),days:{},cycles:[],memos:[],todos:[],logs:[],logFav:[],hol:{show:true,off:false}};save();
   location.reload();
 }
 async function wipeShifts(){
@@ -1475,7 +1638,7 @@ function openImport(){
     let d;try{d=JSON.parse($('imTxt').value)}catch(e){return toast('格式不正確，請貼上完整的備份文字')}
     if(!d||!Array.isArray(d.types))return toast('格式不正確，請貼上完整的備份文字');
     if(!await ask('確定用備份取代目前資料？','取代',true))return;
-    S={sample:!!d.sample,types:d.types,days:d.days||{},cycles:migrateCycles(d),memos:d.memos||[],todos:d.todos||[],hol:d.hol||{show:true,off:false}};save();closeSheet();toast('匯入完成');
+    S={sample:!!d.sample,types:d.types,days:d.days||{},cycles:migrateCycles(d),memos:d.memos||[],todos:d.todos||[],logs:d.logs||[],logFav:d.logFav||[],hol:d.hol||{show:true,off:false}};save();closeSheet();toast('匯入完成');
   };
 }
 function openHelp(){openSheet(`<h2>使用說明<button data-x aria-label="關閉">${ic('close')}</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`)}

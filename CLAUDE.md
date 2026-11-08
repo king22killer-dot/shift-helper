@@ -22,6 +22,8 @@ iPhone 用的月曆班表網頁 App。純靜態網站，沒有建置步驟，部
   - `types`（班別）、`days`（`YYYY-MM-DD` → `{t, note}`，`t:'x'` 代表手動清成空白）
   - `cycles`：多組排班循環，每組 `{id, start, seq, months}`；`months` 排幾個月，最後一輪沒輪完會延到下個月排完（`cycleEnd()`）。重疊時以 `start` 較晚的為準（`cycleAt()`）。舊版單一 `cycle` 由 `migrateCycles()` 自動轉換。
   - `memos`（備忘錄，`files: [{id, type:'draw'|'audio', at, dur}]`；手寫 PNG／錄音檔本身存在 IndexedDB `shift-helper-files` 的 `files` store，用 `fileGet/filePut/fileDel`，不在匯出備份裡）、`todos`（`date`、`time` 時間、`color` 月曆橫條顏色（沒設就依 id 自動配色，`colorOf()`）、`days` 幾天完成、`repeat` 重複 `day`/`week`/`month`（舊資料 `monthly:true`＝每月，用 `repOf()` 讀）＋`doneM` 完成狀態（每月用 `YYYY-MM`、每天／每週用日期當 key）、`remind` 提早幾分鐘、`cal` 已加入 iPhone 行事曆）
+  - `logs`：工作日誌 `{id, date, text, tags:{fav,week,perf}, at}`，三個標記可以同時有。「週報」依週（週一～週日，`weekStart()`）分組、「績效」依月份分組，每組可複製成文字（`logReport()`）。
+  - `logFav`：常用內容 `{id, text, tags:{week,perf}}`。日誌標成「常用」時由 `rememberFav()` 自動記錄（相同內容只記一次），新增日誌時顯示成可點的按鈕；刪掉日誌不會刪常用。
   - `theme`：外觀 `{mode:'auto'|'light'|'dark'|'time', day, night}`（`applyTheme()`）
   - `rem`：App 開著時已跳過的提醒（`checkReminders()`）
   - `calTodo`：班表上待辦的顯示方式 `bar` 彩色橫條（預設）／`num` 紅色數字／`off`（`renderCal()`，一週一列 `.wrow`，最多 2 條）
