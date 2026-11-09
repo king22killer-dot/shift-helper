@@ -5,7 +5,8 @@ on:
   pull_request:
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Playwright 1.56 還不支援 ubuntu-latest（26.04），先固定用 24.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
