@@ -539,6 +539,10 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
 .lvq input{width:56px;border:1px solid var(--line);border-radius:8px;padding:5px;text-align:center;font-size:15px;background:var(--input);color:var(--fg)}
 .lvck{display:flex;align-items:center;gap:3px;font-size:12px;color:var(--muted);flex:none}
 .lvck input{width:18px;height:18px;accent-color:var(--accent)}
+
+.lrange{margin:-2px 0 10px;align-items:center;gap:4px;padding:3px}
+.lrange .lrl{font-size:12px;color:var(--muted);padding:0 6px 0 8px;white-space:nowrap}
+.lrange button{flex:1;padding:6px 4px;font-size:13px}
 </style>
 </head>
 <body>
@@ -587,6 +591,7 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
       <div class="lrow2"><input class="field" type="date" id="logDate" aria-label="日期"><button class="lbtn"><span class="ms" aria-hidden="true">add</span>新增</button></div>
     </form>
     <div class="seg lseg" id="logSeg"><button data-f="all">全部</button><button data-f="week"><span class="ms" aria-hidden="true">date_range</span>週報</button><button data-f="perf"><span class="ms" aria-hidden="true">trending_up</span>績效</button><button data-f="fav"><span class="ms" aria-hidden="true">star</span>常用</button></div>
+    <div class="seg lrange" id="logRange" hidden></div>
     <label class="search"><span class="ms" aria-hidden="true">search</span><input class="field" id="logQ" type="search" placeholder="搜尋日誌"></label>
     <div id="logList"></div>
   </section>
@@ -619,7 +624,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v24（2026-11-09）';
+const APP_VER='v25（2026-11-09）';
 // Material Symbols 線條圖示
 const ic=n=>`<span class="ms" aria-hidden="true">${n}</span>`;
 const KEY='shift-helper-v1';
@@ -636,7 +641,7 @@ const HELP=[
   '【待辦月曆】待辦分頁上方可切換「月曆／清單」。月曆會把待辦畫成彩色橫條（好幾天的會連成一條），日期右上的小點是那天的班別顏色。點某一天，下方「今日計劃」列出那天的待辦，可以直接打勾；按「＋ 新增」可以設定時間和顏色。',
   '【提醒】新增或修改待辦時，可以設日期、時間、重複（每天／每週／每月）、提早提醒，並打開「新增至 iPhone 行事曆」：儲存後按「加到『行事曆』」→「加入」，之後時間到 iPhone 會跳通知（App 沒開也會響）。App 開著的時候，時間到畫面上方也會跳出提醒。',
   '【外觀】選單 →「外觀」：可選跟隨手機、淺色、深色，或依時間自動切換（預設早上 6:00 淺色、晚上 6:00 深色，可以自己改）。',
-  '【工作日誌】下方「日誌」分頁：寫下今天做了什麼，可以同時標「常用」「週報」「績效」。上面切換「週報」會依週（週一到週日）列出、「績效」依月份列出，每一組都能按「複製」整理成文字貼到 LINE 或 Email。標成「常用」的內容會自動記下來，之後新增時點一下就能帶入；在「常用」裡可以移除。往左滑可以刪除日誌。',
+  '【工作日誌】下方「日誌」分頁：寫下今天做了什麼，可以同時標「常用」「週報」「績效」。上面切換「週報」會依週（週一到週日）列出，可選一次看 1、2 或 3 週；「績效」可選每月、半年（1～6 月、7～12 月）或全年整理，每一組都能按「複製」整理成文字貼到 LINE 或 Email。標成「常用」的內容會自動記下來，之後新增時點一下就能帶入；在「常用」裡可以移除。往左滑可以刪除日誌。',
   '【刪除待辦】在待辦上往左滑，右邊會出現紅色「刪除」，按下去確認就刪掉；往右滑或點別的地方可以收回。也可以點待辦進去按「刪除」。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
   '【每月固定】勾「每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
@@ -1387,7 +1392,20 @@ let logFilter='all',logNew={};
 const tagHtml=(tags,btn)=>LTAG.map(([k,i,n])=>btn?`<button type="button" class="ltag ${k}${tags[k]?' on':''}" data-tg="${k}">${ic(i)}${n}</button>`:(tags[k]?`<span class="lpill ${k}">${ic(i)}${n}</span>`:'')).join('');
 // 一週從星期一算起
 const weekStart=k=>{const d=parse(k);return ymd(addDays(d,-((d.getDay()+6)%7)))};
-const fmtWeek=ws=>{const e=addDays(parse(ws),6),a=parse(ws);return `${a.getFullYear()}/${a.getMonth()+1}/${a.getDate()}～${e.getMonth()+1}/${e.getDate()}`};
+const fmtRange=(a,b)=>`${a.getFullYear()}/${a.getMonth()+1}/${a.getDate()}～${b.getFullYear()!==a.getFullYear()?b.getFullYear()+'/':''}${b.getMonth()+1}/${b.getDate()}`;
+// 日誌分組的期間：週報可以 1～3 週一組（從這週往回算），績效可以每月／半年／全年
+function logPeriod(date,kind){
+  if(kind==='perf'){
+    const y=+date.slice(0,4),m=+date.slice(5,7),P=S.logPerfP||'month';
+    if(P==='year')return {k:''+y,type:P,label:`${y} 年`,from:`${y}-01-01`,to:`${y}-12-31`};
+    if(P==='half'){const h=m<=6?1:2;return {k:`${y}-H${h}`,type:P,label:`${y} ${h===1?'上半年（1～6 月）':'下半年（7～12 月）'}`,from:`${y}-${h===1?'01':'07'}-01`,to:`${y}-${h===1?'06-30':'12-31'}`}}
+    return {k:date.slice(0,7),type:'month',label:`${y}年${m}月`,from:date.slice(0,7)+'-01',to:ymd(new Date(y,m,0))};
+  }
+  const N=kind==='week'?(S.logWeekN||1):1,anchor=parse(weekStart(ymd(today)));
+  const dw=Math.round((dayNum(anchor)-dayNum(parse(weekStart(date))))/7),idx=Math.floor(dw/N);
+  const a=addDays(anchor,-(idx*N+N-1)*7),b=addDays(a,7*N-1);
+  return {k:ymd(a),type:'week',n:N,label:fmtRange(a,b),from:ymd(a),to:ymd(b)};
+}
 // 標為常用時，把內容記到常用清單（相同內容只記一次）
 function rememberFav(text,tags){
   const t=text.trim();if(!t)return;
@@ -1411,6 +1429,10 @@ function logReport(kind,label,arr){
 function renderLogs(){
   renderLogForm();
   $('logSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===logFilter));
+  const rg=$('logRange'),opts=logFilter==='week'?[[1,'1 週'],[2,'2 週'],[3,'3 週']]:logFilter==='perf'?[['month','每月'],['half','半年'],['year','全年']]:null;
+  rg.hidden=!opts;
+  if(opts){const cur=logFilter==='week'?(S.logWeekN||1):(S.logPerfP||'month');
+    rg.innerHTML=`<span class="lrl">${logFilter==='week'?'一次看':'整理方式'}</span>`+opts.map(([v,l])=>`<button data-rg="${v}" class="${String(v)===String(cur)?'on':''}">${l}</button>`).join('')}
   const q=$('logQ').value.trim().toLowerCase();
   if(logFilter==='fav'){
     const arr=S.logFav.filter(f=>!q||f.text.toLowerCase().includes(q));
@@ -1420,43 +1442,49 @@ function renderLogs(){
   let arr=S.logs.filter(l=>logFilter==='all'||(l.tags&&l.tags[logFilter])).filter(l=>!q||l.text.toLowerCase().includes(q))
     .sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.at-a.at);
   if(!arr.length){$('logList').innerHTML=`<div class="empty">${q?'找不到符合的日誌。':logFilter==='all'?'還沒有日誌。<br>在上面寫下今天做了什麼，按「新增」。':'還沒有標成「'+(logFilter==='week'?'週報':'績效')+'」的日誌。'}</div>`;return}
-  // 週報、全部：依週分組；績效：依月份分組
-  const byMonth=logFilter==='perf',groups=[];
-  arr.forEach(l=>{const g=byMonth?l.date.slice(0,7):weekStart(l.date);let G=groups.find(x=>x.k===g);if(!G)groups.push(G={k:g,items:[]});G.items.push(l)});
-  $('logList').innerHTML=groups.map(G=>{
-    const label=byMonth?`${G.k.slice(0,4)}年${+G.k.slice(5)}月`:fmtWeek(G.k);
-    const copy=logFilter!=='all'?`<button data-copy="${G.k}">${ic('content_copy')}複製</button>`:'';
-    return `<div class="group"><h3><span>${byMonth?'':ic('date_range')}${label}（${G.items.length}）</span>${copy}</h3><div class="list">${G.items.map(logRow).join('')}</div></div>`;
+  // 全部：每週一組；週報：1～3 週一組；績效：每月／半年／全年一組
+  const groups=[];
+  arr.forEach(l=>{const P=logPeriod(l.date,logFilter);let G=groups.find(x=>x.P.k===P.k);if(!G)groups.push(G={P,items:[]});G.items.push(l)});
+  $('logList').innerHTML=groups.map((G,i)=>{
+    const copy=logFilter!=='all'?`<button data-copy="${i}">${ic('content_copy')}複製</button>`:'';
+    return `<div class="group"><h3><span>${G.P.type==='week'?ic('date_range'):''}${G.P.label}（${G.items.length}）</span>${copy}</h3><div class="list">${G.items.map(logRow).join('')}</div></div>`;
   }).join('');
   $('logList').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{
-    const G=groups.find(x=>x.k===b.dataset.copy),items=[...G.items].sort((a,c)=>a.date<c.date?-1:1);
-    openReport(logFilter,G.k,byMonth?`${G.k.slice(0,4)}年${+G.k.slice(5)}月`:fmtWeek(G.k),items);
+    const G=groups[+b.dataset.copy],items=[...G.items].sort((a,c)=>a.date<c.date?-1:1);
+    openReport(logFilter,G.P,items);
   });
 }
 // 段落版：例行工作（常用或同一週重複出現）合併計次，其餘列為重點工作，再加上績效亮點、下週預定
-function logParagraph(kind,key,label,arr){
-  const favs=new Set(S.logFav.map(f=>f.text)),cnt={};
+function logParagraph(kind,P,arr){
+  const favs=new Set(S.logFav.map(f=>f.text)),cnt={},md=k=>fmtMD(k).replace(/（.）/,'');
   arr.forEach(l=>cnt[l.text]=(cnt[l.text]||0)+1);
   const routine=[],main=[],seen={};
-  arr.forEach(l=>{if(favs.has(l.text)||cnt[l.text]>1){if(!seen[l.text]){seen[l.text]=1;routine.push(l.text+(cnt[l.text]>1?`（共 ${cnt[l.text]} 次）`:''))}}else main.push(`${fmtMD(l.date).replace(/（.）/,'')} ${l.text}`)});
+  arr.forEach(l=>{if(favs.has(l.text)||cnt[l.text]>1){if(!seen[l.text]){seen[l.text]=1;routine.push(l.text+(cnt[l.text]>1?`（共 ${cnt[l.text]} 次）`:''))}}else main.push(`${md(l.date)} ${l.text}`)});
   const perf=arr.filter(l=>l.tags&&l.tags.perf).map(l=>l.text).filter((v,i,a)=>a.indexOf(v)===i);
-  const out=[kind==='week'?`【週報】${label}`:`【績效紀錄】${label}`];
+  const out=[kind==='week'?`【週報】${P.label}`:`【績效紀錄】${P.label}`];
   if(kind==='week'){
-    if(routine.length)out.push(`本週例行工作：${routine.join('；')}。`);
-    if(main.length)out.push(`本週重點工作：${main.join('；')}。`);
+    const w=P.n>1?`這 ${P.n} 週`:'本週';
+    if(routine.length)out.push(`${w}例行工作：${routine.join('；')}。`);
+    if(main.length)out.push(`${w}重點工作：${main.join('；')}。`);
     if(perf.length)out.push(`績效亮點：${perf.join('；')}。`);
-    const ns=ymd(addDays(parse(key),7)),ne=ymd(addDays(parse(key),13));
+    const ns=ymd(addDays(parse(P.to),1)),ne=ymd(addDays(parse(P.to),7));
     const next=todoItems(ymOf(ns),ymOf(ne)).filter(i=>!i.done&&i.date>=ns&&i.date<=ne).sort((a,b)=>a.date<b.date?-1:1)
-      .map(i=>`${fmtMD(i.date).replace(/（.）/,'')} ${i.t.text}`).filter((v,i,a)=>a.indexOf(v)===i);
+      .map(i=>`${md(i.date)} ${i.t.text}`).filter((v,i,a)=>a.indexOf(v)===i);
     if(next.length)out.push(`下週預定：${next.join('；')}。`);
+  }else if(P.type==='month'){
+    out.push(`本月共有 ${arr.length} 項績效紀錄：${arr.map(l=>`${md(l.date)} ${l.text}`).join('；')}。`);
   }else{
-    out.push(`本月共有 ${arr.length} 項績效紀錄：${arr.map(l=>`${fmtMD(l.date).replace(/（.）/,'')} ${l.text}`).join('；')}。`);
+    // 半年、全年：先總數，再依月份各一段
+    const byM={};arr.forEach(l=>{const m=+l.date.slice(5,7);(byM[m]=byM[m]||[]).push(l)});
+    const ms=Object.keys(byM).map(Number).sort((a,b)=>a-b);
+    out.push(`${P.type==='half'?'這半年':'這一年'}共有 ${arr.length} 項績效紀錄，分布在 ${ms.length} 個月。`);
+    ms.forEach(m=>out.push(`${m} 月：${byM[m].map(l=>`${md(l.date)} ${l.text}`).join('；')}。`));
   }
   return out.join('\n\n');
 }
-function openReport(kind,key,label,items){
+function openReport(kind,P,items){
   let fmt=S.rptFmt||'para';
-  const make=()=>fmt==='para'?logParagraph(kind,key,label,items):logReport(kind,label,items);
+  const make=()=>fmt==='para'?logParagraph(kind,P,items):logReport(kind,P.label,items);
   openSheet(`<h2>${kind==='week'?'週報':'績效紀錄'}<button data-x aria-label="關閉">${ic('close')}</button></h2>
     <div class="seg" id="rpSeg" style="margin-bottom:10px"><button data-r="para">${ic('subject')}段落</button><button data-r="list">${ic('format_list_bulleted')}條列</button></div>
     <textarea id="rpTxt" style="height:300px"></textarea>
@@ -1483,6 +1511,7 @@ $('logSet').onclick=()=>{
 };
 $('logSeg').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;logFilter=b.dataset.f;renderLogs()};
 $('logQ').oninput=renderLogs;
+$('logRange').onclick=e=>{const b=e.target.closest('[data-rg]');if(!b)return;if(logFilter==='week')S.logWeekN=+b.dataset.rg;else S.logPerfP=b.dataset.rg;save();renderLogs()};
 $('logTags').onclick=e=>{const b=e.target.closest('[data-tg]');if(!b)return;logNew[b.dataset.tg]=logNew[b.dataset.tg]?0:1;renderLogForm()};
 $('logFavs').onclick=e=>{const b=e.target.closest('[data-fav]');if(!b)return;const f=S.logFav.find(x=>x.id===b.dataset.fav);if(!f)return;
   $('logTxt').value=f.text;logNew={fav:1,week:f.tags&&f.tags.week?1:0,perf:f.tags&&f.tags.perf?1:0};renderLogForm();$('logTxt').focus()};

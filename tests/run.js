@@ -102,6 +102,33 @@ test('工作日誌：同時標記、常用自動記錄、週報段落',async p=>
   assert((await p.inputValue('#rpTxt')).includes('1. 11/9（一） 處理冷卻水塔漏水'),'條列格式不對');
 });
 
+test('週報一次看 2～3 週、績效依半年／全年整理',async p=>{
+  await p.evaluate(()=>{S.logs=[
+    {id:'a',date:'2026-11-09',text:'本週工作',tags:{week:1},at:1},
+    {id:'b',date:'2026-11-03',text:'上週工作',tags:{week:1},at:1},
+    {id:'c',date:'2026-10-27',text:'上上週工作',tags:{week:1},at:1},
+    {id:'d',date:'2026-03-10',text:'三月績效',tags:{perf:1},at:1},
+    {id:'e',date:'2026-05-20',text:'五月績效',tags:{perf:1},at:1},
+    {id:'f',date:'2026-09-01',text:'九月績效',tags:{perf:1},at:1}];save()});
+  await p.click('[data-tab=log]');await p.click('#logSeg [data-f=week]');
+  const heads=async()=>p.$$eval('#logList .group h3 > span',x=>x.map(e=>e.textContent.replace(/^date_range/,'')));
+  assert((await heads()).length===3,'1 週應該有 3 組');
+  await p.click('#logRange [data-rg="2"]');
+  assert(JSON.stringify(await heads())===JSON.stringify(['2026/11/2～11/15（2）','2026/10/19～11/1（1）']),'2 週分組不對：'+await heads());
+  await p.click('#logRange [data-rg="3"]');
+  assert(JSON.stringify(await heads())===JSON.stringify(['2026/10/26～11/15（3）']),'3 週分組不對：'+await heads());
+  await p.click('#logList .group [data-copy]');await p.click('#rpSeg [data-r=para]');
+  assert((await p.inputValue('#rpTxt')).includes('這 3 週重點工作'),'3 週的段落用詞不對');
+  await p.click('#sheet h2 [data-x]');
+  await p.click('#logSeg [data-f=perf]');await p.click('#logRange [data-rg=half]');
+  assert(JSON.stringify(await heads())===JSON.stringify(['2026 下半年（7～12 月）（1）','2026 上半年（1～6 月）（2）']),'半年分組不對：'+await heads());
+  await p.click('#logRange [data-rg=year]');
+  assert(JSON.stringify(await heads())===JSON.stringify(['2026 年（3）']),'全年分組不對：'+await heads());
+  await p.click('#logList .group [data-copy]');
+  const t=await p.inputValue('#rpTxt');
+  assert(t.includes('這一年共有 3 項績效紀錄')&&t.includes('3 月：3/10 三月績效')&&t.includes('9 月：9/1 九月績效'),'全年段落不對：'+t);
+});
+
 test('假別與特休：額度、已休、剩餘',async p=>{
   await p.evaluate(()=>{S.cycles=[];S.days={'2026-03-02':{t:'al'},'2026-11-03':{t:'al'},'2026-12-24':{t:'al'},'2026-11-04':{t:'sl'}};save();renderCal()});
   await p.click('#menuBtn');await p.click('[data-m=leave]');
