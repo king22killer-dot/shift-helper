@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&icon_names=add,alarm,arrow_back,autorenew,backspace,block,calendar_add_on,calendar_month,calendar_today,check,checklist,chevron_left,chevron_right,clear_all,close,content_copy,contrast,dark_mode,date_range,delete,delete_sweep,download,draw,edit,edit_calendar,edit_note,event_available,event_busy,event_repeat,expand_less,expand_more,flag,help,hourglass_empty,ink_eraser,ios_share,light_mode,line_weight,list,menu,mic,notifications,palette,push_pin,repeat,restart_alt,schedule,search,star,sticky_note_2,stop,task_alt,timer_off,today,trending_up,undo,upload,view_agenda&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..500,0..1,0&icon_names=add,alarm,arrow_back,autorenew,backspace,beach_access,block,calendar_add_on,calendar_month,calendar_today,check,checklist,chevron_left,chevron_right,clear_all,close,cloud_download,cloud_upload,content_copy,contrast,dark_mode,date_range,delete,delete_sweep,download,draw,edit,edit_calendar,edit_note,event_available,event_busy,event_repeat,expand_less,expand_more,flag,format_list_bulleted,help,hourglass_empty,ink_eraser,ios_share,light_mode,line_weight,list,menu,mic,notifications,palette,push_pin,repeat,restart_alt,schedule,search,settings,star,sticky_note_2,stop,subject,task_alt,timer_off,today,trending_up,undo,upload,view_agenda&display=block">
 <title>班表小幫手</title>
 <style>
 /* 版面：沿用「薪資出勤」的設計——深藍漸層頂欄、淺灰藍底、白色圓角卡片與日期格、底部分頁列（藍色底線） */
@@ -521,11 +521,30 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
 .favrow button{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:none;display:grid;place-items:center;color:var(--accent);padding:0}
 .favrow button .ms{margin:0;font-size:20px}
 .favrow .fdel{color:var(--muted)}
+
+/* ===== 備份提醒、假別、日誌設定 ===== */
+.sample.bk{background:var(--sky);color:var(--accent)}
+.sample.bk .bkx{background:none;color:var(--muted);padding:4px;min-width:0}
+.sample.bk .bkx .ms{margin:0}
+.hbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--navy);display:grid;place-items:center;padding:0}
+.hbtn .ms{margin:0;font-size:22px}
+.lvchip{background:#dcfce7!important;color:#166534!important;box-shadow:none!important;font-weight:600!important;cursor:pointer}
+.stats .lvchip .ms{font-size:15px;margin-right:2px;background:none!important;box-shadow:none!important;padding:0!important;border-radius:0}
+.lvrow{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.lvrow .tag{flex:none;font-size:13px;padding:2px 8px;border-radius:6px;font-weight:700;background:var(--soft)}
+.lvnum{flex:1;font-size:13px;color:var(--muted);line-height:1.5}
+.lvnum b{color:var(--fg);font-size:15px}
+.lvnum .neg b,.lvnum .neg{color:var(--danger)}
+.lvq{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.lvq input{width:56px;border:1px solid var(--line);border-radius:8px;padding:5px;text-align:center;font-size:15px;background:var(--input);color:var(--fg)}
+.lvck{display:flex;align-items:center;gap:3px;font-size:12px;color:var(--muted);flex:none}
+.lvck input{width:18px;height:18px;accent-color:var(--accent)}
 </style>
 </head>
 <body>
 <header><h1><span class="logo"><span class="ms" aria-hidden="true">calendar_month</span></span>班表小幫手</h1><button class="menu-btn" id="menuBtn"><span class="ms" aria-hidden="true">menu</span>選單</button></header>
 <main class="fit">
+  <div class="sample bk" id="bkBar" hidden><span id="bkTxt"></span><button id="bkGo2"><span class="ms" aria-hidden="true">cloud_upload</span>備份</button><button class="bkx" id="bkX" aria-label="明天再提醒"><span class="ms" aria-hidden="true">close</span></button></div>
   <div class="sample" id="sampleBar" hidden><span>目前是範例資料，可以先點點看。</span><button id="sampleClr"><span class="ms" aria-hidden="true">restart_alt</span>清除範例，開始使用</button></div>
 
   <section class="view" id="v-cal">
@@ -560,7 +579,7 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
     </div>
   </section>
   <section class="view" id="v-log" hidden>
-    <div class="panel-head"><h2>工作日誌</h2></div>
+    <div class="panel-head"><h2>工作日誌</h2><button class="hbtn" id="logSet" aria-label="日誌設定"><span class="ms" aria-hidden="true">settings</span></button></div>
     <form class="lform" id="logForm">
       <div class="lfav" id="logFavs"></div>
       <textarea class="field" id="logTxt" rows="2" placeholder="今天做了什麼？"></textarea>
@@ -600,7 +619,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v23（2026-11-08）';
+const APP_VER='v24（2026-11-09）';
 // Material Symbols 線條圖示
 const ic=n=>`<span class="ms" aria-hidden="true">${n}</span>`;
 const KEY='shift-helper-v1';
@@ -627,11 +646,18 @@ const HELP=[
   '【班別設定】選單 →「班別設定」：可以新增、改名、改顏色或刪除班別。',
   '【分享】按右上分享鍵，把本月班表做成圖片，長按圖片即可儲存或傳 LINE。',
   '【重設】選單 →「重設 App」會刪除全部資料（班表、循環、備忘錄、待辦、設定）並重新載入，畫面卡住或想從頭開始時使用。',
-  '【備份】資料存在這支手機的瀏覽器裡。選單 →「匯出備份」複製一段文字保存；換手機時用「匯入備份」貼上即可還原（班表、備忘錄、待辦全部包含）。'
+  '【備份到 Google 雲端】選單 →「備份到 Google 雲端」→「立即備份」，在分享選單選「雲端硬碟」或「儲存到檔案」→ Google 雲端硬碟。備份檔包含全部資料和手寫、錄音。7 天沒備份，班表上方會提醒。換手機時用「從備份檔還原」選那個檔案。',
+  '【假別與特休】班別裡有特休、病假、事假、補休，在班表把那天設成假別就會自動計算。選單 →「假別與特休」可以設每年額度和年度起算日（到職日），看已休、已排、剩幾天；班表下方也會顯示「特休剩幾天」。',
+  '【待辦和日誌】待辦打勾完成，會自動寫進今天的工作日誌（預設標「週報」）；取消打勾會拿掉。日誌右上的齒輪可以關掉或改標記。',
+  '【週報段落】日誌切到「週報」或「績效」，按「複製」可以選「段落」或「條列」：段落會把例行工作合併計次，列出重點工作、績效亮點和下週預定的待辦，可以先修改再複製。',
+  '【文字備份】選單 →「複製文字備份」可以把資料（不含手寫、錄音）複製成一段文字，貼到 LINE 給自己；「貼上文字還原」貼回來就能還原。',
 ];
+// 假別（leave:1 的班別會算進「假別與特休」）
+const LEAVE_TYPES=[{id:'al',name:'特休',color:'#34d399',leave:1},{id:'sl',name:'病假',color:'#fda4af',leave:1},{id:'pl',name:'事假',color:'#fcd34d',leave:1},{id:'cl',name:'補休',color:'#93c5fd',leave:1}];
 const TYPES=[
   {id:'d',name:'日班',color:'#4da6f7'},{id:'n',name:'夜班',color:'#f6cfa1'},{id:'o',name:'休假',color:'#ffffff'},
-  {id:'r',name:'常日班',color:'#c9b8f0'},{id:'a',name:'A班',color:'#ffe08a'},{id:'b',name:'B班',color:'#a8e6c1'}
+  {id:'r',name:'常日班',color:'#c9b8f0'},{id:'a',name:'A班',color:'#ffe08a'},{id:'b',name:'B班',color:'#a8e6c1'},
+  ...LEAVE_TYPES
 ];
 
 const $=id=>document.getElementById(id);
@@ -680,7 +706,16 @@ function migrateCycles(d){
 let S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!Array.isArray(S.types))S=sampleData();
-S.days=S.days||{};S.cycles=migrateCycles(S);delete S.cycle;S.memos=S.memos||[];S.todos=S.todos||[];S.logs=S.logs||[];S.logFav=S.logFav||[];S.hol=S.hol||{show:true,off:false};
+function normalizeS(){
+  S.days=S.days||{};S.cycles=migrateCycles(S);delete S.cycle;S.memos=S.memos||[];S.todos=S.todos||[];S.logs=S.logs||[];S.logFav=S.logFav||[];S.hol=S.hol||{show:true,off:false};
+  // 舊資料補上假別（只補一次，之後使用者刪掉就不再加回）
+  if(!S.leaveInit){LEAVE_TYPES.forEach(t=>{if(!S.types.some(x=>x.id===t.id))S.types.push({...t})});S.leaveInit=1}
+  S.leaveCfg=S.leaveCfg||{start:'01-01',quota:{al:14}};
+  if(S.todoLog===undefined)S.todoLog=true;
+  S.logAutoTags=S.logAutoTags||{week:1};
+  if(!S.firstUse)S.firstUse=Date.now();
+}
+normalizeS();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('無法儲存：'+(e&&e.name||e))}}
 const typeById=id=>S.types.find(t=>t.id===id);
 
@@ -820,7 +855,14 @@ function renderCal(){
     }).join('')+bars+'</div>';
   }
   $('grid').innerHTML=html;
-  $('stats').innerHTML=S.types.filter(t=>cnt[t.id]).map(t=>`<span><i class="dot" style="background:${t.color}"></i>${esc(t.name)} ${cnt[t.id]} 天</span>`).join('');
+  let lv='';const q=S.leaveCfg&&S.leaveCfg.quota;
+  if(q&&q.al!=null&&S.types.some(t=>t.id==='al')){const u=leaveUsage().al||{past:0,future:0},left=q.al-u.past-u.future;lv=`<span class="lvchip" data-lv>${ic('beach_access')}特休剩 ${left} 天</span>`}
+  $('stats').innerHTML=lv+S.types.filter(t=>cnt[t.id]).map(t=>`<span><i class="dot" style="background:${t.color}"></i>${esc(t.name)} ${cnt[t.id]} 天</span>`).join('');
+  const lc=$('stats').querySelector('[data-lv]');if(lc)lc.onclick=openLeave;
+  // 7 天沒備份就提醒（範例資料不提醒，按 ✕ 隔天再提醒）
+  const need=!S.sample&&daysSince(S.lastBackup||S.firstUse)>=7&&!(S.bkSnooze>Date.now());
+  $('bkBar').hidden=!need;
+  if(need)$('bkTxt').textContent=S.lastBackup?`已經 ${daysSince(S.lastBackup)} 天沒備份了`:'還沒備份過資料';
   $('editBtn').classList.toggle('on',editing);
 }
 function go(m){view=new Date(view.getFullYear(),view.getMonth()+m,1);renderCal()}
@@ -903,7 +945,15 @@ function todoRow(it,showDate){
 }
 function toggleItem(key){
   const[id,ym]=key.split('@'),t=S.todos.find(x=>x.id===id);if(!t)return;
-  if(ym){t.doneM=t.doneM||{};if(t.doneM[ym])delete t.doneM[ym];else t.doneM[ym]=true}else t.done=!t.done;
+  let done;
+  if(ym){t.doneM=t.doneM||{};if(t.doneM[ym])delete t.doneM[ym];else t.doneM[ym]=true;done=!!t.doneM[ym]}else{t.done=!t.done;done=t.done}
+  // 打勾完成 → 記到今天的日誌；取消勾選 → 把那則自動日誌拿掉
+  if(S.todoLog!==false){
+    if(done){
+      if(!S.logs.some(l=>l.from===key)){const tags={};['week','perf'].forEach(k=>{if(S.logAutoTags&&S.logAutoTags[k])tags[k]=1});
+        S.logs.push({id:uid(),date:ymd(new Date()),text:t.text,tags,at:Date.now(),from:key});toast('已完成，記到今天的日誌')}
+    }else S.logs=S.logs.filter(l=>l.from!==key);
+  }
   save();
 }
 // 左滑出現「刪除」：外框 .swipe 裡放待辦列和藏在後面的刪除鍵
@@ -1380,13 +1430,57 @@ function renderLogs(){
   }).join('');
   $('logList').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{
     const G=groups.find(x=>x.k===b.dataset.copy),items=[...G.items].sort((a,c)=>a.date<c.date?-1:1);
-    const txt=logReport(logFilter,byMonth?`${G.k.slice(0,4)}年${+G.k.slice(5)}月`:fmtWeek(G.k),items);
-    try{navigator.clipboard.writeText(txt).then(()=>toast('已複製，可以貼到 LINE 或 Email'),()=>showCopy(txt))}catch(e){showCopy(txt)}
+    openReport(logFilter,G.k,byMonth?`${G.k.slice(0,4)}年${+G.k.slice(5)}月`:fmtWeek(G.k),items);
   });
+}
+// 段落版：例行工作（常用或同一週重複出現）合併計次，其餘列為重點工作，再加上績效亮點、下週預定
+function logParagraph(kind,key,label,arr){
+  const favs=new Set(S.logFav.map(f=>f.text)),cnt={};
+  arr.forEach(l=>cnt[l.text]=(cnt[l.text]||0)+1);
+  const routine=[],main=[],seen={};
+  arr.forEach(l=>{if(favs.has(l.text)||cnt[l.text]>1){if(!seen[l.text]){seen[l.text]=1;routine.push(l.text+(cnt[l.text]>1?`（共 ${cnt[l.text]} 次）`:''))}}else main.push(`${fmtMD(l.date).replace(/（.）/,'')} ${l.text}`)});
+  const perf=arr.filter(l=>l.tags&&l.tags.perf).map(l=>l.text).filter((v,i,a)=>a.indexOf(v)===i);
+  const out=[kind==='week'?`【週報】${label}`:`【績效紀錄】${label}`];
+  if(kind==='week'){
+    if(routine.length)out.push(`本週例行工作：${routine.join('；')}。`);
+    if(main.length)out.push(`本週重點工作：${main.join('；')}。`);
+    if(perf.length)out.push(`績效亮點：${perf.join('；')}。`);
+    const ns=ymd(addDays(parse(key),7)),ne=ymd(addDays(parse(key),13));
+    const next=todoItems(ymOf(ns),ymOf(ne)).filter(i=>!i.done&&i.date>=ns&&i.date<=ne).sort((a,b)=>a.date<b.date?-1:1)
+      .map(i=>`${fmtMD(i.date).replace(/（.）/,'')} ${i.t.text}`).filter((v,i,a)=>a.indexOf(v)===i);
+    if(next.length)out.push(`下週預定：${next.join('；')}。`);
+  }else{
+    out.push(`本月共有 ${arr.length} 項績效紀錄：${arr.map(l=>`${fmtMD(l.date).replace(/（.）/,'')} ${l.text}`).join('；')}。`);
+  }
+  return out.join('\n\n');
+}
+function openReport(kind,key,label,items){
+  let fmt=S.rptFmt||'para';
+  const make=()=>fmt==='para'?logParagraph(kind,key,label,items):logReport(kind,label,items);
+  openSheet(`<h2>${kind==='week'?'週報':'績效紀錄'}<button data-x aria-label="關閉">${ic('close')}</button></h2>
+    <div class="seg" id="rpSeg" style="margin-bottom:10px"><button data-r="para">${ic('subject')}段落</button><button data-r="list">${ic('format_list_bulleted')}條列</button></div>
+    <textarea id="rpTxt" style="height:300px"></textarea>
+    <div class="small" style="margin-top:6px">可以先在上面修改，再按「複製」。</div>
+    <button class="btn" id="rpCopy">${ic('content_copy')}複製</button>`);
+  const upd=()=>{$('rpSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.r===fmt));$('rpTxt').value=make()};
+  upd();
+  $('rpSeg').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;fmt=S.rptFmt=b.dataset.r;save();upd()};
+  $('rpCopy').onclick=()=>{const txt=$('rpTxt').value;
+    const fb=()=>{const t=$('rpTxt');t.focus();t.select();toast('已選取，請按「拷貝」')};
+    try{navigator.clipboard.writeText(txt).then(()=>toast('已複製，可以貼到 LINE 或 Email'),fb)}catch(e){fb()}};
 }
 function showCopy(txt){
   openSheet(`<h2>複製內容<button data-x aria-label="關閉">${ic('close')}</button></h2><div class="small">長按下面的文字 →「全選」→「拷貝」。</div><textarea readonly style="height:240px;margin-top:8px">${esc(txt)}</textarea>`);
 }
+$('logSet').onclick=()=>{
+  const tg=S.logAutoTags||{};
+  openSheet(`<h2>日誌設定<button data-x aria-label="關閉">${ic('close')}</button></h2>
+    <div class="form"><label class="fr"><span>${ic('task_alt')}待辦完成時自動記到日誌<small>打勾就寫進今天的日誌；取消打勾會拿掉</small></span><input type="checkbox" id="lsAuto" class="sw2"${S.todoLog!==false?' checked':''}></label>
+      <label class="fr"><span>${ic('date_range')}自動記的日誌標「週報」</span><input type="checkbox" id="lsWeek" class="sw2"${tg.week?' checked':''}></label>
+      <label class="fr"><span>${ic('trending_up')}自動記的日誌標「績效」</span><input type="checkbox" id="lsPerf" class="sw2"${tg.perf?' checked':''}></label></div>`);
+  const upd=()=>{S.todoLog=$('lsAuto').checked;S.logAutoTags={week:$('lsWeek').checked?1:0,perf:$('lsPerf').checked?1:0};save()};
+  $('lsAuto').onchange=$('lsWeek').onchange=$('lsPerf').onchange=upd;
+};
 $('logSeg').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;logFilter=b.dataset.f;renderLogs()};
 $('logQ').oninput=renderLogs;
 $('logTags').onclick=e=>{const b=e.target.closest('[data-tg]');if(!b)return;logNew[b.dataset.tg]=logNew[b.dataset.tg]?0:1;renderLogForm()};
@@ -1444,9 +1538,11 @@ function renderAll(){
   if(tab==='cal')renderCal();else if(tab==='memo')renderMemos();else if(tab==='log')renderLogs();else renderTodos();
   updateBadge();
 }
+$('bkGo2').onclick=openBackup;
+$('bkX').onclick=()=>{S.bkSnooze=Date.now()+864e5;save();renderAll()};
 $('sampleClr').onclick=async()=>{
   if(!await ask('清除所有範例（班表、備忘錄、待辦、日誌）？班別種類會保留。','清除'))return;
-  S={types:S.types,days:{},cycles:[],memos:[],todos:[],logs:[],logFav:[],hol:S.hol};save();renderAll();toast('已清除，可以開始使用');
+  S={types:S.types,days:{},cycles:[],memos:[],todos:[],logs:[],logFav:[],hol:S.hol,leaveInit:1,leaveCfg:S.leaveCfg,firstUse:Date.now()};normalizeS();save();renderAll();toast('已清除，可以開始使用');
 };
 
 /* ===== 選單 ===== */
@@ -1455,17 +1551,20 @@ $('menuBtn').onclick=()=>{
     <button class="btn" data-m="cycle">${ic('event_repeat')}排班循環</button>
     <button class="btn" data-m="types">${ic('palette')}班別設定</button>
     <button class="btn" data-m="clear">${ic('event_busy')}清除本月班別</button>
+    <button class="btn" data-m="leave">${ic('beach_access')}假別與特休</button>
     <button class="btn" data-m="look">${ic('contrast')}外觀（深色模式、待辦顯示）</button>
     <button class="btn" data-m="hol">${ic('flag')}國定假日</button>
     <button class="btn" data-m="wipe" style="color:var(--danger)">${ic('delete_sweep')}清除所有排班</button>
     <button class="btn" data-m="reset" style="color:var(--danger)">${ic('restart_alt')}重設 App（清除全部資料）</button>
-    <button class="btn" data-m="export">${ic('upload')}匯出備份</button>
-    <button class="btn" data-m="import">${ic('download')}匯入備份</button>
+    <button class="btn" data-m="backup">${ic('cloud_upload')}備份到 Google 雲端</button>
+    <button class="btn" data-m="restore">${ic('cloud_download')}從備份檔還原</button>
+    <button class="btn" data-m="export">${ic('upload')}複製文字備份</button>
+    <button class="btn" data-m="import">${ic('download')}貼上文字還原</button>
     <button class="btn" data-m="help">${ic('help')}使用說明</button>
   </div><p class="small" style="text-align:center;margin-top:14px">班表小幫手 ${APP_VER}</p>`);
   $('sheet').querySelector('.menu').onclick=e=>{
     const m=e.target.closest('[data-m]');if(!m)return;
-    ({cycle:openCycle,look:openLook,hol:openHol,types:openTypes,clear:clearMonth,wipe:wipeShifts,reset:resetApp,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
+    ({cycle:openCycle,leave:openLeave,backup:openBackup,restore:openRestore,look:openLook,hol:openHol,types:openTypes,clear:clearMonth,wipe:wipeShifts,reset:resetApp,export:openExport,import:openImport,help:openHelp})[m.dataset.m]();
   };
 };
 const fmtYMD=k=>{const d=parse(k);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`};
@@ -1546,12 +1645,12 @@ function editCycle(id){
   };
 }
 function openTypes(){
-  const rows=()=>S.types.map((t,i)=>`<div class="trow" data-i="${i}"><input type="color" value="${t.color}" aria-label="顏色"><input class="field" type="text" value="${esc(t.name)}" maxlength="5" aria-label="名稱"><button data-del aria-label="刪除">${ic('delete')}</button></div>`).join('');
+  const rows=()=>S.types.map((t,i)=>`<div class="trow" data-i="${i}"><input type="color" value="${t.color}" aria-label="顏色"><input class="field" type="text" value="${esc(t.name)}" maxlength="5" aria-label="名稱"><label class="lvck"><input type="checkbox"${t.leave?' checked':''}>假別</label><button data-del aria-label="刪除">${ic('delete')}</button></div>`).join('');
   openSheet(`<h2>班別設定<button data-x aria-label="關閉">${ic('close')}</button></h2>
-    <div class="small">名稱最多 5 個字。刪除班別後，用到它的日子會變成空白。</div>
+    <div class="small">名稱最多 5 個字。勾「假別」的會算進「假別與特休」。刪除班別後，用到它的日子會變成空白。</div>
     <div id="tyList" style="margin-top:10px">${rows()}</div>
     <button class="btn gray" id="tyAdd">${ic('add')}新增班別</button><button class="btn" id="tySave">${ic('check')}儲存</button>`);
-  const collect=()=>$('tyList').querySelectorAll('.trow').forEach(r=>{const t=S.types[+r.dataset.i];t.color=r.querySelector('[type=color]').value;t.name=r.querySelector('[type=text]').value.trim()||t.name});
+  const collect=()=>$('tyList').querySelectorAll('.trow').forEach(r=>{const t=S.types[+r.dataset.i];t.color=r.querySelector('[type=color]').value;t.name=r.querySelector('[type=text]').value.trim()||t.name;if(r.querySelector('.lvck input').checked)t.leave=1;else delete t.leave});
   $('tyList').onclick=async e=>{
     if(!e.target.closest('[data-del]'))return;
     const i=+e.target.closest('.trow').dataset.i;collect();
@@ -1571,6 +1670,83 @@ function applyTheme(){
   // 頂欄是深藍漸層，狀態列跟著用深藍
   const meta=document.querySelector('meta[name=theme-color]'),dark=getComputedStyle(root).colorScheme==='dark';
   if(meta)meta.content=dark?'#0a0f2c':'#151d4b';
+}
+// 特休年度：從 leaveCfg.start（MM-DD）起算一年
+function leavePeriod(){
+  const st=(S.leaveCfg&&S.leaveCfg.start)||'01-01',[mm,dd]=st.split('-').map(Number),n=today;
+  let a=new Date(n.getFullYear(),mm-1,dd);if(a>n)a=new Date(n.getFullYear()-1,mm-1,dd);
+  return {from:ymd(a),to:ymd(addDays(new Date(a.getFullYear()+1,a.getMonth(),a.getDate()),-1))};
+}
+function leaveUsage(){
+  const {from,to}=leavePeriod(),tk=ymd(today),res={};
+  S.types.filter(t=>t.leave).forEach(t=>res[t.id]={past:0,future:0});
+  for(let d=parse(from);ymd(d)<=to;d=addDays(d,1)){const k=ymd(d),t=shiftOf(k);if(t&&res[t.id])res[t.id][k<=tk?'past':'future']++}
+  return res;
+}
+function openLeave(){
+  const {from,to}=leavePeriod(),u=leaveUsage(),q=(S.leaveCfg&&S.leaveCfg.quota)||{},lt=S.types.filter(t=>t.leave);
+  const f=k=>{const d=parse(k);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`};
+  openSheet(`<h2>假別與特休<button data-x aria-label="關閉">${ic('close')}</button></h2>
+    <div class="small">年度：<b>${f(from)}～${f(to)}</b>。在班表把那天設成假別就會自動計算（「已休」算到今天，「已排」是之後排好的）。</div>
+    <div id="lvList" style="margin-top:10px">${lt.length?lt.map(t=>{const x=u[t.id],qq=q[t.id];const left=qq!=null&&qq!==''?qq-x.past-x.future:null;
+      return `<div class="lvrow"><span class="tag" style="${chipStyle(t)}">${esc(t.name)}</span><div class="lvnum">已休 <b>${x.past}</b> 天${x.future?`・已排 <b>${x.future}</b> 天`:''}${left!=null?`<br><span class="${left<0?'neg':''}">剩 <b>${left}</b> 天</span>`:''}</div><label class="lvq">額度<input type="number" min="0" max="366" inputmode="decimal" data-q="${t.id}" value="${qq!=null?qq:''}" placeholder="不限">天</label></div>`}).join(''):'<div class="empty">還沒有假別。到「班別設定」把班別勾成「假別」。</div>'}</div>
+    <h3>年度起算日（到職日或 1 月 1 日）</h3>
+    <div class="form"><label class="fr"><span>${ic('calendar_today')}每年從</span><input type="date" id="lvStart" value="${from}"></label></div>
+    <div class="small" style="margin-top:6px">只會用到月和日。例如到職日是 3/15，就選任何一年的 3 月 15 日。</div>`);
+  $('lvList').onchange=e=>{const i=e.target.closest('[data-q]');if(!i)return;S.leaveCfg.quota=S.leaveCfg.quota||{};
+    if(i.value==='')delete S.leaveCfg.quota[i.dataset.q];else S.leaveCfg.quota[i.dataset.q]=Math.max(0,+i.value);save();renderCal();openLeave()};
+  $('lvStart').onchange=()=>{const v=$('lvStart').value;if(!v)return;S.leaveCfg.start=v.slice(5);save();renderCal();openLeave()};
+}
+// ===== 備份到 Google 雲端：做成一個完整備份檔（含手寫、錄音），用分享選單存到 Google 雲端硬碟 =====
+const blobToDataURL=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b)});
+async function buildBackup(){
+  const files={};
+  for(const f of S.memos.flatMap(m=>m.files||[])){try{const b=await fileGet(f.id);if(b)files[f.id]=await blobToDataURL(b)}catch(e){}}
+  return {app:'shift-helper',ver:APP_VER,at:Date.now(),data:S,files};
+}
+async function backupNow(){
+  const bk=await buildBackup(),name=`班表小幫手備份_${ymd(new Date())}.json`;
+  const file=new File([JSON.stringify(bk)],name,{type:'application/json'});
+  const done=()=>{S.lastBackup=Date.now();save();renderAll();closeSheet();toast('已備份')};
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:name});done()}
+    catch(e){if(e&&e.name==='AbortError')toast('已取消');else toast('分享失敗：'+(e&&e.name||e))}
+    return;
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);done();
+}
+const daysSince=t=>Math.floor((Date.now()-t)/864e5);
+function openBackup(){
+  const lb=S.lastBackup;
+  openSheet(`<h2>備份到 Google 雲端<button data-x aria-label="關閉">${ic('close')}</button></h2>
+    <div class="small">${lb?`上次備份：<b>${new Date(lb).toLocaleDateString('zh-TW')}</b>（${daysSince(lb)} 天前）`:'還沒有備份過。'}</div>
+    <div class="help"><p><b>1.</b> 按下面的「立即備份」。</p><p><b>2.</b> 在分享選單選「<b>雲端硬碟</b>」（Google Drive App），或選「<b>儲存到檔案</b>」再選 Google 雲端硬碟。</p><p><b>3.</b> 按「上傳」或「儲存」就好了。</p></div>
+    <div class="small">備份檔包含班表、排班循環、待辦、日誌、備忘錄，還有<b>手寫和錄音</b>。換手機時用「從備份檔還原」選這個檔案。每 7 天沒備份，班表上方會提醒你。</div>
+    <button class="btn" id="bkGo">${ic('cloud_upload')}立即備份</button>`);
+  $('bkGo').onclick=async()=>{$('bkGo').disabled=true;try{await backupNow()}finally{if($('bkGo'))$('bkGo').disabled=false}};
+}
+async function restoreData(d,files){
+  if(!d||!Array.isArray(d.types))throw new Error('格式不正確');
+  S=Object.assign({},d);delete S.firstUse;normalizeS();
+  for(const[id,u] of Object.entries(files||{})){try{await filePut(id,await (await fetch(u)).blob())}catch(e){}}
+  save();renderAll();
+}
+function openRestore(){
+  openSheet(`<h2>從備份檔還原<button data-x aria-label="關閉">${ic('close')}</button></h2>
+    <div class="small">選之前存到 Google 雲端硬碟的備份檔（班表小幫手備份_日期.json）。在檔案選單點「瀏覽」→ 選 Google 雲端硬碟。<b>會取代目前所有資料。</b></div>
+    <input type="file" id="rsFile" accept=".json,application/json" hidden>
+    <button class="btn" id="rsPick">${ic('cloud_download')}選擇備份檔</button>`);
+  $('rsPick').onclick=()=>$('rsFile').click();
+  $('rsFile').onchange=async()=>{
+    const f=$('rsFile').files[0];if(!f)return;
+    let j;try{j=JSON.parse(await f.text())}catch(e){return toast('這不是班表小幫手的備份檔')}
+    const d=j&&j.app==='shift-helper'?j.data:j,files=j&&j.app==='shift-helper'?j.files:{};
+    if(!d||!Array.isArray(d.types))return toast('這不是班表小幫手的備份檔');
+    const when=j.at?new Date(j.at).toLocaleString('zh-TW'):'';
+    if(!await ask(`用 ${when||'這個'} 的備份取代目前資料？`,'還原',true))return;
+    try{await restoreData(d,files);closeSheet();toast('還原完成')}catch(e){toast('還原失敗：'+e.message)}
+  };
 }
 function openLook(){
   const th=S.theme||{mode:'auto'};
@@ -1623,7 +1799,7 @@ async function clearMonth(){
 function openExport(){
   const txt=JSON.stringify(S);
   openSheet(`<h2>匯出備份<button data-x aria-label="關閉">${ic('close')}</button></h2>
-    <div class="small">內含班表、備忘錄、待辦。把整段文字複製起來，貼到 LINE 給自己或存在別的地方。</div>
+    <div class="small">內含班表、待辦、日誌、備忘錄文字（不含手寫、錄音；要完整備份請用「備份到 Google 雲端」）。把整段文字複製起來，貼到 LINE 給自己或存在別的地方。</div>
     <textarea id="exTxt" style="height:160px;margin-top:8px" readonly>${esc(txt)}</textarea><button class="btn" id="exCopy">${ic('content_copy')}複製</button>`);
   $('exCopy').onclick=()=>{
     const fb=()=>{const t=$('exTxt');t.focus();t.select();toast('已選取，請按「拷貝」')};
@@ -1638,7 +1814,7 @@ function openImport(){
     let d;try{d=JSON.parse($('imTxt').value)}catch(e){return toast('格式不正確，請貼上完整的備份文字')}
     if(!d||!Array.isArray(d.types))return toast('格式不正確，請貼上完整的備份文字');
     if(!await ask('確定用備份取代目前資料？','取代',true))return;
-    S={sample:!!d.sample,types:d.types,days:d.days||{},cycles:migrateCycles(d),memos:d.memos||[],todos:d.todos||[],logs:d.logs||[],logFav:d.logFav||[],hol:d.hol||{show:true,off:false}};save();closeSheet();toast('匯入完成');
+    await restoreData(d,{});closeSheet();toast('匯入完成');
   };
 }
 function openHelp(){openSheet(`<h2>使用說明<button data-x aria-label="關閉">${ic('close')}</button></h2><div class="help">${HELP.map(h=>'<p>'+esc(h)+'</p>').join('')}</div>`)}

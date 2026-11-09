@@ -1,0 +1,11 @@
+{
+  "name": "shift-helper",
+  "private": true,
+  "description": "班表小幫手（只用來跑自動化測試，App 本身不需要建置）",
+  "scripts": {
+    "test": "node tests/run.js"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
