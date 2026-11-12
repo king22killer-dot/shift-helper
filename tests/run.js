@@ -152,7 +152,9 @@ test('週報、績效可以自訂從哪天到哪天',async p=>{
 test('日誌月曆：每天顯示日誌、點日期列出、補寫那天',async p=>{
   await p.evaluate(()=>{S.logs=[{id:'a',date:'2026-11-05',text:'五號巡檢',tags:{week:1},at:1}];S.todos=[{id:'t',text:'私人待辦',date:'2026-11-05',done:false}];save()});
   await p.click('[data-tab=log]');await p.click('#logView [data-v=cal]');
-  assert(await p.isVisible('#lCal'),'沒有月曆');assert(!(await p.isVisible('#logList')),'月曆模式還顯示清單');
+  assert(await p.isVisible('#lCal'),'沒有月曆');
+  assert(await p.evaluate(()=>$('lCal').getBoundingClientRect().top<$('logForm').getBoundingClientRect().top),'月曆應該在輸入框上面');
+  assert(await p.evaluate(()=>$('logView').firstElementChild.dataset.v==='cal'),'月曆按鈕應該在清單前面');assert(!(await p.isVisible('#logList')),'月曆模式還顯示清單');
   const cell=await p.textContent('#lCal [data-k="2026-11-05"]');
   assert(cell.includes('五號巡檢'),'月曆上沒有日誌');assert(!cell.includes('私人待辦'),'日誌月曆不應該出現待辦');
   await p.click('#lCal [data-k="2026-11-05"]');

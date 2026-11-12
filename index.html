@@ -561,6 +561,7 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
 .lmore{font-size:9.5px;color:var(--muted);text-align:center}
 #lDayList .swipe+.swipe{border-top:1px solid var(--line)}
 #lDayAdd{display:inline-flex;align-items:center}
+#logCalWrap{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -601,7 +602,12 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
     </div>
   </section>
   <section class="view" id="v-log" hidden>
-    <div class="panel-head"><h2>工作日誌</h2><div class="seg" id="logView"><button data-v="list"><span class="ms" aria-hidden="true">list</span>清單</button><button data-v="cal"><span class="ms" aria-hidden="true">calendar_month</span>月曆</button></div></div>
+    <div class="panel-head"><h2>工作日誌</h2><div class="seg" id="logView"><button data-v="cal"><span class="ms" aria-hidden="true">calendar_month</span>月曆</button><button data-v="list"><span class="ms" aria-hidden="true">list</span>清單</button></div></div>
+    <div id="logCalWrap" hidden>
+      <div class="tnav"><button id="lPrev" aria-label="上個月"><span class="ms" aria-hidden="true">chevron_left</span></button><b id="lTitle"></b><button id="lNext" aria-label="下個月"><span class="ms" aria-hidden="true">chevron_right</span></button></div>
+      <div class="tcal"><div class="tweek"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div><div id="lCal"></div></div>
+      <div class="plan"><div class="plan-h"><b id="lDayTitle"></b><button id="lDayAdd"><span class="ms" aria-hidden="true">add</span>寫這天的日誌</button></div><div id="lDayList"></div></div>
+    </div>
     <form class="lform" id="logForm">
       <div class="lfav" id="logFavs"></div>
       <textarea class="field" id="logTxt" rows="2" placeholder="今天做了什麼？"></textarea>
@@ -614,11 +620,6 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
     <div class="lcustom" id="logCustom" hidden><input class="field" type="date" id="lrFrom" aria-label="從"><span>到</span><input class="field" type="date" id="lrTo" aria-label="到"></div>
     <label class="search"><span class="ms" aria-hidden="true">search</span><input class="field" id="logQ" type="search" placeholder="搜尋日誌"></label>
     <div id="logList"></div>
-    </div>
-    <div id="logCalWrap" hidden>
-      <div class="tnav"><button id="lPrev" aria-label="上個月"><span class="ms" aria-hidden="true">chevron_left</span></button><b id="lTitle"></b><button id="lNext" aria-label="下個月"><span class="ms" aria-hidden="true">chevron_right</span></button></div>
-      <div class="tcal"><div class="tweek"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div><div id="lCal"></div></div>
-      <div class="plan"><div class="plan-h"><b id="lDayTitle"></b><button id="lDayAdd"><span class="ms" aria-hidden="true">add</span>寫這天的日誌</button></div><div id="lDayList"></div></div>
     </div>
   </section>
 </main>
@@ -650,7 +651,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v27（2026-11-12）';
+const APP_VER='v28（2026-11-12）';
 // Material Symbols 線條圖示
 const ic=n=>`<span class="ms" aria-hidden="true">${n}</span>`;
 const KEY='shift-helper-v1';
@@ -1599,7 +1600,7 @@ $('lPrev').onclick=()=>lGo(-1);$('lNext').onclick=()=>lGo(1);
  el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
  el.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;
    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)lGo(dx<0?1:-1)},{passive:true});}
-$('lDayAdd').onclick=()=>{$('logDate').value=lSel;document.querySelector('main').scrollTop=0;$('logTxt').focus();toast(`日期已設成 ${fmtMD(lSel)}`)};
+$('lDayAdd').onclick=()=>{$('logDate').value=lSel;$('logForm').scrollIntoView({block:'center',behavior:'smooth'});$('logTxt').focus({preventScroll:true});toast(`日期已設成 ${fmtMD(lSel)}`)};
 $('logView').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;S.logView=b.dataset.v;save();renderLogs()};
 async function logListClick(e){
   if(swJust)return;
