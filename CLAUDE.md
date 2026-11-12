@@ -26,7 +26,7 @@ iPhone 用的月曆班表網頁 App。純靜態網站，沒有建置步驟，部
   - `logs`：工作日誌 `{id, date, text, tags:{fav,week,perf}, at}`，三個標記可以同時有。分組期間由 `logPeriod()` 決定：「週報」一次看 1～3 週（`logWeekN`，從這週往回每 N 週一組，週一～週日）、「績效」每月／半年／全年（`logPerfP`: month/half/year）。每組可複製成文字（`logReport()` 條列、`logParagraph()` 段落）。
   - `logFav`：常用內容 `{id, text, tags:{week,perf}}`。日誌標成「常用」時由 `rememberFav()` 自動記錄（相同內容只記一次），新增日誌時顯示成可點的按鈕；刪掉日誌不會刪常用。
   - 假別：班別有 `leave:1` 的算假別（預設特休 al、病假 sl、事假 pl、補休 cl，`LEAVE_TYPES`；舊資料由 `normalizeS()` 補一次，`leaveInit`）。`leaveCfg {start:'MM-DD', quota:{類別id:天數}}`，`leaveUsage()` 算年度內已休／已排。
-  - `todoLog`（預設 true）：待辦打勾自動寫進今天的日誌（日誌的 `from` 記待辦 key，取消打勾會刪掉）；`logAutoTags` 自動日誌的標記。`rptFmt`：週報複製格式 `para` 段落／`list` 條列（`logParagraph()`、`logReport()`）。
+  - `rptFmt`：週報複製格式 `para` 段落／`list` 條列（`logParagraph()`、`logReport()`）。
   - 備份：`lastBackup`、`firstUse`、`bkSnooze`；7 天沒備份在班表上方顯示 `#bkBar`。
   - `theme`：外觀 `{mode:'auto'|'light'|'dark'|'time', day, night}`（`applyTheme()`）
   - `rem`：App 開著時已跳過的提醒（`checkReminders()`）
@@ -54,5 +54,6 @@ iPhone 用的月曆班表網頁 App。純靜態網站，沒有建置步驟，部
 - 顏色都用 `:root` 的變數，深色模式在 `prefers-color-scheme` 與 `[data-theme="dark"]` 兩處各寫一份。樣式在 `<style>` 最後的「薪資出勤風格」區塊覆蓋舊樣式。
 
 ## 使用者偏好
+- **工作日誌是工作用、待辦是私事，兩邊要分開**：不要讓待辦自動寫進日誌，週報、績效也不要讀待辦的資料（曾經做過，使用者要求拿掉）。
 - 介面與說明一律繁體中文。
 - 使用者主要在 iPhone 上使用。

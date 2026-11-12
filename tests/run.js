@@ -59,12 +59,12 @@ test('待辦：新增、班表橫條、左滑刪除',async p=>{
   assert(await p.evaluate(()=>S.todos.length)===n-1,'左滑刪除失敗');
 });
 
-test('待辦打勾 → 自動寫進日誌，取消打勾 → 拿掉',async p=>{
+test('待辦（私事）打勾不會寫進工作日誌',async p=>{
+  const n=await p.evaluate(()=>S.logs.length);
   await p.click('[data-tab=todo]');await p.click('#planAdd');await p.fill('#etTxt','繳交月報');await p.click('#etSave');
   await p.click('#planList .swipe:has-text("繳交月報") [data-chk]');
-  assert(await p.evaluate(()=>S.logs.some(l=>l.text==='繳交月報'&&l.tags.week&&l.date==='2026-11-09')),'完成後沒有寫進日誌');
-  await p.click('#planList .swipe:has-text("繳交月報") [data-chk]');
-  assert(!(await p.evaluate(()=>S.logs.some(l=>l.text==='繳交月報'))),'取消打勾後日誌沒有拿掉');
+  assert(await p.evaluate(()=>S.todos.find(t=>t.text==='繳交月報').done),'待辦沒有打勾');
+  assert(await p.evaluate(()=>S.logs.length)===n,'待辦打勾不應該寫進日誌');
 });
 
 test('App 開著時到時間跳出提醒',async p=>{
@@ -91,13 +91,13 @@ test('工作日誌：同時標記、常用自動記錄、週報段落',async p=>
   assert(await p.evaluate(()=>S.logFav.some(f=>f.text==='處理冷卻水塔漏水')),'常用沒有自動記錄');
   await p.click('#logFavs .chip:has-text("冷卻水塔")');await p.click('#logForm .lbtn');
   assert(await p.evaluate(()=>S.logFav.filter(f=>f.text==='處理冷卻水塔漏水').length)===1,'常用重複記錄');
-  await p.evaluate(()=>{S.todos.push({id:'nx',text:'下週安全稽核',date:'2026-11-17',done:false});save()});
+  await p.evaluate(()=>{S.todos.push({id:'nx',text:'私人待辦不該出現',date:'2026-11-17',done:false});save()});
   await p.click('#logSeg [data-f=week]');await p.click('#logList .group:first-child [data-copy]');
   const para=await p.inputValue('#rpTxt');
   assert(para.startsWith('【週報】2026/11/9～11/15'),'週報標題不對：'+para.split('\n')[0]);
   assert(/本週例行工作：.*處理冷卻水塔漏水（共 2 次）/.test(para),'例行工作沒有合併計次');
   assert(para.includes('績效亮點：處理冷卻水塔漏水'),'沒有績效亮點');
-  assert(para.includes('下週預定：11/17 下週安全稽核'),'沒有下週預定');
+  assert(!para.includes('私人待辦不該出現'),'週報不應該帶入待辦');
   await p.click('#rpSeg [data-r=list]');
   assert((await p.inputValue('#rpTxt')).includes('1. 11/9（一） 處理冷卻水塔漏水'),'條列格式不對');
 });
