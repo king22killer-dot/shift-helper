@@ -541,6 +541,26 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
 .lrange{margin:-2px 0 10px;align-items:center;gap:4px;padding:3px}
 .lrange .lrl{font-size:12px;color:var(--muted);padding:0 6px 0 8px;white-space:nowrap}
 .lrange button{flex:1;padding:6px 4px;font-size:13px}
+
+/* ===== 日誌月曆、自訂期間 ===== */
+.lcustom{display:flex;align-items:center;gap:6px;margin:-4px 0 10px}
+.lcustom .field{flex:1;min-width:0;padding:8px 10px;font-size:15px}
+.lcustom span{font-size:13px;color:var(--muted)}
+#logView button{padding:6px 10px}
+#logView .ms{font-size:16px;margin-right:3px}
+.lwk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.lwk:last-child{border-bottom:0}
+.ltday{border:0;background:none;min-height:70px;padding:3px 1px 2px;display:flex;flex-direction:column;align-items:stretch;gap:2px;position:relative;min-width:0;color:var(--fg);font-variant-numeric:tabular-nums}
+.ltday i{font-style:normal;font-size:12px;width:20px;height:20px;line-height:20px;border-radius:10px;text-align:center;align-self:center}
+.ltday.sun i{color:var(--sun)}.ltday.sat i{color:var(--sat)}
+.ltday.out{opacity:.45}
+.ltday.today i{background:#f59e0b;color:#fff;font-weight:600}
+.ltday.sel{background:var(--sky)}
+.ltday .sh{position:absolute;top:4px;right:3px;width:6px;height:6px;border-radius:3px}
+.lmini{font-size:9.5px;line-height:13px;border-left:3px solid;padding-left:2px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink2)}
+.lmore{font-size:9.5px;color:var(--muted);text-align:center}
+#lDayList .swipe+.swipe{border-top:1px solid var(--line)}
+#lDayAdd{display:inline-flex;align-items:center}
 </style>
 </head>
 <body>
@@ -581,17 +601,25 @@ header .menu-btn{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,
     </div>
   </section>
   <section class="view" id="v-log" hidden>
-    <div class="panel-head"><h2>工作日誌</h2></div>
+    <div class="panel-head"><h2>工作日誌</h2><div class="seg" id="logView"><button data-v="list"><span class="ms" aria-hidden="true">list</span>清單</button><button data-v="cal"><span class="ms" aria-hidden="true">calendar_month</span>月曆</button></div></div>
     <form class="lform" id="logForm">
       <div class="lfav" id="logFavs"></div>
       <textarea class="field" id="logTxt" rows="2" placeholder="今天做了什麼？"></textarea>
       <div class="ltags" id="logTags"></div>
       <div class="lrow2"><input class="field" type="date" id="logDate" aria-label="日期"><button class="lbtn"><span class="ms" aria-hidden="true">add</span>新增</button></div>
     </form>
+    <div id="logListWrap">
     <div class="seg lseg" id="logSeg"><button data-f="all">全部</button><button data-f="week"><span class="ms" aria-hidden="true">date_range</span>週報</button><button data-f="perf"><span class="ms" aria-hidden="true">trending_up</span>績效</button><button data-f="fav"><span class="ms" aria-hidden="true">star</span>常用</button></div>
     <div class="seg lrange" id="logRange" hidden></div>
+    <div class="lcustom" id="logCustom" hidden><input class="field" type="date" id="lrFrom" aria-label="從"><span>到</span><input class="field" type="date" id="lrTo" aria-label="到"></div>
     <label class="search"><span class="ms" aria-hidden="true">search</span><input class="field" id="logQ" type="search" placeholder="搜尋日誌"></label>
     <div id="logList"></div>
+    </div>
+    <div id="logCalWrap" hidden>
+      <div class="tnav"><button id="lPrev" aria-label="上個月"><span class="ms" aria-hidden="true">chevron_left</span></button><b id="lTitle"></b><button id="lNext" aria-label="下個月"><span class="ms" aria-hidden="true">chevron_right</span></button></div>
+      <div class="tcal"><div class="tweek"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div><div id="lCal"></div></div>
+      <div class="plan"><div class="plan-h"><b id="lDayTitle"></b><button id="lDayAdd"><span class="ms" aria-hidden="true">add</span>寫這天的日誌</button></div><div id="lDayList"></div></div>
+    </div>
   </section>
 </main>
 
@@ -622,7 +650,7 @@ function showErr(msg){
 }
 window.addEventListener('error',e=>showErr((e.message||'')+' @'+(e.lineno||'')+':'+(e.colno||'')));
 window.addEventListener('unhandledrejection',e=>showErr(String(e.reason&&e.reason.message||e.reason)));
-const APP_VER='v26（2026-11-12）';
+const APP_VER='v27（2026-11-12）';
 // Material Symbols 線條圖示
 const ic=n=>`<span class="ms" aria-hidden="true">${n}</span>`;
 const KEY='shift-helper-v1';
@@ -639,7 +667,7 @@ const HELP=[
   '【待辦月曆】待辦分頁上方可切換「月曆／清單」。月曆會把待辦畫成彩色橫條（好幾天的會連成一條），日期右上的小點是那天的班別顏色。點某一天，下方「今日計劃」列出那天的待辦，可以直接打勾；按「＋ 新增」可以設定時間和顏色。',
   '【提醒】新增或修改待辦時，可以設日期、時間、重複（每天／每週／每月）、提早提醒，並打開「新增至 iPhone 行事曆」：儲存後按「加到『行事曆』」→「加入」，之後時間到 iPhone 會跳通知（App 沒開也會響）。App 開著的時候，時間到畫面上方也會跳出提醒。',
   '【外觀】選單 →「外觀」：可選跟隨手機、淺色、深色，或依時間自動切換（預設早上 6:00 淺色、晚上 6:00 深色，可以自己改）。',
-  '【工作日誌】下方「日誌」分頁：寫下今天做了什麼，可以同時標「常用」「週報」「績效」。上面切換「週報」會依週（週一到週日）列出，可選一次看 1、2 或 3 週；「績效」可選每月、半年（1～6 月、7～12 月）或全年整理，每一組都能按「複製」整理成文字貼到 LINE 或 Email。標成「常用」的內容會自動記下來，之後新增時點一下就能帶入；在「常用」裡可以移除。往左滑可以刪除日誌。',
+  '【工作日誌】下方「日誌」分頁：寫下今天做了什麼，可以同時標「常用」「週報」「績效」。上面切換「週報」會依週（週一到週日）列出，可選一次看 1、2、3 週或「自訂」從哪天到哪天；「績效」可選每月、半年（1～6 月、7～12 月）、全年或自訂期間整理，每一組都能按「複製」整理成文字貼到 LINE 或 Email。標成「常用」的內容會自動記下來，之後新增時點一下就能帶入；在「常用」裡可以移除。往左滑可以刪除日誌。',
   '【刪除待辦】在待辦上往左滑，右邊會出現紅色「刪除」，按下去確認就刪掉；往右滑或點別的地方可以收回。也可以點待辦進去按「刪除」。',
   '【幾天完成】新增時在「共 □ 天完成」填天數（例如 7），會從開始日算起，期間每天都會在月曆上提醒，清單上顯示「還剩幾天」，超過最後一天就列為已過期。沒填日期就從今天開始算。',
   '【每月固定】勾「每月同一天」，之後每個月的同一天都會出現這個待辦（例如每月 5 號繳房租）。31 號遇到小月會排在月底。每個月打勾各自算；刪除時會刪掉所有月份。',
@@ -651,6 +679,7 @@ const HELP=[
   '【重設】選單 →「重設 App」會刪除全部資料（班表、循環、備忘錄、待辦、設定）並重新載入，畫面卡住或想從頭開始時使用。',
   '【備份到 Google 雲端】選單 →「備份到 Google 雲端」→「立即備份」，在分享選單選「雲端硬碟」或「儲存到檔案」→ Google 雲端硬碟。備份檔包含全部資料和手寫、錄音。7 天沒備份，班表上方會提醒。換手機時用「從備份檔還原」選那個檔案。',
   '【假別與特休】班別裡有特休、病假、事假、補休，在班表把那天設成假別就會自動計算。選單 →「假別與特休」可以設每年額度和年度起算日（到職日），看已休、已排、剩幾天；班表下方也會顯示「特休剩幾天」。',
+  '【日誌月曆】日誌右上可切換「清單／月曆」：月曆每天顯示那天寫的日誌（藍色＝週報、綠色＝績效、橘色＝常用），點某一天下面會列出當天的日誌，按「寫這天的日誌」可以補寫那天的內容。',
   '【週報段落】日誌切到「週報」或「績效」，按「複製」可以選「段落」或「條列」：段落會把例行工作合併計次，列出重點工作和績效亮點，可以先修改再複製。工作日誌和待辦（私事）是分開的，不會互相帶資料。',
   '【文字備份】選單 →「複製文字備份」可以把資料（不含手寫、錄音）複製成一段文字，貼到 LINE 給自己；「貼上文字還原」貼回來就能還原。',
 ];
@@ -1383,14 +1412,24 @@ const tagHtml=(tags,btn)=>LTAG.map(([k,i,n])=>btn?`<button type="button" class="
 const weekStart=k=>{const d=parse(k);return ymd(addDays(d,-((d.getDay()+6)%7)))};
 const fmtRange=(a,b)=>`${a.getFullYear()}/${a.getMonth()+1}/${a.getDate()}～${b.getFullYear()!==a.getFullYear()?b.getFullYear()+'/':''}${b.getMonth()+1}/${b.getDate()}`;
 // 日誌分組的期間：週報可以 1～3 週一組（從這週往回算），績效可以每月／半年／全年
+// 自訂期間（週報、績效各自記一組）：沒設時預設最近 3 週
+function customRange(kind){
+  const r=(kind==='perf'?S.logPerfRange:S.logWeekRange)||{};
+  return {from:r.from||ymd(addDays(parse(weekStart(ymd(today))),-14)),to:r.to||ymd(today)};
+}
 function logPeriod(date,kind){
+  if((kind==='week'&&S.logWeekN==='c')||(kind==='perf'&&S.logPerfP==='custom')){
+    const r=customRange(kind);
+    if(date<r.from||date>r.to)return null;
+    return {k:'custom',type:'range',label:fmtRange(parse(r.from),parse(r.to)),from:r.from,to:r.to};
+  }
   if(kind==='perf'){
     const y=+date.slice(0,4),m=+date.slice(5,7),P=S.logPerfP||'month';
     if(P==='year')return {k:''+y,type:P,label:`${y} 年`,from:`${y}-01-01`,to:`${y}-12-31`};
     if(P==='half'){const h=m<=6?1:2;return {k:`${y}-H${h}`,type:P,label:`${y} ${h===1?'上半年（1～6 月）':'下半年（7～12 月）'}`,from:`${y}-${h===1?'01':'07'}-01`,to:`${y}-${h===1?'06-30':'12-31'}`}}
     return {k:date.slice(0,7),type:'month',label:`${y}年${m}月`,from:date.slice(0,7)+'-01',to:ymd(new Date(y,m,0))};
   }
-  const N=kind==='week'?(S.logWeekN||1):1,anchor=parse(weekStart(ymd(today)));
+  const N=kind==='week'&&S.logWeekN!=='c'?(S.logWeekN||1):1,anchor=parse(weekStart(ymd(today)));
   const dw=Math.round((dayNum(anchor)-dayNum(parse(weekStart(date))))/7),idx=Math.floor(dw/N);
   const a=addDays(anchor,-(idx*N+N-1)*7),b=addDays(a,7*N-1);
   return {k:ymd(a),type:'week',n:N,label:fmtRange(a,b),from:ymd(a),to:ymd(b)};
@@ -1417,11 +1456,17 @@ function logReport(kind,label,arr){
 }
 function renderLogs(){
   renderLogForm();
+  const cal=S.logView==='cal';
+  $('logView').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===(cal?'cal':'list')));
+  $('logListWrap').hidden=cal;$('logCalWrap').hidden=!cal;
+  if(cal){renderLogCal();return}
   $('logSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===logFilter));
-  const rg=$('logRange'),opts=logFilter==='week'?[[1,'1 週'],[2,'2 週'],[3,'3 週']]:logFilter==='perf'?[['month','每月'],['half','半年'],['year','全年']]:null;
+  const rg=$('logRange'),opts=logFilter==='week'?[[1,'1 週'],[2,'2 週'],[3,'3 週'],['c','自訂']]:logFilter==='perf'?[['month','每月'],['half','半年'],['year','全年'],['custom','自訂']]:null;
   rg.hidden=!opts;
-  if(opts){const cur=logFilter==='week'?(S.logWeekN||1):(S.logPerfP||'month');
-    rg.innerHTML=`<span class="lrl">${logFilter==='week'?'一次看':'整理方式'}</span>`+opts.map(([v,l])=>`<button data-rg="${v}" class="${String(v)===String(cur)?'on':''}">${l}</button>`).join('')}
+  const cur=logFilter==='week'?(S.logWeekN||1):(S.logPerfP||'month'),isC=!!opts&&(cur==='c'||cur==='custom');
+  if(opts)rg.innerHTML=`<span class="lrl">${logFilter==='week'?'一次看':'整理方式'}</span>`+opts.map(([v,l])=>`<button data-rg="${v}" class="${String(v)===String(cur)?'on':''}">${l}</button>`).join('');
+  $('logCustom').hidden=!isC;
+  if(isC){const r=customRange(logFilter);$('lrFrom').value=r.from;$('lrTo').value=r.to}
   const q=$('logQ').value.trim().toLowerCase();
   if(logFilter==='fav'){
     const arr=S.logFav.filter(f=>!q||f.text.toLowerCase().includes(q));
@@ -1433,10 +1478,11 @@ function renderLogs(){
   if(!arr.length){$('logList').innerHTML=`<div class="empty">${q?'找不到符合的日誌。':logFilter==='all'?'還沒有日誌。<br>在上面寫下今天做了什麼，按「新增」。':'還沒有標成「'+(logFilter==='week'?'週報':'績效')+'」的日誌。'}</div>`;return}
   // 全部：每週一組；週報：1～3 週一組；績效：每月／半年／全年一組
   const groups=[];
-  arr.forEach(l=>{const P=logPeriod(l.date,logFilter);let G=groups.find(x=>x.P.k===P.k);if(!G)groups.push(G={P,items:[]});G.items.push(l)});
+  arr.forEach(l=>{const P=logPeriod(l.date,logFilter);if(!P)return;let G=groups.find(x=>x.P.k===P.k);if(!G)groups.push(G={P,items:[]});G.items.push(l)});
+  if(!groups.length){$('logList').innerHTML='<div class="empty">這段期間沒有日誌。</div>';return}
   $('logList').innerHTML=groups.map((G,i)=>{
     const copy=logFilter!=='all'?`<button data-copy="${i}">${ic('content_copy')}複製</button>`:'';
-    return `<div class="group"><h3><span>${G.P.type==='week'?ic('date_range'):''}${G.P.label}（${G.items.length}）</span>${copy}</h3><div class="list">${G.items.map(logRow).join('')}</div></div>`;
+    return `<div class="group"><h3><span>${G.P.type==='week'||G.P.type==='range'?ic('date_range'):''}${G.P.label}（${G.items.length}）</span>${copy}</h3><div class="list">${G.items.map(logRow).join('')}</div></div>`;
   }).join('');
   $('logList').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{
     const G=groups[+b.dataset.copy],items=[...G.items].sort((a,c)=>a.date<c.date?-1:1);
@@ -1452,7 +1498,7 @@ function logParagraph(kind,P,arr){
   const perf=arr.filter(l=>l.tags&&l.tags.perf).map(l=>l.text).filter((v,i,a)=>a.indexOf(v)===i);
   const out=[kind==='week'?`【週報】${P.label}`:`【績效紀錄】${P.label}`];
   if(kind==='week'){
-    const w=P.n>1?`這 ${P.n} 週`:'本週';
+    const w=P.type==='range'?'這段期間':P.n>1?`這 ${P.n} 週`:'本週';
     if(routine.length)out.push(`${w}例行工作：${routine.join('；')}。`);
     if(main.length)out.push(`${w}重點工作：${main.join('；')}。`);
     if(perf.length)out.push(`績效亮點：${perf.join('；')}。`);
@@ -1462,7 +1508,7 @@ function logParagraph(kind,P,arr){
     // 半年、全年：先總數，再依月份各一段
     const byM={};arr.forEach(l=>{const m=+l.date.slice(5,7);(byM[m]=byM[m]||[]).push(l)});
     const ms=Object.keys(byM).map(Number).sort((a,b)=>a-b);
-    out.push(`${P.type==='half'?'這半年':'這一年'}共有 ${arr.length} 項績效紀錄，分布在 ${ms.length} 個月。`);
+    out.push(`${P.type==='half'?'這半年':P.type==='year'?'這一年':'這段期間'}共有 ${arr.length} 項績效紀錄，分布在 ${ms.length} 個月。`);
     ms.forEach(m=>out.push(`${m} 月：${byM[m].map(l=>`${md(l.date)} ${l.text}`).join('；')}。`));
   }
   return out.join('\n\n');
@@ -1487,7 +1533,9 @@ function showCopy(txt){
 }
 $('logSeg').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;logFilter=b.dataset.f;renderLogs()};
 $('logQ').oninput=renderLogs;
-$('logRange').onclick=e=>{const b=e.target.closest('[data-rg]');if(!b)return;if(logFilter==='week')S.logWeekN=+b.dataset.rg;else S.logPerfP=b.dataset.rg;save();renderLogs()};
+$('logRange').onclick=e=>{const b=e.target.closest('[data-rg]');if(!b)return;const v=b.dataset.rg;if(logFilter==='week')S.logWeekN=v==='c'?'c':+v;else S.logPerfP=v;save();renderLogs()};
+$('lrFrom').onchange=$('lrTo').onchange=()=>{let f=$('lrFrom').value,t=$('lrTo').value;if(!f||!t)return;if(f>t)[f,t]=[t,f];
+  const r={from:f,to:t};if(logFilter==='perf')S.logPerfRange=r;else S.logWeekRange=r;save();renderLogs()};
 $('logTags').onclick=e=>{const b=e.target.closest('[data-tg]');if(!b)return;logNew[b.dataset.tg]=logNew[b.dataset.tg]?0:1;renderLogForm()};
 $('logFavs').onclick=e=>{const b=e.target.closest('[data-fav]');if(!b)return;const f=S.logFav.find(x=>x.id===b.dataset.fav);if(!f)return;
   $('logTxt').value=f.text;logNew={fav:1,week:f.tags&&f.tags.week?1:0,perf:f.tags&&f.tags.perf?1:0};renderLogForm();$('logTxt').focus()};
@@ -1516,7 +1564,44 @@ async function deleteLog(id,after){
   if(!await ask(`刪除這則日誌？\n「${l.text.slice(0,30)}${l.text.length>30?'…':''}」`,'刪除',true)){closeSwipes();return}
   S.logs=S.logs.filter(x=>x!==l);save();after&&after();renderAll();toast('已刪除');
 }
-$('logList').onclick=async e=>{
+// 日誌月曆：每天列出那天的日誌（只看工作日誌，不顯示待辦）
+let lView=new Date(today.getFullYear(),today.getMonth(),1),lSel=ymd(today);
+const LCOL={fav:'#f59e0b',week:'var(--accent)',perf:'#16a34a'};
+const logColor=l=>{const t=l.tags||{};return t.perf?LCOL.perf:t.week?LCOL.week:t.fav?LCOL.fav:'var(--muted)'};
+function renderLogCal(){
+  const y=lView.getFullYear(),mo=lView.getMonth(),tk=ymd(today),NW=weeksOf(y,mo);
+  $('lTitle').textContent=y+'年'+(mo+1)+'月';
+  const first=new Date(y,mo,1),start=addDays(first,-first.getDay()),byDay={};
+  S.logs.forEach(l=>{(byDay[l.date]=byDay[l.date]||[]).push(l)});
+  let h='';
+  for(let w=0;w<NW;w++){
+    h+='<div class="lwk">';
+    for(let c=0;c<7;c++){
+      const d=addDays(start,w*7+c),k=ymd(d),arr=(byDay[k]||[]).sort((a,b)=>a.at-b.at),sh=shiftOf(k);
+      const cls=['ltday',d.getMonth()!==mo?'out':'',k===tk?'today':'',k===lSel?'sel':'',c===0?'sun':c===6?'sat':''].join(' ');
+      h+=`<button class="${cls}" data-k="${k}"><i>${d.getDate()}</i>${sh&&lum(sh.color)<=245?`<span class="sh" style="background:${sh.color}"></span>`:''}`+
+        arr.slice(0,2).map(l=>`<span class="lmini" style="border-color:${logColor(l)}">${esc(l.text)}</span>`).join('')+
+        (arr.length>2?`<span class="lmore">+${arr.length-2}</span>`:'')+'</button>';
+    }
+    h+='</div>';
+  }
+  $('lCal').innerHTML=h;
+  const d=parse(lSel),sh=shiftOf(lSel),arr=S.logs.filter(l=>l.date===lSel).sort((a,b)=>a.at-b.at);
+  $('lDayTitle').textContent=`${d.getMonth()+1}月${d.getDate()}日（${WK[d.getDay()]}）${sh?' · '+sh.name:''}${HOLIDAYS[lSel]?' · '+HOLIDAYS[lSel]:''}`;
+  $('lDayList').innerHTML=arr.length?arr.map(logRow).join(''):'<div class="empty" style="padding:14px">這天沒有日誌。</div>';
+}
+$('lCal').onclick=e=>{const b=e.target.closest('.ltday');if(!b)return;lSel=b.dataset.k;const d=parse(lSel);
+  if(d.getMonth()!==lView.getMonth())lView=new Date(d.getFullYear(),d.getMonth(),1);renderLogCal();
+  requestAnimationFrame(()=>$('lDayList').scrollIntoView({block:'nearest',behavior:'smooth'}))};
+const lGo=n=>{lView=new Date(lView.getFullYear(),lView.getMonth()+n,1);const tk=ymd(today);lSel=ymOf(tk)===ymOf(ymd(lView))?tk:ymd(lView);renderLogCal()};
+$('lPrev').onclick=()=>lGo(-1);$('lNext').onclick=()=>lGo(1);
+{let sx=null,sy=0;const el=$('lCal');
+ el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+ el.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;
+   if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)lGo(dx<0?1:-1)},{passive:true});}
+$('lDayAdd').onclick=()=>{$('logDate').value=lSel;document.querySelector('main').scrollTop=0;$('logTxt').focus();toast(`日期已設成 ${fmtMD(lSel)}`)};
+$('logView').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;S.logView=b.dataset.v;save();renderLogs()};
+async function logListClick(e){
   if(swJust)return;
   const fr=e.target.closest('.favrow');
   if(fr){const f=S.logFav.find(x=>x.id===fr.dataset.fid);if(!f)return;
@@ -1527,7 +1612,8 @@ $('logList').onclick=async e=>{
   if(del){deleteLog(del.closest('.swipe').querySelector('[data-lid]').dataset.lid);return}
   const sw=e.target.closest('.swipe');if(sw&&sw.classList.contains('open')){sw.classList.remove('open');return}
   const row=e.target.closest('[data-lid]');if(row&&e.target.closest('[data-open]'))editLog(row.dataset.lid);
-};
+}
+$('logList').onclick=logListClick;$('lDayList').onclick=logListClick;
 
 /* ===== 分頁 ===== */
 function setTab(t){

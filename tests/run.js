@@ -129,6 +129,42 @@ test('週報一次看 2～3 週、績效依半年／全年整理',async p=>{
   assert(t.includes('這一年共有 3 項績效紀錄')&&t.includes('3 月：3/10 三月績效')&&t.includes('9 月：9/1 九月績效'),'全年段落不對：'+t);
 });
 
+test('週報、績效可以自訂從哪天到哪天',async p=>{
+  await p.evaluate(()=>{S.logs=[
+    {id:'a',date:'2026-11-09',text:'十一月九日',tags:{week:1,perf:1},at:1},
+    {id:'b',date:'2026-10-20',text:'十月二十日',tags:{week:1,perf:1},at:1},
+    {id:'c',date:'2026-10-05',text:'十月五日',tags:{week:1,perf:1},at:1}];save()});
+  await p.click('[data-tab=log]');await p.click('#logSeg [data-f=week]');await p.click('#logRange [data-rg=c]');
+  assert(await p.isVisible('#lrFrom'),'沒有出現日期選擇');
+  await p.fill('#lrFrom','2026-10-10');await p.dispatchEvent('#lrFrom','change');
+  await p.fill('#lrTo','2026-11-09');await p.dispatchEvent('#lrTo','change');
+  const h=await p.$$eval('#logList .group h3 > span',x=>x.map(e=>e.textContent.replace(/^date_range/,'')));
+  assert(JSON.stringify(h)===JSON.stringify(['2026/10/10～11/9（2）']),'自訂期間分組不對：'+h);
+  await p.click('#logList .group [data-copy]');await p.click('#rpSeg [data-r=para]');
+  const t=await p.inputValue('#rpTxt');
+  assert(t.startsWith('【週報】2026/10/10～11/9')&&t.includes('這段期間重點工作')&&!t.includes('十月五日'),'自訂期間週報不對：'+t);
+  await p.click('#sheet h2 [data-x]');
+  await p.click('#logSeg [data-f=perf]');await p.click('#logRange [data-rg=custom]');
+  await p.fill('#lrFrom','2026-10-01');await p.dispatchEvent('#lrFrom','change');await p.fill('#lrTo','2026-10-31');await p.dispatchEvent('#lrTo','change');
+  assert((await p.$$('#logList .lrow')).length===2,'績效自訂期間筆數不對');
+});
+
+test('日誌月曆：每天顯示日誌、點日期列出、補寫那天',async p=>{
+  await p.evaluate(()=>{S.logs=[{id:'a',date:'2026-11-05',text:'五號巡檢',tags:{week:1},at:1}];S.todos=[{id:'t',text:'私人待辦',date:'2026-11-05',done:false}];save()});
+  await p.click('[data-tab=log]');await p.click('#logView [data-v=cal]');
+  assert(await p.isVisible('#lCal'),'沒有月曆');assert(!(await p.isVisible('#logList')),'月曆模式還顯示清單');
+  const cell=await p.textContent('#lCal [data-k="2026-11-05"]');
+  assert(cell.includes('五號巡檢'),'月曆上沒有日誌');assert(!cell.includes('私人待辦'),'日誌月曆不應該出現待辦');
+  await p.click('#lCal [data-k="2026-11-05"]');
+  assert((await p.textContent('#lDayList')).includes('五號巡檢'),'點日期沒列出日誌');
+  await p.click('#lDayAdd');assert(await p.inputValue('#logDate')==='2026-11-05','補寫沒有帶入日期');
+  await p.fill('#logTxt','補寫的內容');await p.click('#logForm .lbtn');
+  assert((await p.textContent('#lCal [data-k="2026-11-05"]')).includes('補寫的內容'),'補寫後月曆沒更新');
+  await p.click('#lNext');assert((await p.textContent('#lTitle'))==='2026年12月','換月失敗');
+  await p.reload();await p.waitForSelector('.cell');await p.click('[data-tab=log]');
+  assert(await p.isVisible('#lCal'),'重開後沒記住月曆模式');
+});
+
 test('假別與特休：額度、已休、剩餘',async p=>{
   await p.evaluate(()=>{S.cycles=[];S.days={'2026-03-02':{t:'al'},'2026-11-03':{t:'al'},'2026-12-24':{t:'al'},'2026-11-04':{t:'sl'}};save();renderCal()});
   await p.click('#menuBtn');await p.click('[data-m=leave]');
